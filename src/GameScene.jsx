@@ -21,8 +21,14 @@ const WOOD_COLORS = [
 ];
 
 // ─── Компонент отдельного блока ────────────────────────────────────────────────
-function Block({ id, position, rotation, color, onClick, isSelected }) {
+function Block({ id, position, rotation, color, onClick, isSelected, onRigidRef }) {
   const rigidRef = useRef(null);
+
+  React.useEffect(() => {
+    if (onRigidRef && rigidRef.current) {
+      onRigidRef(id, rigidRef.current);
+    }
+  }, [id, onRigidRef]);
 
   return (
     <RigidBody
@@ -49,17 +55,21 @@ function Block({ id, position, rotation, color, onClick, isSelected }) {
           emissiveIntensity={isSelected ? 0.3 : 0}
         />
         {/* Контуры граней */}
-        <Edges color="#3a2010" threshold={15} />
+        <Edges color="#3a2010" />
       </mesh>
     </RigidBody>
   );
 }
 
 // Tiny helper — рисует рёбра блока
-function Edges({ color, threshold }) {
+function Edges({ color }) {
+  const geometry = useMemo(
+    () => new THREE.EdgesGeometry(new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D)),
+    []
+  );
+  
   return (
-    <lineSegments>
-      <edgesGeometry args={[new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D)]} />
+    <lineSegments geometry={geometry}>
       <lineBasicMaterial color={color} />
     </lineSegments>
   );
@@ -94,25 +104,7 @@ function generateTower() {
   return blocks;
 }
 
-// ─── Детектор падения ──────────────────────────────────────────────────────────
-function useFallDetector(blockRefs, setGameOver, setIsFalling) {
-  useFrame(() => {
-    let anyFallen = false;
-    for (const ref of blockRefs.current) {
-      if (ref.current) {
-        const t = ref.current.translation();
-        if (t.y < FALL_THRESHOLD) {
-          anyFallen = true;
-          break;
-        }
-      }
-    }
-    if (anyFallen) {
-      setGameOver(true);
-      setIsFalling(false);
-    }
-  });
-}
+
 
 // ─── UI-панель (HTML поверх canvas) ────────────────────────────────────────────
 function UIPanel({
@@ -207,6 +199,7 @@ function Scene() {
 
   // Рефы для физических тел
   const rigidRefs = useRef({});
+  const blockRefs = useRef([]);
 
   // Текущая высота башни
   const towerHeight = useMemo(() => {
@@ -372,6 +365,9 @@ function Scene() {
           color={b.color}
           onClick={handleBlockClick}
           isSelected={b.id === selectedId}
+          onRigidRef={(id, ref) => {
+            rigidRefs.current[id] = ref;
+          }}
         />
       ))}
 
