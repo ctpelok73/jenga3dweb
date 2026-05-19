@@ -80,29 +80,27 @@ function generateTower() {
   const blocks = [];
   let id = 0;
 
-  // Расстояние между центрами блоков
-  const spacing = BLOCK_W + GAP;
+  // Расстояние между центрами блоков (без зазора - плотное прилегание)
+  const spacing = BLOCK_W;
+  const halfSpacing = spacing * 1.5; // (3 блока) * width / 2
 
   for (let layer = 0; layer < TOWER_LAYERS; layer++) {
     const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
     const isOdd = layer % 2 === 1;
     
-    // Для квадратной башни: блоки расставляются в форме креста
-    // Чётные слои: вдоль X, нечётные: вдоль Z
-    const positions = [
-      isOdd ? [0, -spacing, 0] : [-spacing, 0, 0],
-      [0, 0, 0],
-      isOdd ? [0, spacing, 0] : [spacing, 0, 0],
-    ];
+    // Чётные слои: 3 блока вдоль X оси
+    // Нечётные слои: 3 блока вдоль Z оси
     const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
 
     for (let b = 0; b < BLOCKS_PER_LAYER; b++) {
-      const [px, pz] = isOdd ? [positions[b][0], positions[b][1]] : [positions[b][1], positions[b][0]];
+      const offset = -BLOCK_W + b * BLOCK_W;
+      const x = isOdd ? 0 : offset;
+      const z = isOdd ? offset : 0;
       const color = WOOD_COLORS[id % WOOD_COLORS.length];
 
       blocks.push({
         id,
-        position: [px, y, pz],
+        position: [x, y, z],
         rotation: rot,
         color,
         layer,
@@ -255,20 +253,13 @@ function Scene() {
       slotIndex = 0;
     }
 
-    // Вычисляем новую позицию в крестообразной конфигурации
+    // Вычисляем новую позицию в ряду (плотное прилегание блоков)
     const y = newLayer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
     const isOdd = newLayer % 2 === 1;
-    const spacing = BLOCK_W + GAP;
     
-    const positions = [
-      isOdd ? [0, -spacing, 0] : [-spacing, 0, 0],
-      [0, 0, 0],
-      isOdd ? [0, spacing, 0] : [spacing, 0, 0],
-    ];
-    
-    const [px, pz] = isOdd ? [positions[slotIndex][0], positions[slotIndex][1]] : [positions[slotIndex][1], positions[slotIndex][0]];
-    const newX = px;
-    const newZ = pz;
+    const offset = -BLOCK_W + slotIndex * BLOCK_W;
+    const newX = isOdd ? 0 : offset;
+    const newZ = isOdd ? offset : 0;
     const newRot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
 
     // Телепортируем физическое тело блока на новую позицию
