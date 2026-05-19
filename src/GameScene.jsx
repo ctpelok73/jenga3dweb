@@ -38,10 +38,10 @@ function Block({ id, position, rotation, color, onClick, isSelected, onRigidRef 
       rotation={rotation}
       colliders={false}
       mass={0.5}
-      restitution={0.05}
-      friction={0.7}
-      linearDamping={0.1}
-      angularDamping={0.3}
+      restitution={0.2}
+      friction={0.9}
+      linearDamping={0.15}
+      angularDamping={0.5}
       userData={{ id }}
     >
       <CuboidCollider args={[BLOCK_W / 2, BLOCK_H / 2, BLOCK_D / 2]} />
@@ -83,11 +83,15 @@ function generateTower() {
   for (let layer = 0; layer < TOWER_LAYERS; layer++) {
     const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
     const isOdd = layer % 2 === 1;
-    const halfSpan = (BLOCKS_PER_LAYER - 1) * (BLOCK_D + GAP) / 2;
+    
+    // Размеры блока в активной плоскости (вдоль которой расставляются блоки)
+    const activeSize = isOdd ? BLOCK_W : BLOCK_D;
+    const halfSpan = (BLOCKS_PER_LAYER - 1) * (activeSize + GAP) / 2;
 
     for (let b = 0; b < BLOCKS_PER_LAYER; b++) {
-      const x = isOdd ? 0 : -halfSpan + b * (BLOCK_D + GAP);
-      const z = isOdd ? -halfSpan + b * (BLOCK_D + GAP) : 0;
+      const offset = -halfSpan + b * (activeSize + GAP);
+      const x = isOdd ? 0 : offset;
+      const z = isOdd ? offset : 0;
       const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
       const color = WOOD_COLORS[id % WOOD_COLORS.length];
 
@@ -323,6 +327,23 @@ function Scene() {
     setMessage('');
     setTurnCount(0);
     rigidRefs.current = {};
+  }, []);
+
+  // Инициализация башни - стабилизация позиций блоков
+  useEffect(() => {
+    const stabilizeTimeout = setTimeout(() => {
+      // Фиксируем нижние слои, чтобы предотвратить разлёт
+      for (const id in rigidRefs.current) {
+        const rigid = rigidRefs.current[id];
+        const block = blocks.find(b => b.id === parseInt(id));
+        if (rigid && block && block.layer < 5) {
+          // Очищаем скорости нижних слоев
+          rigid.setLinvel({ x: 0, y: 0, z: 0 }, true);
+          rigid.setAngvel({ x: 0, y: 0, z: 0 }, true);
+        }
+      }
+    }, 500);
+    return () => clearTimeout(stabilizeTimeout);
   }, []);
 
   // Периодическая проверка падения
