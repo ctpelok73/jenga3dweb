@@ -80,24 +80,29 @@ function generateTower() {
   const blocks = [];
   let id = 0;
 
+  // Расстояние между центрами блоков
+  const spacing = BLOCK_W + GAP;
+
   for (let layer = 0; layer < TOWER_LAYERS; layer++) {
     const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
     const isOdd = layer % 2 === 1;
     
-    // Размеры блока в активной плоскости (вдоль которой расставляются блоки)
-    const activeSize = isOdd ? BLOCK_W : BLOCK_D;
-    const halfSpan = (BLOCKS_PER_LAYER - 1) * (activeSize + GAP) / 2;
+    // Для квадратной башни: блоки расставляются в форме креста
+    // Чётные слои: вдоль X, нечётные: вдоль Z
+    const positions = [
+      isOdd ? [0, -spacing, 0] : [-spacing, 0, 0],
+      [0, 0, 0],
+      isOdd ? [0, spacing, 0] : [spacing, 0, 0],
+    ];
+    const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
 
     for (let b = 0; b < BLOCKS_PER_LAYER; b++) {
-      const offset = -halfSpan + b * (activeSize + GAP);
-      const x = isOdd ? 0 : offset;
-      const z = isOdd ? offset : 0;
-      const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
+      const [px, pz] = isOdd ? [positions[b][0], positions[b][1]] : [positions[b][1], positions[b][0]];
       const color = WOOD_COLORS[id % WOOD_COLORS.length];
 
       blocks.push({
         id,
-        position: [x, y, z],
+        position: [px, y, pz],
         rotation: rot,
         color,
         layer,
@@ -250,21 +255,21 @@ function Scene() {
       slotIndex = 0;
     }
 
-    // Вычисляем новую позицию
+    // Вычисляем новую позицию в крестообразной конфигурации
     const y = newLayer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
     const isOdd = newLayer % 2 === 1;
-    const halfSpan = ((BLOCKS_PER_LAYER - 1) * (BLOCK_D + GAP)) / 2;
-    let newX, newZ, newRot;
-
-    if (isOdd) {
-      newX = 0;
-      newZ = -halfSpan + slotIndex * (BLOCK_D + GAP);
-      newRot = [0, Math.PI / 2, 0];
-    } else {
-      newX = -halfSpan + slotIndex * (BLOCK_D + GAP);
-      newZ = 0;
-      newRot = [0, 0, 0];
-    }
+    const spacing = BLOCK_W + GAP;
+    
+    const positions = [
+      isOdd ? [0, -spacing, 0] : [-spacing, 0, 0],
+      [0, 0, 0],
+      isOdd ? [0, spacing, 0] : [spacing, 0, 0],
+    ];
+    
+    const [px, pz] = isOdd ? [positions[slotIndex][0], positions[slotIndex][1]] : [positions[slotIndex][1], positions[slotIndex][0]];
+    const newX = px;
+    const newZ = pz;
+    const newRot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
 
     // Телепортируем физическое тело блока на новую позицию
     const rigid = rigidRefs.current[selectedBlock.id];
