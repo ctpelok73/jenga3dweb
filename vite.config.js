@@ -20,6 +20,10 @@ export default defineConfig({
           ) {
             return 'r3f';
           }
+          // ─── Fix #9: Rapier WASM (~500KB) gets its own chunk ───
+          if (id.includes('node_modules/@react-three/rapier')) {
+            return 'rapier';
+          }
           return undefined;
         },
       },

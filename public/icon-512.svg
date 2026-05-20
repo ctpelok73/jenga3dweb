@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="64" fill="#2a6eff"/>
+  <!-- Jenga tower: 3 rows of blocks -->
+  <g transform="translate(150, 100)">
+    <!-- Row 1 (horizontal) -->
+    <rect x="0" y="0" width="212" height="42" rx="4" fill="#deb887"/>
+    <rect x="0" y="52" width="212" height="42" rx="4" fill="#b5651d"/>
+    <rect x="0" y="104" width="212" height="42" rx="4" fill="#cd853f"/>
+    <!-- Row 2 (vertical, rotated 90°) -->
+    <rect x="20" y="156" width="42" height="212" rx="4" fill="#a0522d"/>
+    <rect x="74" y="156" width="42" height="212" rx="4" fill="#8b4513"/>
+    <rect x="128" y="156" width="42" height="212" rx="4" fill="#d2b48c"/>
+  </g>
+  <text x="256" y="460" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="52" fill="white">JENGA</text>
+</svg>

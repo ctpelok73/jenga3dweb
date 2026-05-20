@@ -1,0 +1,114 @@
+# Jenga 3D — Roadmap монетизации и развития
+
+## ✅ Реализовано (текущая версия)
+
+### Критические исправления (баги физики)
+- Quaternion → Euler синхронизация вращений
+- Только relevant блоки dynamic (не все 54)
+- Settling-детекция по скорости (не таймер)
+- Table collider выровнен с визуальной поверхностью
+
+### Продуктовые фичи
+- 🔊 **Звуковые эффекты** — Web Audio API, процедурная генерация (0 KB)
+  - `playSelect()` — клик выбора блока
+  - `playPull()` — вытаскивание
+  - `playPlace()` — постановка наверх
+  - `playCollapse()` — падение башни
+  - `playGameOver()` — драматичный тон
+- 🏠 **Стартовый экран** — «Начать игру» + статистика (лучший результат, игр сыграно)
+- 💥 **Экран Game Over** — «Башня рухнула!» + ходы / лучший / всего игр
+- 📊 **Score Tracker** — localStorage persistence (best score, total games, history)
+- 📱 **PWA** — manifest + service worker + SVG icons → installable на телефон
+- 🎨 **Упрощённая сцена** — чистая поверхность + 2 directional lights (без комнаты/стола/лампы)
+- 📐 **Реалистичные пропорции** — BLOCK_H=0.3 (тонкие доски, не квадратные бруски)
+
+---
+
+## 🎯 Стратегия монетизации
+
+### Модель: Freemium + Ads
+
+**Core loop бесплатный:** классическая Дженга, 1 игрок, бесконечные партии.
+
+**Monetization layers:**
+
+| Уровень | Фича | Цена | ROI |
+|---------|-------|------|-----|
+| **Ads** | Banner между партиями | $0 | 💰 CPM $2-5 |
+| **Ads** | Rewarded video: «Продолжить после падения» | $0 | 💰 CPM $10-20, retention +30% |
+| **Premium** | Скины блоков (неоновый, мрамор, лед) | $1-3 | 💰 5-10% conversion |
+| **Premium** | Темы окружения (космос, пляж, библиотека) | $1-3 | 💰 visual variety |
+| **Premium** | «Remove ads» | $2-5 | 💰 3-5% conversion |
+| **SaaS** | Мультиплеер (2 игрока online) | subscription | 💰 long-term retention |
+
+---
+
+## 📋 Приоритетный план доработки
+
+### P0 — Готовность к публикации (1-2 недели)
+
+- [ ] **Ad SDK интеграция** — Google AdSense / Unity Ads
+  - Banner: внизу экрана, только на стартовом/GameOver экранах
+  - Rewarded: кнопка «Продолжить» на GameOver → видео → блоки замораживаются, можно продолжить
+- [ ] **Drag-and-drop блоков** — touch + mouse перетаскивание
+  - Выбранный блок → drag → snap к слоту наверху
+  - Это главный UX-улучшение, без него игра feels «clicky»
+- [ ] **Deploy** — Vercel/Netlify (бесплатно для static)
+  - Custom domain: `jenga3d.app` или `playjenga.com`
+- [ ] **Analytics** — Google Analytics или Mixpanel (free tier)
+  - Track: start_game, make_move, game_over, restart, ad_click
+
+### P1 — Retention & Engagement (2-4 недели)
+
+- [ ] **Ежедневные челленджи** — «Собери 10 ходов без падения»
+  - Daily seed → одинаковая башня для всех игроков сегодня
+  - Leaderboard (local + опционально Firebase)
+- [ ] **2-player local** — два игрока на одном устройстве, чередование ходов
+- [ ] **Achievements** — «Первые 5 ходов», «20 ходов», «Без падения N ходов»
+- [ ] **Tutorial** — 3-шаговый overlay: «Кликни блок → Сделай ход → Не урони!»
+
+### P2 — Premium content (4-8 недели)
+
+- [ ] **Скины блоков** — набор текстур (albedo + normal + roughness)
+  - Neon glow, Marble, Ice/crystal, Bamboo, Candy
+- [ ] **Темы окружения** — разные GroundSurface + lighting + fog
+  - Space (звёзды, туман), Beach (песок, голубой свет), Library (тёмное дерево)
+- [ ] **In-app purchase flow** — Stripe или Gumroad для web
+  - Или RevenueCat если оборачиваем в Capacitor/Cordova для App Store
+
+### P3 — Мультиплеер (8-12 недели)
+
+- [ ] **WebSocket backend** — Node.js + Socket.IO или Supabase Realtime
+- [ ] **Matchmaking** — quick match или invite link
+- [ ] **Spectator mode** — смотреть чужую партию
+- [ ] **Rankings** — ELO-based leaderboard
+
+### P4 — Mobile App (12+ недели)
+
+- [ ] **Capacitor** — обёртка PWA в native iOS/Android
+- [ ] **App Store / Google Play** — $99/год Apple, $25 Google
+- [ ] **Push notifications** — «Твой друг играет, присоединись!»
+- [ ] **Rate limiting** — 1 бесплатная партия / час → premium unlimited
+
+---
+
+## 📈 KPI для отслеживания
+
+| Метрика | Цель (30 дней) | Инструмент |
+|---------|----------------|------------|
+| DAU | 500 | Analytics |
+| Avg session length | 3+ минуты | Analytics |
+| Retention D7 | 15% | Analytics |
+| Ad revenue | $5/день | AdSense |
+| Premium conversion | 5% | Stripe |
+| Install rate (PWA) | 10% от DAU | SW events |
+
+---
+
+## 💡 Quick wins (0 cost, immediate impact)
+
+1. **SEO** — `<title>`, `<meta description>`, Open Graph tags → поисковики
+2. **Social sharing** — кнопка «Поделиться результатом» → Twitter/Telegram
+3. **Favicon** — SVG icon → брендинг в табе браузера
+4. **Performance** — lazy load Rapier (уже сделано) → быстрый первый экран
+5. **Accessibility** — keyboard controls (Tab + Enter для ходов)

@@ -1,444 +1,87 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
-import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
-import * as THREE from 'three';
+import React, { Suspense, lazy, Component } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 
-// ─── Константы ────────────────────────────────────────────────────────────────
-const BLOCK_W = 1.5;   // длина
-const BLOCK_H = 0.5;   // высота
-const BLOCK_D = 0.5;   // ширина
-const GAP = 0.04;      // зазор между блоками в слое
-const LAYER_GAP = 0.04; // зазор между слоями
-const TOWER_LAYERS = 18; // количество слоёв
-const BLOCKS_PER_LAYER = 3;
-const FALL_THRESHOLD = -2; // если центр блока ниже этого — считаем упавшим
-const TILT_THRESHOLD = 0.5; // допустимый наклон башни (по смещению центра)
+const GameSceneWithPhysics = lazy(() => import('./GameSceneWithPhysics'));
 
-const WOOD_COLORS = [
-  '#b5651d', '#a0522d', '#8b4513', '#cd853f', '#deb887',
-  '#d2b48c', '#c19a6b', '#b8860b', '#daa520', '#bc8f8f',
-];
-
-// ─── Компонент отдельного блока ────────────────────────────────────────────────
-function Block({ id, position, rotation, color, onClick, isSelected, onRigidRef }) {
-  const rigidRef = useRef(null);
-
-  React.useEffect(() => {
-    if (onRigidRef && rigidRef.current) {
-      onRigidRef(id, rigidRef.current);
-    }
-  }, [id, onRigidRef]);
-
-  return (
-    <RigidBody
-      ref={rigidRef}
-      type="dynamic"
-      position={position}
-      rotation={rotation}
-      colliders={false}
-      mass={0.5}
-      restitution={0.2}
-      friction={0.9}
-      linearDamping={0.15}
-      angularDamping={0.5}
-      userData={{ id }}
-    >
-      <CuboidCollider args={[BLOCK_W / 2, BLOCK_H / 2, BLOCK_D / 2]} />
-      <mesh onClick={(e) => { e.stopPropagation(); onClick(id); }}>
-        <boxGeometry args={[BLOCK_W, BLOCK_H, BLOCK_D]} />
-        <meshStandardMaterial
-          color={color}
-          roughness={0.7}
-          metalness={0.05}
-          emissive={isSelected ? '#4488ff' : '#000000'}
-          emissiveIntensity={isSelected ? 0.3 : 0}
-        />
-        {/* Контуры граней */}
-        <Edges color="#3a2010" />
-      </mesh>
-    </RigidBody>
-  );
-}
-
-// Tiny helper — рисует рёбра блока
-function Edges({ color }) {
-  const geometry = useMemo(
-    () => new THREE.EdgesGeometry(new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D)),
-    []
-  );
-  
-  return (
-    <lineSegments geometry={geometry}>
-      <lineBasicMaterial color={color} />
-    </lineSegments>
-  );
-}
-
-// ─── Генератор башни ────────────────────────────────────────────────────────────
-function generateTower() {
-  const blocks = [];
-  let id = 0;
-
-  // Расстояние между центрами блоков (без зазора - плотное прилегание)
-  const spacing = BLOCK_W;
-  const halfSpacing = spacing * 1.5; // (3 блока) * width / 2
-
-  for (let layer = 0; layer < TOWER_LAYERS; layer++) {
-    const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
-    const isOdd = layer % 2 === 1;
-    
-    // Чётные слои: 3 блока вдоль X оси
-    // Нечётные слои: 3 блока вдоль Z оси
-    const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
-
-    for (let b = 0; b < BLOCKS_PER_LAYER; b++) {
-      const offset = -BLOCK_W + b * BLOCK_W;
-      const x = isOdd ? 0 : offset;
-      const z = isOdd ? offset : 0;
-      const color = WOOD_COLORS[id % WOOD_COLORS.length];
-
-      blocks.push({
-        id,
-        position: [x, y, z],
-        rotation: rot,
-        color,
-        layer,
-      });
-      id++;
-    }
-  }
-  return blocks;
-}
-
-
-
-// ─── UI-панель (HTML поверх canvas) ────────────────────────────────────────────
-function UIPanel({
-  selectedId,
-  canMove,
-  onMakeMove,
-  onRestart,
-  gameOver,
-  message,
-  towerHeight,
-  turnCount,
-}) {
-  return (
-    <Html center={false} fullscreen>
-      <div style={styles.overlay}>
-        <div style={styles.panel}>
-          <h2 style={styles.title}>Jenga 3D</h2>
-          {gameOver && <div style={styles.gameOver}>💥 Башня рухнула!</div>}
-          <div style={styles.info}>
-            {message && <div style={styles.message}>{message}</div>}
-            <div>Слой: {towerHeight}</div>
-            <div>Ходов: {turnCount}</div>
-          </div>
-          <div style={styles.buttons}>
-            <button
-              style={{ ...styles.btn, opacity: canMove ? 1 : 0.4 }}
-              disabled={!canMove}
-              onClick={onMakeMove}
-            >
-              Сделать ход
-            </button>
-            <button style={styles.btn} onClick={onRestart}>
-              Новая игра
-            </button>
-          </div>
-        </div>
-      </div>
-    </Html>
-  );
-}
-
-const styles = {
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'none',
-    fontFamily: 'Arial, sans-serif',
-  },
-  panel: {
-    position: 'absolute',
-    top: 16,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    background: 'rgba(16, 19, 26, 0.85)',
-    color: '#fff',
-    padding: '12px 24px',
-    borderRadius: 12,
-    backdropFilter: 'blur(6px)',
-    textAlign: 'center',
-    pointerEvents: 'auto',
-    minWidth: 200,
-    border: '1px solid rgba(255,255,255,0.1)',
-  },
-  title: { margin: '0 0 8px', fontSize: 20 },
-  gameOver: { color: '#ff4444', fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  info: { fontSize: 14, marginBottom: 10, lineHeight: 1.6 },
-  message: { color: '#ffcc00', marginBottom: 4 },
-  buttons: { display: 'flex', gap: 10, justifyContent: 'center' },
-  btn: {
-    padding: '8px 18px',
-    borderRadius: 8,
-    border: 'none',
-    background: '#2a6eff',
-    color: '#fff',
-    fontSize: 14,
-    cursor: 'pointer',
-    fontWeight: 'bold',
-  },
-};
-
-// ─── Основная сцена ────────────────────────────────────────────────────────────
-function Scene() {
-  const [blocks, setBlocks] = useState(() => generateTower());
-  const [selectedId, setSelectedId] = useState(null);
-  const [gameOver, setGameOver] = useState(false);
-  const [isFalling, setIsFalling] = useState(false);
-  const [message, setMessage] = useState('');
-  const [turnCount, setTurnCount] = useState(0);
-
-  // Рефы для физических тел
-  const rigidRefs = useRef({});
-  const blockRefs = useRef([]);
-
-  // Текущая высота башни
-  const towerHeight = useMemo(() => {
-    let maxLayer = 0;
-    for (const b of blocks) {
-      if (b.layer > maxLayer) maxLayer = b.layer;
-    }
-    return maxLayer + 1;
-  }, [blocks]);
-
-  // Выбранный блок
-  const selectedBlock = useMemo(
-    () => blocks.find((b) => b.id === selectedId),
-    [blocks, selectedId]
-  );
-
-  // Можно ли сделать ход?
-  const canMove = selectedBlock !== undefined && !gameOver;
-
-  // Обработчик клика по блоку
-  const handleBlockClick = useCallback(
-    (id) => {
-      if (gameOver) return;
-      setSelectedId((prev) => (prev === id ? null : id));
-      setMessage('');
-    },
-    [gameOver]
-  );
-
-  // Сделать ход — перенести блок наверх
-  const handleMakeMove = useCallback(() => {
-    if (!canMove || !selectedBlock) return;
-
-    // Определяем, какой слой сверху
-    const maxLayer = blocks.reduce((m, b) => Math.max(m, b.layer), 0);
-    const topLayerBlocks = blocks.filter((b) => b.layer === maxLayer);
-
-    let newLayer = maxLayer;
-    let slotIndex = topLayerBlocks.length;
-
-    if (topLayerBlocks.length >= BLOCKS_PER_LAYER) {
-      // Новый слой
-      newLayer = maxLayer + 1;
-      slotIndex = 0;
-    }
-
-    // Вычисляем новую позицию в ряду (плотное прилегание блоков)
-    const y = newLayer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
-    const isOdd = newLayer % 2 === 1;
-    
-    const offset = -BLOCK_W + slotIndex * BLOCK_W;
-    const newX = isOdd ? 0 : offset;
-    const newZ = isOdd ? offset : 0;
-    const newRot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
-
-    // Телепортируем физическое тело блока на новую позицию
-    const rigid = rigidRefs.current[selectedBlock.id];
-    if (rigid) {
-      rigid.setTranslation({ x: newX, y, z: newZ }, true);
-      rigid.setRotation({ x: newRot[0], y: newRot[1], z: newRot[2], w: 1 }, true);
-      rigid.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    }
-
-    // Обновляем состояние блока
-    setBlocks((prev) =>
-      prev.map((b) =>
-        b.id === selectedBlock.id
-          ? { ...b, position: [newX, y, newZ], rotation: newRot, layer: newLayer }
-          : b
-      )
-    );
-
-    setSelectedId(null);
-    setTurnCount((c) => c + 1);
-    setMessage(`Блок ${selectedBlock.id + 1} перенесён на слой ${newLayer + 1}`);
-
-    // Запускаем проверку устойчивости через небольшую задержку (чтобы физика устаканилась)
-    setIsFalling(true);
-    setTimeout(() => {
-      setIsFalling(false);
-      checkStability();
-    }, 800);
-  }, [canMove, selectedBlock, blocks]);
-
-  // Упрощённая проверка устойчивости
-  const checkStability = useCallback(() => {
-    // Смотрим, не слишком ли сильно разъехались верхние блоки
-    const topBlocks = blocks.filter((b) => b.layer > TOWER_LAYERS - 3);
-    if (topBlocks.length < 2) return;
-
-    let maxDrift = 0;
-    for (const b of topBlocks) {
-      const rigid = rigidRefs.current[b.id];
-      if (rigid) {
-        const t = rigid.translation();
-        const [origX, , origZ] = b.position;
-        const drift = Math.sqrt((t.x - origX) ** 2 + (t.z - origZ) ** 2);
-        if (drift > maxDrift) maxDrift = drift;
-      }
-    }
-
-    if (maxDrift > TILT_THRESHOLD) {
-      setGameOver(true);
-      setMessage('💥 Башня слишком наклонилась! Проигрыш.');
-    }
-  }, [blocks]);
-
-  // Сброс игры
-  const handleRestart = useCallback(() => {
-    setBlocks(generateTower());
-    setSelectedId(null);
-    setGameOver(false);
-    setIsFalling(false);
-    setMessage('');
-    setTurnCount(0);
-    rigidRefs.current = {};
-  }, []);
-
-  // Инициализация башни - стабилизация позиций блоков
-  useEffect(() => {
-    const stabilizeTimeout = setTimeout(() => {
-      // Фиксируем нижние слои, чтобы предотвратить разлёт
-      for (const id in rigidRefs.current) {
-        const rigid = rigidRefs.current[id];
-        const block = blocks.find(b => b.id === parseInt(id));
-        if (rigid && block && block.layer < 5) {
-          // Очищаем скорости нижних слоев
-          rigid.setLinvel({ x: 0, y: 0, z: 0 }, true);
-          rigid.setAngvel({ x: 0, y: 0, z: 0 }, true);
-        }
-      }
-    }, 500);
-    return () => clearTimeout(stabilizeTimeout);
-  }, []);
-
-  // Периодическая проверка падения
-  useEffect(() => {
-    if (!isFalling) return;
-    const interval = setInterval(() => {
-      for (const id in rigidRefs.current) {
-        const rigid = rigidRefs.current[id];
-        if (rigid) {
-          const t = rigid.translation();
-          if (t.y < FALL_THRESHOLD) {
-            setGameOver(true);
-            setIsFalling(false);
-            setMessage('💥 Башня рухнула!');
-            clearInterval(interval);
-            return;
-          }
-        }
-      }
-    }, 200);
-    return () => clearInterval(interval);
-  }, [isFalling]);
-
+function LoadingScene() {
   return (
     <>
-      {/* Освещение */}
-      <ambientLight intensity={0.4} />
-      <hemisphereLight args={['#87ceeb', '#3a2010', 0.6]} />
-      <directionalLight position={[5, 10, 5]} intensity={1.2} castShadow />
-      <directionalLight position={[-5, 5, -5]} intensity={0.4} />
-      <pointLight position={[0, 15, 0]} intensity={0.3} color="#ffddaa" />
-
-      {/* Блоки */}
-      {blocks.map((b) => (
-        <Block
-          key={b.id}
-          id={b.id}
-          position={b.position}
-          rotation={b.rotation}
-          color={b.color}
-          onClick={handleBlockClick}
-          isSelected={b.id === selectedId}
-          onRigidRef={(id, ref) => {
-            rigidRefs.current[id] = ref;
-          }}
-        />
-      ))}
-
-      {/* Пол */}
-      <RigidBody type="fixed" position={[0, -0.25, 0]}>
-        <mesh>
-          <boxGeometry args={[10, 0.5, 10]} />
-          <meshStandardMaterial color="#2a2a2a" roughness={0.9} />
-        </mesh>
-      </RigidBody>
-
-      {/* Небольшая решётка/пол для красоты */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-        <planeGeometry args={[12, 12]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.8} />
+      <ambientLight intensity={0.8} />
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="#b5651d" />
       </mesh>
-
-      {/* UI */}
-      <UIPanel
-        selectedId={selectedId}
-        canMove={canMove}
-        onMakeMove={handleMakeMove}
-        onRestart={handleRestart}
-        gameOver={gameOver}
-        message={message}
-        towerHeight={towerHeight}
-        turnCount={turnCount}
-      />
     </>
   );
 }
 
-// ─── Корневой компонент с Canvas ──────────────────────────────────────────────
-export default function GameScene() {
+// ─── Fix #8: ErrorBoundary around Canvas ───
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('[Jenga 3D] ErrorBoundary caught:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          width: '100vw', height: '100vh',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: '#1a1410', color: '#fff', fontFamily: 'Arial, sans-serif',
+          flexDirection: 'column', gap: 16
+        }}>
+          <h2>⚠ Ошибка 3D-сцены</h2>
+          <p style={{ color: '#ff6666', maxWidth: 400, textAlign: 'center', fontSize: 14 }}>
+            {this.state.error?.message || 'Неизвестная ошибка'}
+          </p>
+          <p style={{ fontSize: 13, color: '#aaa' }}>
+            Попробуйте перезагрузить страницу или проверить поддержку WebGL.
+          </p>
+          <button
+            onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              padding: '8px 20px', borderRadius: 6, border: 'none',
+              background: '#2a6eff', color: '#fff', fontSize: 14, cursor: 'pointer'
+            }}
+          >
+            Попробовать снова
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey }) {
   return (
-    <Canvas
-      camera={{ position: [8, 6, 8], fov: 45 }}
-      shadows
-      gl={{ antialias: true }}
-      style={{ background: '#10131a' }}
-      onPointerMissed={() => {}}
-    >
-      {/* Туман */}
-      <fog attach="fog" args={['#10131a', 12, 25]} />
-      <Physics gravity={[0, -9.81, 0]} debug={false}>
-        <Scene />
-      </Physics>
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.1}
-        minDistance={4}
-        maxDistance={20}
-        maxPolarAngle={Math.PI / 2.1}
-      />
-    </Canvas>
+    <ErrorBoundary>
+      <Canvas
+        camera={{ position: [5, 3.5, 5], fov: 50 }}
+        style={{ width: '100%', height: '100%', display: 'block', background: '#2a2a2a' }}
+      >
+        <Suspense fallback={<LoadingScene />}>
+          <GameSceneWithPhysics
+            blocks={blocks}
+            selectedId={selectedId}
+            onBlockClick={onBlockClick}
+            simulatingBlockIds={simulatingBlockIds}
+            onSimulationComplete={onSimulationComplete}
+            restartKey={restartKey}
+          />
+        </Suspense>
+        <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={12} maxPolarAngle={Math.PI / 2.1} />
+      </Canvas>
+    </ErrorBoundary>
   );
 }
