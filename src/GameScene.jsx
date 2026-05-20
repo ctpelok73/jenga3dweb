@@ -63,7 +63,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey }) {
+export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot }) {
   return (
     <ErrorBoundary>
       <Canvas
@@ -78,6 +78,8 @@ export default function GameScene({ blocks, selectedId, onBlockClick, simulating
             simulatingBlockIds={simulatingBlockIds}
             onSimulationComplete={onSimulationComplete}
             restartKey={restartKey}
+            dropSlots={dropSlots}
+            onDropSlot={onDropSlot}
           />
         </Suspense>
         <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={12} maxPolarAngle={Math.PI / 2.1} />

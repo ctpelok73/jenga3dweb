@@ -13,7 +13,7 @@ import {
   BLOCK_PHYSICS
 } from './towerConfig';
 
-// ─── Shared geometries (one instance for all 54 blocks) ───
+// ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
 const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedBlockGeometry);
 const sharedEdgesMaterial = new THREE.LineBasicMaterial({ color: '#3a2010' });
@@ -31,6 +31,7 @@ function Block({
   color,
   onClick,
   isSelected,
+  isGhost,
   onRigidRef,
   isDynamic = false
 }) {
@@ -41,6 +42,9 @@ function Block({
   useEffect(() => {
     if (onRigidRef && rigidRef.current) onRigidRef(id, rigidRef.current);
   }, [id, onRigidRef]);
+
+  // Ghost block: selected block shown semi-transparent to indicate it's "lifted"
+  const opacity = isGhost ? 0.35 : 1;
 
   return (
     <RigidBody
@@ -62,7 +66,7 @@ function Block({
         geometry={sharedBlockGeometry}
         onClick={(e) => {
           e.stopPropagation();
-          if (!isDynamic) {
+          if (!isDynamic && !isGhost) {
             onClick(id);
           }
         }}
@@ -73,6 +77,8 @@ function Block({
           color={color}
           roughness={0.75}
           metalness={0.0}
+          transparent={isGhost}
+          opacity={opacity}
           emissive={isSelected ? '#4488ff' : (isHovered ? '#88ccff' : '#000000')}
           emissiveIntensity={isSelected ? 0.3 : (isHovered ? 0.15 : 0)}
         />
@@ -82,7 +88,34 @@ function Block({
   );
 }
 
-// ─── Simplified scene: just a flat wooden surface ───
+// ─── Drop slot: clickable placement zone on top of tower ───
+function DropSlot({ position, rotation, slotIndex, onClick }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh
+        onClick={(e) => { e.stopPropagation(); onClick(slotIndex); }}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false); }}
+      >
+        <boxGeometry args={[BLOCK_W, BLOCK_H, BLOCK_D]} />
+        <meshStandardMaterial
+          color={hovered ? '#4488ff' : '#2a6eff'}
+          transparent
+          opacity={hovered ? 0.6 : 0.3}
+          emissive={hovered ? '#4488ff' : '#2a6eff'}
+          emissiveIntensity={hovered ? 0.5 : 0.15}
+        />
+      </mesh>
+      {/* Glow outline */}
+      <lineSegments geometry={sharedEdgesGeometry} raycast={() => null}>
+        <lineBasicMaterial color={hovered ? '#88ccff' : '#2a6eff'} />
+      </lineSegments>
+    </group>
+  );
+}
+
+// ─── Scene environment ───
 function GroundSurface() {
   return (
     <mesh position={[0, -0.025, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow raycast={() => null}>
@@ -92,7 +125,6 @@ function GroundSurface() {
   );
 }
 
-// ─── Ground collider: flat surface at y=0 for blocks to rest on ───
 function GroundCollider() {
   return (
     <RigidBody type="fixed" position={[0, -0.05, 0]}>
@@ -101,7 +133,6 @@ function GroundCollider() {
   );
 }
 
-// ─── Floor collider far below: catches fallen blocks ───
 function FloorCollider() {
   return (
     <RigidBody type="fixed" position={[0, -5, 0]}>
@@ -110,22 +141,20 @@ function FloorCollider() {
   );
 }
 
-function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete }) {
+// ─── Main Scene ───
+function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot }) {
   const rigidRefs = useRef({});
   const simulateTime = useRef(0);
   const completionCalled = useRef(false);
 
-  // ─── Settling detection by velocity, not timer ───
+  // ─── Settling detection ───
   useFrame((_, delta) => {
     if (simulatingBlockIds && simulatingBlockIds.size > 0 && !completionCalled.current) {
       simulateTime.current += delta * 1000;
-
-      // Minimum 300ms before checking settling
       if (simulateTime.current < 300) return;
 
       let allSettled = true;
       const VELOCITY_THRESHOLD = 0.08;
-
       for (const id of simulatingBlockIds) {
         const rigid = rigidRefs.current[id];
         if (rigid) {
@@ -144,7 +173,6 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
         completionCalled.current = true;
         simulateTime.current = 0;
 
-        // Convert quaternion → Euler for consistent rotation format
         const updatedBlocks = blocks.map(b => {
           if (simulatingBlockIds.has(b.id)) {
             const rigid = rigidRefs.current[b.id];
@@ -153,22 +181,16 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
               const q = rigid.rotation();
               const quaternion = new THREE.Quaternion(q.x, q.y, q.z, q.w);
               const euler = new THREE.Euler().setFromQuaternion(quaternion);
-              return {
-                ...b,
-                position: [trans.x, trans.y, trans.z],
-                rotation: [euler.x, euler.y, euler.z]
-              };
+              return { ...b, position: [trans.x, trans.y, trans.z], rotation: [euler.x, euler.y, euler.z] };
             }
           }
           return b;
         });
-
         onSimulationComplete(updatedBlocks);
       }
     }
   });
 
-  // Reset timers when a new simulation phase starts
   useEffect(() => {
     if (simulatingBlockIds && simulatingBlockIds.size > 0) {
       simulateTime.current = 0;
@@ -178,7 +200,6 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
   return (
     <>
-      {/* Clean lighting: warm overhead + soft ambient */}
       <ambientLight intensity={0.4} />
       <hemisphereLight args={['#e8d5b0', '#2a1a0a', 0.5]} />
       <directionalLight position={[2, 8, 4]} intensity={0.8} color="#ffddaa" />
@@ -188,19 +209,30 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       <GroundCollider />
       <FloorCollider />
 
-      {/* Only blocks in simulatingBlockIds become dynamic */}
+      {/* Tower blocks — selected block shown as ghost (semi-transparent) */}
       {blocks.map((b) => (
         <Block key={b.id} id={b.id} position={b.position} rotation={b.rotation} color={b.color}
           onClick={onBlockClick} isSelected={b.id === selectedId}
+          isGhost={b.id === selectedId && dropSlots && dropSlots.length > 0}
           onRigidRef={(id, ref) => { rigidRefs.current[id] = ref; }}
           isDynamic={simulatingBlockIds != null && simulatingBlockIds.has(b.id)} />
+      ))}
+
+      {/* Drop slots: clickable placement zones on top of tower */}
+      {dropSlots && dropSlots.map((slot) => (
+        <DropSlot
+          key={`drop-${slot.slotIndex}`}
+          position={slot.position}
+          rotation={slot.rotation}
+          slotIndex={slot.slotIndex}
+          onClick={onDropSlot}
+        />
       ))}
     </>
   );
 }
 
-// restartKey forces Physics remount → clears stale rigidRefs
-export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey }) {
+export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot }) {
   return (
     <Physics key={restartKey} gravity={[0, -9.81, 0]} debug={false}>
       <Scene
@@ -209,6 +241,8 @@ export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick,
         onBlockClick={onBlockClick}
         simulatingBlockIds={simulatingBlockIds}
         onSimulationComplete={onSimulationComplete}
+        dropSlots={dropSlots}
+        onDropSlot={onDropSlot}
       />
     </Physics>
   );
