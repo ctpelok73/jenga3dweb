@@ -273,6 +273,55 @@ function App() {
   const selectedBlock = useMemo(() => blocks.find((b) => b.id === selectedId) || null, [blocks, selectedId]);
   const canMove = selectedBlock !== null && phase === PHASE_PLAYING && simulatingBlockIds === null && selectedBlock.layer < topCompleteLayer;
 
+  // ─── Drop slots: available placement positions on top of tower ───
+  const dropSlots = useMemo(() => {
+    if (!selectedBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return null;
+    const maxLayer = blocks.reduce((m, b) => Math.max(m, b.layer), 0);
+    const topLayerBlocks = blocks.filter((b) => b.layer === maxLayer);
+    const slots = [];
+
+    if (topLayerBlocks.length >= BLOCKS_PER_LAYER) {
+      // New empty layer — all 3 slots available
+      const newLayer = maxLayer + 1;
+      const y = newLayer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
+      const isOdd = newLayer % 2 === 1;
+      const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
+      for (let s = 0; s < BLOCKS_PER_LAYER; s++) {
+        const offset = -STEP + s * STEP;
+        slots.push({
+          slotIndex: s,
+          isOdd,
+          position: [isOdd ? offset : 0, y, isOdd ? 0 : offset],
+          rotation: rot,
+          newLayer,
+        });
+      }
+    } else {
+      // Incomplete top layer — remaining slots available
+      const y = maxLayer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
+      const isOdd = maxLayer % 2 === 1;
+      const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
+      const occupiedSlots = topLayerBlocks.map((b) => {
+        // Determine slot index from position
+        const val = isOdd ? b.position[0] : b.position[2];
+        return Math.round((val + STEP) / STEP);
+      });
+      for (let s = 0; s < BLOCKS_PER_LAYER; s++) {
+        if (!occupiedSlots.includes(s)) {
+          const offset = -STEP + s * STEP;
+          slots.push({
+            slotIndex: s,
+            isOdd,
+            position: [isOdd ? offset : 0, y, isOdd ? 0 : offset],
+            rotation: rot,
+            newLayer: maxLayer,
+          });
+        }
+      }
+    }
+    return slots;
+  }, [selectedBlock, phase, simulatingBlockIds, blocks]);
+
   // Resume audio context on first user interaction
   useEffect(() => {
     const handler = () => { resumeAudio(); };
@@ -410,6 +459,32 @@ function App() {
     }
   }, [turnCount, playerMode, currentPlayer]);
 
+  // ─── Drop slot click handler ───
+  const handleDropSlot = useCallback((slotData) => {
+    if (!selectedBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+
+    playPull();
+
+    const removedLayer = selectedBlock.layer;
+    const updatedBlocks = blocks.map((b) =>
+      b.id === selectedBlock.id
+        ? { ...b, position: slotData.position, rotation: slotData.rotation, layer: slotData.newLayer }
+        : b
+    );
+    setBlocks(updatedBlocks);
+    setSelectedId(null);
+    setTurnCount((c) => c + 1);
+
+    const dynamicIds = new Set();
+    for (const b of updatedBlocks) {
+      if (b.id === selectedBlock.id || b.layer >= removedLayer) {
+        dynamicIds.add(b.id);
+      }
+    }
+    setSimulatingBlockIds(dynamicIds);
+    setMessage('⏳ Стабилизация...');
+  }, [selectedBlock, phase, simulatingBlockIds, blocks]);
+
   // ─── Render ───
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
@@ -420,6 +495,8 @@ function App() {
         simulatingBlockIds={simulatingBlockIds}
         onSimulationComplete={handleSimulationComplete}
         restartKey={restartKey}
+        dropSlots={dropSlots}
+        onDropSlot={handleDropSlot}
       />
       {phase === PHASE_START && !showTutorial && (
         <StartScreen onStart={handleStart} playerMode={playerMode} setPlayerMode={setPlayerMode} />
