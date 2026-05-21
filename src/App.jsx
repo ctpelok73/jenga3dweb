@@ -3,6 +3,7 @@ import GameScene from './GameScene';
 import SocialSharePanel from './SocialSharePanel';
 import QRCodeDisplay from './QRCodeDisplay';
 import InteractiveTutorialOverlay from './InteractiveTutorialOverlay';
+import { PauseMenu } from './PauseMenu';
 import { BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP } from './towerConfig';
 import { playSelect, playPull, playPlace, playCollapse, playStabilize, playGameOver, resumeAudio } from './soundEngine';
 import { getBestScore, getTotalGames, recordGame, resetAllScores } from './scoreTracker';
@@ -443,13 +444,20 @@ function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, achieveme
 }
 
 // ─── Playing UI Panel ───
-function UIPanel({ canMove, onMakeMove, onRestart, message, towerHeight, turnCount, stabilizing, currentPlayer, playerMode }) {
+function UIPanel({ canMove, onMakeMove, onRestart, message, towerHeight, turnCount, stabilizing, currentPlayer, playerMode, onPauseMenu }) {
   const playerColor = playerMode === 2 ? PLAYER_COLORS[currentPlayer] : '#fff';
   const playerName = playerMode === 2 ? PLAYER_NAMES[currentPlayer] : '';
   return (
     <div style={baseStyles.overlay}>
       <div style={baseStyles.panel}>
-        <h2 style={baseStyles.title}>🧱 Jenga</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={baseStyles.title}>🧱 Jenga</h2>
+          <button onClick={onPauseMenu} style={{
+            background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 8, color: '#fff', fontSize: 20, cursor: 'pointer',
+            padding: '4px 10px', lineHeight: 1, transition: 'background 0.2s',
+          }} title="Меню">☰</button>
+        </div>
         {playerMode === 2 && (
           <div style={{ fontSize: 13, color: playerColor, fontWeight: 'bold', marginBottom: 4 }}>
             ▸ Ход: {playerName}
@@ -488,6 +496,7 @@ function App() {
   const [achievementToast, setAchievementToast] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showPauseMenu, setShowPauseMenu] = useState(false);
   const selectionTimeRef = useRef(null); // tracks when block was selected for speed achievement
 
   const towerHeight = useMemo(() => {
@@ -700,8 +709,21 @@ function App() {
 
   const handleRestart = useCallback(() => {
     playSelect();
+    setShowPauseMenu(false);
     initGame();
   }, [initGame]);
+
+  const handleBackToMenu = useCallback(() => {
+    setShowPauseMenu(false);
+    setShowSettings(false);
+    setShowAchievements(false);
+    setPhase(PHASE_START);
+    setBlocks(generateThemedTower());
+    setSelectedId(null);
+    setTurnCount(0);
+    setSimulatingBlockIds(null);
+    setRestartKey((k) => k + 1);
+  }, []);
 
   const handleSimulationComplete = useCallback((updatedBlocks) => {
     let anyFallen = false;
@@ -787,7 +809,7 @@ function App() {
       {showAchievements && (
         <AchievementsPanel onClose={() => setShowAchievements(false)} />
       )}
-      {phase === PHASE_PLAYING && (
+      {phase === PHASE_PLAYING && !showPauseMenu && (
         <UIPanel
           canMove={canMove}
           onMakeMove={handleMakeMove}
@@ -798,6 +820,20 @@ function App() {
           stabilizing={simulatingBlockIds !== null}
           currentPlayer={currentPlayer}
           playerMode={playerMode}
+          onPauseMenu={() => setShowPauseMenu(true)}
+        />
+      )}
+      {showPauseMenu && (
+        <PauseMenu
+          turnCount={turnCount}
+          towerHeight={towerHeight}
+          currentPlayer={currentPlayer}
+          playerMode={playerMode}
+          onResume={() => setShowPauseMenu(false)}
+          onOpenSettings={() => setShowSettings(true)}
+          onOpenAchievements={() => setShowAchievements(true)}
+          onRestart={handleRestart}
+          onBackToMenu={handleBackToMenu}
         />
       )}
       {phase === PHASE_GAME_OVER && (
