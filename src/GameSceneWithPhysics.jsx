@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState, useEffect } from 'react';
+import React, { useRef, useMemo, useState, useEffect, useCallback, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import * as THREE from 'three';
@@ -12,6 +12,7 @@ import {
   WOOD_COLORS,
   BLOCK_PHYSICS
 } from './towerConfig';
+import ParticleEffect from './ParticleEffect';
 
 // ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
@@ -24,7 +25,7 @@ function Edges() {
   );
 }
 
-function Block({
+const Block = memo(function Block({
   id,
   position,
   rotation,
@@ -33,7 +34,7 @@ function Block({
   isSelected,
   isGhost,
   onRigidRef,
-  isDynamic = false
+  isDynamic = false,
 }) {
   const rigidRef = useRef(null);
   const meshRef = useRef(null);
@@ -45,6 +46,13 @@ function Block({
 
   // Ghost block: selected block shown semi-transparent to indicate it's "lifted"
   const opacity = isGhost ? 0.35 : 1;
+
+  const handlePointerDown = (e) => {
+    e.stopPropagation();
+    if (!isDynamic && !isGhost) {
+      onClick(id);
+    }
+  };
 
   return (
     <RigidBody
@@ -64,12 +72,7 @@ function Block({
       <mesh
         ref={meshRef}
         geometry={sharedBlockGeometry}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!isDynamic && !isGhost) {
-            onClick(id);
-          }
-        }}
+        onPointerDown={handlePointerDown}
         onPointerOver={(e) => { e.stopPropagation(); setIsHovered(true); }}
         onPointerOut={(e) => { e.stopPropagation(); setIsHovered(false); }}
       >
@@ -86,34 +89,36 @@ function Block({
       </mesh>
     </RigidBody>
   );
-}
+});
 
 // ─── Drop slot: clickable placement zone on top of tower ───
-function DropSlot({ position, rotation, slotIndex, onClick }) {
+const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick, isDragHover = false }) {
   const [hovered, setHovered] = useState(false);
+  const isHighlighted = hovered || isDragHover;
+  
   return (
     <group position={position} rotation={rotation}>
       <mesh
+        geometry={sharedBlockGeometry}
         onClick={(e) => { e.stopPropagation(); onClick(slotIndex); }}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
         onPointerOut={(e) => { e.stopPropagation(); setHovered(false); }}
       >
-        <boxGeometry args={[BLOCK_W, BLOCK_H, BLOCK_D]} />
         <meshStandardMaterial
-          color={hovered ? '#4488ff' : '#2a6eff'}
+          color={isHighlighted ? '#44ff88' : '#2a6eff'}
           transparent
-          opacity={hovered ? 0.6 : 0.3}
-          emissive={hovered ? '#4488ff' : '#2a6eff'}
-          emissiveIntensity={hovered ? 0.5 : 0.15}
+          opacity={isHighlighted ? 0.7 : 0.3}
+          emissive={isHighlighted ? '#44ff88' : '#2a6eff'}
+          emissiveIntensity={isHighlighted ? 0.6 : 0.15}
         />
       </mesh>
       {/* Glow outline */}
       <lineSegments geometry={sharedEdgesGeometry} raycast={() => null}>
-        <lineBasicMaterial color={hovered ? '#88ccff' : '#2a6eff'} />
+        <lineBasicMaterial color={isHighlighted ? '#44ff88' : '#2a6eff'} linewidth={isHighlighted ? 3 : 1} />
       </lineSegments>
     </group>
   );
-}
+});
 
 // ─── Scene environment ───
 function GroundSurface() {
@@ -142,10 +147,26 @@ function FloorCollider() {
 }
 
 // ─── Main Scene ───
-function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot }) {
+function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot, lastMovedBlockId }) {
   const rigidRefs = useRef({});
   const simulateTime = useRef(0);
   const completionCalled = useRef(false);
+  const [particleBlockId, setParticleBlockId] = useState(null);
+
+  // ─── Show particles when block is moved ───
+  useEffect(() => {
+    if (lastMovedBlockId) {
+      setParticleBlockId(lastMovedBlockId);
+      const timer = setTimeout(() => setParticleBlockId(null), 600); // duration matches animation
+      return () => clearTimeout(timer);
+    }
+  }, [lastMovedBlockId]);
+
+  const movedBlockPos = useMemo(() => {
+    if (!particleBlockId) return null;
+    const block = blocks.find(b => b.id === particleBlockId);
+    return block ? block.position : null;
+  }, [particleBlockId, blocks]);
 
   // ─── Settling detection ───
   useFrame((_, delta) => {
@@ -209,6 +230,11 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       <GroundCollider />
       <FloorCollider />
 
+      {/* Particle effect for successful move */}
+      {movedBlockPos && (
+        <ParticleEffect position={movedBlockPos} enabled={particleBlockId !== null} duration={0.6} />
+      )}
+
       {/* Tower blocks — selected block shown as ghost (semi-transparent) */}
       {blocks.map((b) => (
         <Block key={b.id} id={b.id} position={b.position} rotation={b.rotation} color={b.color}
@@ -225,14 +251,14 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
           position={slot.position}
           rotation={slot.rotation}
           slotIndex={slot.slotIndex}
-          onClick={onDropSlot}
+          onClick={() => onDropSlot(slot)}
         />
       ))}
     </>
   );
 }
 
-export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot }) {
+export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId }) {
   return (
     <Physics key={restartKey} gravity={[0, -9.81, 0]} debug={false}>
       <Scene
@@ -243,6 +269,7 @@ export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick,
         onSimulationComplete={onSimulationComplete}
         dropSlots={dropSlots}
         onDropSlot={onDropSlot}
+        lastMovedBlockId={lastMovedBlockId}
       />
     </Physics>
   );

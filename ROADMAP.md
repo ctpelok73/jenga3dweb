@@ -15,12 +15,43 @@
   - `playPlace()` — постановка наверх
   - `playCollapse()` — падение башни
   - `playGameOver()` — драматичный тон
-- 🏠 **Стартовый экран** — «Начать игру» + статистика (лучший результат, игр сыграно)
-- 💥 **Экран Game Over** — «Башня рухнула!» + ходы / лучший / всего игр
+  - `playStabilize()` — стабилизация башни
+- 🏠 **Стартовый экран** — «Начать игру» + статистика (лучший результат, игр сыграно) + выбор режима (1/2 игрока)
+- 💥 **Экран Game Over** — «Башня рухнула!» + ходы / лучший / всего игр + QR-код + социальный шеринг
 - 📊 **Score Tracker** — localStorage persistence (best score, total games, history)
 - 📱 **PWA** — manifest + service worker + SVG icons → installable на телефон
 - 🎨 **Упрощённая сцена** — чистая поверхность + 2 directional lights (без комнаты/стола/лампы)
 - 📐 **Реалистичные пропорции** — BLOCK_H=0.3 (тонкие доски, не квадратные бруски)
+
+### P0 — Реализовано ✅
+- ✅ **Drag-and-drop блоков** — `dragAndDropController.js` + `DragVisualFeedback.jsx`
+  - Mouse + touch перетаскивание
+  - Визуальная траектория от блока к слоту, подсвечивание целевого слота
+- ✅ **Analytics** — `analyticsService.js` (Google Analytics 4)
+  - `trackGameStart`, `trackGameOver`, `trackShareClick`, `trackAdImpression`, `trackAdClick`
+- ✅ **SEO** — `<title>`, `<meta description>`, Open Graph + Twitter Card tags в `index.html`
+- ✅ **Social sharing** — `SocialSharePanel.jsx` (Twitter, Telegram, Facebook, WhatsApp, Copy Link)
+- ✅ **Favicon / Icons** — SVG icons `icon-192.svg`, `icon-512.svg` + apple-touch-icon
+
+### P1 — Реализовано ✅
+- ✅ **2-player local** — чередование ходов на одном устройстве
+  - `playerMode` state (1/2), `currentPlayer` switching, `PLAYER_COLORS`, `PLAYER_NAMES`
+  - Game Over показывает, кто уронил башню
+- ✅ **Achievements** — `achievementsTracker.js` + AchievementsPanel UI
+  - first_move, five_moves, ten_moves, twenty_moves, steady_hand, speed_demon, no_collapse, architect, survivor, jenga_master
+  - Toast-уведомления при разблокировке
+- ✅ **Tutorial** — `InteractiveTutorialOverlay.jsx` (3-шаговый overlay с подсветкой элементов)
+  - «Кликни блок → Перетащи наверх → Не урони!»
+  - localStorage-флаг `jenga3d_tutorial_done`
+
+### Дополнительные фичи (не были в ROADMAP)
+- ✅ **Settings Panel** — `settingsTracker.js` + UI
+  - Громкость (0-100%), таймер хода (15/30/60 сек), сложность (easy/normal/hard), тема блоков
+- ✅ **Темы блоков** — classic (wood), neon (glow), marble (stone) — `getThemeColors()`
+- ✅ **Difficulty-зависимая физика** — `getDifficultyDynamicIds()` меняет количество dynamic блоков
+- ✅ **Particle effects** — `ParticleEffect.jsx` (взрыв зелёных звёзд при успешном ходе)
+- ✅ **QR Code** — `QRCodeDisplay.jsx` (динамическая загрузка qrcode.js из CDN)
+- ✅ **Achievement Toast** — slideInRight-анимация, auto-dismiss 3.5 сек
 
 ---
 
@@ -28,7 +59,7 @@
 
 ### Модель: Freemium + Ads
 
-**Core loop бесплатный:** классическая Дженга, 1 игрок, бесконечные партии.
+**Core loop бесплатный:** классическая Дженга, 1/2 игрока, бесконечные партии.
 
 **Monetization layers:**
 
@@ -45,32 +76,26 @@
 
 ## 📋 Приоритетный план доработки
 
-### P0 — Готовность к публикации (1-2 недели)
+### P0 — Готовность к публикации (осталось: Ad SDK + Deploy)
 
 - [ ] **Ad SDK интеграция** — Google AdSense / Unity Ads
   - Banner: внизу экрана, только на стартовом/GameOver экранах
   - Rewarded: кнопка «Продолжить» на GameOver → видео → блоки замораживаются, можно продолжить
-- [ ] **Drag-and-drop блоков** — touch + mouse перетаскивание
-  - Выбранный блок → drag → snap к слоту наверху
-  - Это главный UX-улучшение, без него игра feels «clicky»
+  - `analyticsService.js` уже имеет `trackAdImpression()` / `trackAdClick()` — хуки готовы
 - [ ] **Deploy** — Vercel/Netlify (бесплатно для static)
   - Custom domain: `jenga3d.app` или `playjenga.com`
-- [ ] **Analytics** — Google Analytics или Mixpanel (free tier)
-  - Track: start_game, make_move, game_over, restart, ad_click
 
-### P1 — Retention & Engagement (2-4 недели)
+### P1 — Retention & Engagement (осталось: Daily Challenges + Leaderboard)
 
 - [ ] **Ежедневные челленджи** — «Собери 10 ходов без падения»
   - Daily seed → одинаковая башня для всех игроков сегодня
   - Leaderboard (local + опционально Firebase)
-- [ ] **2-player local** — два игрока на одном устройстве, чередование ходов
-- [ ] **Achievements** — «Первые 5 ходов», «20 ходов», «Без падения N ходов»
-- [ ] **Tutorial** — 3-шаговый overlay: «Кликни блок → Сделай ход → Не урони!»
 
 ### P2 — Premium content (4-8 недели)
 
-- [ ] **Скины блоков** — набор текстур (albedo + normal + roughness)
+- [ ] **Полные скины блоков** — набор текстур (albedo + normal + roughness)
   - Neon glow, Marble, Ice/crystal, Bamboo, Candy
+  - Сейчас есть только цветовые темы (classic/neon/marble) — нужно расширить до текстур
 - [ ] **Темы окружения** — разные GroundSurface + lighting + fog
   - Space (звёзды, туман), Beach (песок, голубой свет), Library (тёмное дерево)
 - [ ] **In-app purchase flow** — Stripe или Gumroad для web
@@ -107,8 +132,8 @@
 
 ## 💡 Quick wins (0 cost, immediate impact)
 
-1. **SEO** — `<title>`, `<meta description>`, Open Graph tags → поисковики
-2. **Social sharing** — кнопка «Поделиться результатом» → Twitter/Telegram
-3. **Favicon** — SVG icon → брендинг в табе браузера
-4. **Performance** — lazy load Rapier (уже сделано) → быстрый первый экран
-5. **Accessibility** — keyboard controls (Tab + Enter для ходов)
+1. ✅ **SEO** — `<title>`, `<meta description>`, Open Graph tags → поисковики
+2. ✅ **Social sharing** — кнопка «Поделиться результатом» → Twitter/Telegram
+3. ✅ **Favicon** — SVG icon → брендинг в табе браузера
+4. ✅ **Performance** — lazy load Rapier (уже сделано) → быстрый первый экран
+5. [ ] **Accessibility** — keyboard controls (Tab + Enter для ходов)

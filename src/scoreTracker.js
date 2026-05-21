@@ -34,7 +34,7 @@ export function getRecentHistory(limit = 5) {
 export function recordGame(turns, collapsed) {
   const data = loadScores();
   data.totalGames += 1;
-  if (!collapsed && turns > data.bestTurns) {
+  if (turns > data.bestTurns) {
     data.bestTurns = turns;
   }
   data.history.unshift({
