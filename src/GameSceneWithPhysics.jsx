@@ -13,15 +13,17 @@ import {
   BLOCK_PHYSICS
 } from './towerConfig';
 import ParticleEffect from './ParticleEffect';
+import { getBlockMaterialProps, clearTextureCache, getEnvironmentTheme } from './blockTextures';
 
 // ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
 const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedBlockGeometry);
-const sharedEdgesMaterial = new THREE.LineBasicMaterial({ color: '#3a2010' });
 
-function Edges() {
+// ─── Edges component with theme-aware color ───
+function Edges({ edgeColor = '#3a2010' }) {
+  const edgeMaterial = useMemo(() => new THREE.LineBasicMaterial({ color: edgeColor }), [edgeColor]);
   return (
-    <lineSegments geometry={sharedEdgesGeometry} material={sharedEdgesMaterial} raycast={() => null} />
+    <lineSegments geometry={sharedEdgesGeometry} material={edgeMaterial} raycast={() => null} />
   );
 }
 
@@ -35,6 +37,8 @@ const Block = memo(function Block({
   isGhost,
   onRigidRef,
   isDynamic = false,
+  theme = 'classic',
+  isKeyboardFocused = false,
 }) {
   const rigidRef = useRef(null);
   const meshRef = useRef(null);
@@ -47,12 +51,22 @@ const Block = memo(function Block({
   // Ghost block: selected block shown semi-transparent to indicate it's "lifted"
   const opacity = isGhost ? 0.35 : 1;
 
+  // ─── Procedural texture material props ───
+  const materialProps = useMemo(() => getBlockMaterialProps(theme, color), [theme, color]);
+
   const handlePointerDown = (e) => {
     e.stopPropagation();
     if (!isDynamic && !isGhost) {
       onClick(id);
     }
   };
+
+  // Edge color depends on theme
+  const edgeColor = theme === 'neon' ? color : (theme === 'marble' ? '#8a7a6a' : '#3a2010');
+
+  // Emissive logic — keyboard focus shows as yellow outline, different from blue select
+  const emissiveColor = isSelected ? '#4488ff' : (isKeyboardFocused ? '#ffcc00' : (isHovered ? '#88ccff' : materialProps.emissiveDefault));
+  const emissiveIntensity = isSelected ? 0.3 : (isKeyboardFocused ? 0.25 : (isHovered ? 0.15 : (materialProps.emissiveIntensityDefault || 0)));
 
   return (
     <RigidBody
@@ -77,15 +91,16 @@ const Block = memo(function Block({
         onPointerOut={(e) => { e.stopPropagation(); setIsHovered(false); }}
       >
         <meshStandardMaterial
-          color={color}
-          roughness={0.75}
-          metalness={0.0}
+          map={materialProps.map}
+          normalMap={materialProps.normalMap}
+          roughness={materialProps.roughness}
+          metalness={materialProps.metalness}
           transparent={isGhost}
           opacity={opacity}
-          emissive={isSelected ? '#4488ff' : (isHovered ? '#88ccff' : '#000000')}
-          emissiveIntensity={isSelected ? 0.3 : (isHovered ? 0.15 : 0)}
+          emissive={emissiveColor}
+          emissiveIntensity={emissiveIntensity}
         />
-        <Edges />
+        <Edges edgeColor={edgeColor} />
       </mesh>
     </RigidBody>
   );
@@ -120,20 +135,23 @@ const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick
   );
 });
 
-// ─── Scene environment ───
-function GroundSurface() {
+// ─── Scene environment (theme-aware) ───
+function GroundSurface({ envTheme }) {
+  const theme = getEnvironmentTheme(envTheme);
   return (
     <mesh position={[0, -0.025, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow raycast={() => null}>
-      <planeGeometry args={[4, 4]} />
-      <meshStandardMaterial color="#6b4226" roughness={0.8} />
+      <planeGeometry args={[theme.groundSize, theme.groundSize]} />
+      <meshStandardMaterial color={theme.groundColor} roughness={theme.groundRoughness} />
     </mesh>
   );
 }
 
-function GroundCollider() {
+function GroundCollider({ envTheme }) {
+  const theme = getEnvironmentTheme(envTheme);
+  const halfSize = theme.groundSize / 2;
   return (
     <RigidBody type="fixed" position={[0, -0.05, 0]}>
-      <CuboidCollider args={[2, 0.05, 2]} />
+      <CuboidCollider args={[halfSize, 0.05, halfSize]} />
     </RigidBody>
   );
 }
@@ -146,18 +164,51 @@ function FloorCollider() {
   );
 }
 
+// ─── Stars for space theme ───
+function SpaceStars() {
+  const starsRef = useRef();
+  const positions = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < 200; i++) {
+      arr.push(
+        (Math.random() - 0.5) * 30,
+        Math.random() * 15 + 2,
+        (Math.random() - 0.5) * 30
+      );
+    }
+    return new Float32Array(arr);
+  }, []);
+
+  return (
+    <points ref={starsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={positions.length / 3}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial size={0.08} color="#ffffff" sizeAttenuation transparent opacity={0.8} />
+    </points>
+  );
+}
+
 // ─── Main Scene ───
-function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot, lastMovedBlockId }) {
+function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId }) {
   const rigidRefs = useRef({});
   const simulateTime = useRef(0);
   const completionCalled = useRef(false);
   const [particleBlockId, setParticleBlockId] = useState(null);
 
+  // ─── Environment theme config ───
+  const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
+
   // ─── Show particles when block is moved ───
   useEffect(() => {
     if (lastMovedBlockId) {
       setParticleBlockId(lastMovedBlockId);
-      const timer = setTimeout(() => setParticleBlockId(null), 600); // duration matches animation
+      const timer = setTimeout(() => setParticleBlockId(null), 600);
       return () => clearTimeout(timer);
     }
   }, [lastMovedBlockId]);
@@ -221,13 +272,47 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
   return (
     <>
-      <ambientLight intensity={0.4} />
-      <hemisphereLight args={['#e8d5b0', '#2a1a0a', 0.5]} />
-      <directionalLight position={[2, 8, 4]} intensity={0.8} color="#ffddaa" />
-      <directionalLight position={[-2, 6, -3]} intensity={0.3} color="#ffcc88" />
+      {/* ─── Fog ─── */}
+      <fog attach="fog" args={[env.fogColor, env.fogNear, env.fogFar]} />
 
-      <GroundSurface />
-      <GroundCollider />
+      {/* ─── Lighting ─── */}
+      <ambientLight intensity={env.ambientIntensity} />
+      <hemisphereLight args={[env.hemiSkyColor, env.hemiGroundColor, env.hemiIntensity]} />
+      {env.dirLights.map((dl, i) => (
+        <directionalLight
+          key={`dir-${i}`}
+          position={dl.position}
+          intensity={dl.intensity}
+          color={dl.color}
+          castShadow={env.shadowEnabled}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+          shadow-camera-far={20}
+          shadow-camera-left={-5}
+          shadow-camera-right={5}
+          shadow-camera-top={5}
+          shadow-camera-bottom={-5}
+        />
+      ))}
+      {env.spotLight && (
+        <spotLight
+          position={env.spotLight.position}
+          intensity={env.spotLight.intensity}
+          color={env.spotLight.color}
+          angle={env.spotLight.angle}
+          penumbra={env.spotLight.penumbra}
+          castShadow={env.shadowEnabled}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+        />
+      )}
+
+      {/* ─── Space stars ─── */}
+      {envTheme === 'space' && <SpaceStars />}
+
+      {/* ─── Ground ─── */}
+      <GroundSurface envTheme={envTheme} />
+      <GroundCollider envTheme={envTheme} />
       <FloorCollider />
 
       {/* Particle effect for successful move */}
@@ -241,7 +326,9 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
           onClick={onBlockClick} isSelected={b.id === selectedId}
           isGhost={b.id === selectedId && dropSlots && dropSlots.length > 0}
           onRigidRef={(id, ref) => { rigidRefs.current[id] = ref; }}
-          isDynamic={simulatingBlockIds != null && simulatingBlockIds.has(b.id)} />
+          isDynamic={simulatingBlockIds != null && simulatingBlockIds.has(b.id)}
+          theme={blockTheme}
+          isKeyboardFocused={b.id === keyboardFocusId} />
       ))}
 
       {/* Drop slots: clickable placement zones on top of tower */}
@@ -258,7 +345,7 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
   );
 }
 
-export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId }) {
+export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId }) {
   return (
     <Physics key={restartKey} gravity={[0, -9.81, 0]} debug={false}>
       <Scene
@@ -270,6 +357,9 @@ export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick,
         dropSlots={dropSlots}
         onDropSlot={onDropSlot}
         lastMovedBlockId={lastMovedBlockId}
+        blockTheme={blockTheme}
+        envTheme={envTheme}
+        keyboardFocusId={keyboardFocusId}
       />
     </Physics>
   );

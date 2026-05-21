@@ -1,6 +1,7 @@
-import React, { Suspense, lazy, Component } from 'react';
+import React, { Suspense, lazy, Component, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import { getEnvironmentTheme } from './blockTextures';
 
 const GameSceneWithPhysics = lazy(() => import('./GameSceneWithPhysics'));
 
@@ -63,12 +64,15 @@ class ErrorBoundary extends Component {
   }
 }
 
-export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId }) {
+export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId }) {
+  const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
+
   return (
     <ErrorBoundary>
       <Canvas
         camera={{ position: [5, 3.5, 5], fov: 50 }}
-        style={{ width: '100%', height: '100%', display: 'block', background: '#2a2a2a' }}
+        style={{ width: '100%', height: '100%', display: 'block', background: env.bgColor }}
+        shadows
       >
         <Suspense fallback={<LoadingScene />}>
           <GameSceneWithPhysics
@@ -81,6 +85,9 @@ export default function GameScene({ blocks, selectedId, onBlockClick, simulating
             dropSlots={dropSlots}
             onDropSlot={onDropSlot}
             lastMovedBlockId={lastMovedBlockId}
+            blockTheme={blockTheme}
+            envTheme={envTheme}
+            keyboardFocusId={keyboardFocusId}
           />
         </Suspense>
         <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={12} maxPolarAngle={Math.PI / 2.1} />

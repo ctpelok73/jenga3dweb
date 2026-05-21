@@ -10,7 +10,9 @@ import { getBestScore, getTotalGames, recordGame, resetAllScores } from './score
 import { initializeAnalytics, trackGameStart, trackGameOver, trackShareClick, trackAdImpression } from './analyticsService';
 import { recordMove, recordCollapse, ACHIEVEMENTS, getUnlockedAchievements, getLockedAchievements, getAchievementData } from './achievementsTracker';
 import { getSettings, updateAllSettings, getDifficultyDynamicIds, getThemeColors } from './settingsTracker';
+import { clearTextureCache, ENVIRONMENT_THEMES } from './blockTextures';
 import { updateMasterVolume } from './soundEngine';
+import { handleKeyEvent } from './keyboardController';
 
 // ─── Game phases ───
 const PHASE_START = 'start';
@@ -155,7 +157,7 @@ function SettingsPanel({ onClose, onSettingsChange }) {
   };
 
   const handleReset = () => {
-    const defaults = { volume: 70, moveTimer: 0, difficulty: 'normal', theme: 'classic' };
+    const defaults = { volume: 70, moveTimer: 0, difficulty: 'normal', theme: 'classic', environment: 'classic' };
     setSettings(defaults);
     updateAllSettings(defaults);
     updateMasterVolume();
@@ -179,6 +181,13 @@ function SettingsPanel({ onClose, onSettingsChange }) {
     { label: '🪵 Классика', value: 'classic' },
     { label: '💜 Неон', value: 'neon' },
     { label: '🤍 Мрамор', value: 'marble' },
+  ];
+
+  const envOptions = [
+    { label: '🪵 Классика', value: 'classic' },
+    { label: '🌌 Космос', value: 'space' },
+    { label: '🏖️ Пляж', value: 'beach' },
+    { label: '📚 Библиотека', value: 'library' },
   ];
 
   const selectStyle = (isActive) => ({
@@ -229,12 +238,23 @@ function SettingsPanel({ onClose, onSettingsChange }) {
         </div>
 
         {/* Theme */}
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 18 }}>
           <div style={{ fontSize: 13, color: '#aaa', marginBottom: 6 }}>🎨 Тема блоков</div>
           <div style={{ display: 'flex', gap: 6 }}>
             {themeOptions.map(opt => (
               <button key={opt.value} style={selectStyle(settings.theme === opt.value)}
-                onClick={() => handleChange('theme', opt.value)}>{opt.label}</button>
+                onClick={() => { handleChange('theme', opt.value); clearTextureCache(); }}>{opt.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Environment */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, color: '#aaa', marginBottom: 6 }}>🌍 Окружение</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {envOptions.map(opt => (
+              <button key={opt.value} style={selectStyle(settings.environment === opt.value)}
+                onClick={() => handleChange('environment', opt.value)}>{opt.label}</button>
             ))}
           </div>
         </div>
@@ -497,6 +517,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showPauseMenu, setShowPauseMenu] = useState(false);
+  const [keyboardFocusId, setKeyboardFocusId] = useState(null); // keyboard accessibility focus
   const selectionTimeRef = useRef(null); // tracks when block was selected for speed achievement
 
   const towerHeight = useMemo(() => {
@@ -561,6 +582,7 @@ function App() {
     }
     return slots;
   }, [selectedBlock, phase, simulatingBlockIds, blocks]);
+
 
   // Resume audio context on first user interaction
   useEffect(() => {
@@ -713,6 +735,51 @@ function App() {
     initGame();
   }, [initGame]);
 
+  // ─── Keyboard accessibility ───
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) {
+        // Only handle Escape/M for pause menu outside of playing
+        if (e.key === 'Escape' || e.key === 'm' || e.key === 'М') {
+          e.preventDefault();
+          setShowPauseMenu(true);
+        }
+        return;
+      }
+
+      const result = handleKeyEvent(e, blocks, topCompleteLayer, keyboardFocusId, selectedId, canMove);
+      if (!result) return;
+
+      switch (result.action) {
+        case 'focus':
+          setKeyboardFocusId(result.focusId);
+          break;
+        case 'select':
+          setKeyboardFocusId(result.focusId);
+          handleBlockClick(result.focusId);
+          break;
+        case 'move':
+          handleMakeMove();
+          break;
+        case 'deselect':
+          setSelectedId(null);
+          setKeyboardFocusId(null);
+          setMessage(playerMode === 2 ? `Ход: ${PLAYER_NAMES[currentPlayer]}. Выберите блок.` : 'Выберите блок.');
+          selectionTimeRef.current = null;
+          break;
+        case 'pause':
+          setShowPauseMenu(true);
+          break;
+        case 'restart':
+          handleRestart();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [phase, simulatingBlockIds, blocks, topCompleteLayer, keyboardFocusId, selectedId, canMove, playerMode, currentPlayer, handleBlockClick, handleMakeMove, handleRestart]);
+
   const handleBackToMenu = useCallback(() => {
     setShowPauseMenu(false);
     setShowSettings(false);
@@ -787,6 +854,9 @@ function App() {
         dropSlots={dropSlots}
         onDropSlot={handleDropSlot}
         lastMovedBlockId={lastMovedBlockId}
+        blockTheme={getSettings().theme}
+        envTheme={getSettings().environment}
+        keyboardFocusId={keyboardFocusId}
       />
       {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && (
         <StartScreen

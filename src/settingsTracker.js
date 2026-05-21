@@ -7,7 +7,8 @@ const DEFAULT_SETTINGS = {
   volume: 70,            // 0-100
   moveTimer: 0,          // 0=off, 15, 30, 60 (seconds)
   difficulty: 'normal',  // easy, normal, hard
-  theme: 'classic',      // classic, neon, marble
+  theme: 'classic',      // classic, neon, marble — block textures
+  environment: 'classic', // classic, space, beach, library — scene environment
 };
 
 function loadSettings() {
