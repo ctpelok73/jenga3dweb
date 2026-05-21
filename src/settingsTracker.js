@@ -96,6 +96,18 @@ export const THEME_COLORS = {
     '#f0ead6', '#e8e0cc', '#d4cbb8', '#c8bda0', '#bfb494',
     '#e0d8c4', '#d0c4a8', '#c4b898', '#b8a888', '#a89878',
   ],
+  ice: [
+    '#a8d8ea', '#88c8e8', '#68b8d8', '#48a8c8', '#c8e8f8',
+    '#b0d0e0', '#98c0d0', '#78b0c0', '#58a0b0', '#d0f0ff',
+  ],
+  bamboo: [
+    '#7dba4d', '#6da83d', '#5d962d', '#8dcc5d', '#9cdd6d',
+    '#a8e878', '#b8f888', '#6cb048', '#5ca038', '#4c9028',
+  ],
+  candy: [
+    '#ff6b9d', '#ff9a76', '#ffd166', '#06d6a0', '#118ab2',
+    '#ef476f', '#ff85a1', '#ffc6d9', '#a8e6cf', '#dcedc1',
+  ],
 };
 
 export function getThemeColors() {

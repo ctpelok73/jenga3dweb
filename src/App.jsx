@@ -3,6 +3,7 @@ import GameScene from './GameScene';
 import SocialSharePanel from './SocialSharePanel';
 import QRCodeDisplay from './QRCodeDisplay';
 import InteractiveTutorialOverlay from './InteractiveTutorialOverlay';
+import AriaAnnouncer from './AriaAnnouncer';
 import { PauseMenu } from './PauseMenu';
 import { BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP } from './towerConfig';
 import { playSelect, playPull, playPlace, playCollapse, playStabilize, playGameOver, resumeAudio } from './soundEngine';
@@ -13,6 +14,8 @@ import { getSettings, updateAllSettings, getDifficultyDynamicIds, getThemeColors
 import { clearTextureCache, ENVIRONMENT_THEMES } from './blockTextures';
 import { updateMasterVolume } from './soundEngine';
 import { handleKeyEvent } from './keyboardController';
+import DailyChallengePanel from './DailyChallengePanel';
+import { getDailyChallenge, generateDailyTower, recordDailyChallengeAttempt, isDailyChallengeCompleted } from './dailyChallengeTracker';
 
 // ─── Game phases ───
 const PHASE_START = 'start';
@@ -112,7 +115,7 @@ function AchievementToast({ achievement, onDismiss }) {
   if (!achievement) return null;
 
   return (
-    <div style={{
+    <div role="alert" aria-live="assertive" style={{
       position: 'fixed', top: 16, right: 16, zIndex: 200,
       background: 'rgba(0, 0, 0, 0.9)', color: '#fff',
       padding: '14px 20px', borderRadius: 12,
@@ -129,7 +132,7 @@ function AchievementToast({ achievement, onDismiss }) {
           <div style={{ fontSize: 15, fontWeight: 'bold', marginTop: 2 }}>{achievement.title}</div>
           <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>{achievement.description}</div>
         </div>
-        <button onClick={onDismiss} style={{
+        <button onClick={onDismiss} aria-label="Закрыть уведомление" style={{
           background: 'none', border: 'none', color: '#666', fontSize: 18,
           cursor: 'pointer', padding: '0 4px', marginLeft: 'auto',
         }}>✕</button>
@@ -181,6 +184,9 @@ function SettingsPanel({ onClose, onSettingsChange }) {
     { label: '🪵 Классика', value: 'classic' },
     { label: '💜 Неон', value: 'neon' },
     { label: '🤍 Мрамор', value: 'marble' },
+    { label: '🧊 Лёд', value: 'ice' },
+    { label: '🎋 Бамбук', value: 'bamboo' },
+    { label: '🍬 Конфеты', value: 'candy' },
   ];
 
   const envOptions = [
@@ -199,11 +205,11 @@ function SettingsPanel({ onClose, onSettingsChange }) {
   });
 
   return (
-    <div style={screenStyles.container}>
+    <div style={screenStyles.container} role="dialog" aria-label="Настройки">
       <div style={{ ...screenStyles.card, maxWidth: 400, textAlign: 'left' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ ...screenStyles.heading, margin: 0, fontSize: 22 }}>⚙️ Настройки</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', fontSize: 22, cursor: 'pointer' }}>✕</button>
+          <button onClick={onClose} aria-label="Закрыть настройки" style={{ background: 'none', border: 'none', color: '#888', fontSize: 22, cursor: 'pointer' }}>✕</button>
         </div>
 
         {/* Volume */}
@@ -212,6 +218,7 @@ function SettingsPanel({ onClose, onSettingsChange }) {
           <input type="range" min="0" max="100" value={settings.volume}
             onChange={(e) => handleChange('volume', Number(e.target.value))}
             style={{ width: '100%', accentColor: '#2a6eff' }}
+            aria-label="Громкость"
           />
         </div>
 
@@ -276,11 +283,11 @@ function AchievementsPanel({ onClose }) {
   const data = getAchievementData();
 
   return (
-    <div style={screenStyles.container}>
+    <div style={screenStyles.container} role="dialog" aria-label="Достижения">
       <div style={{ ...screenStyles.card, maxWidth: 420, textAlign: 'left', maxHeight: '80vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h2 style={{ ...screenStyles.heading, margin: 0, fontSize: 22 }}>🏆 Достижения</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', fontSize: 22, cursor: 'pointer' }}>✕</button>
+          <button onClick={onClose} aria-label="Закрыть достижения" style={{ background: 'none', border: 'none', color: '#888', fontSize: 22, cursor: 'pointer' }}>✕</button>
         </div>
         <div style={{ fontSize: 14, color: '#2a6eff', fontWeight: 'bold', marginBottom: 16 }}>
           {unlocked.length}/{total} разблокировано
@@ -323,12 +330,12 @@ function AchievementsPanel({ onClose }) {
 }
 
 // ─── Start Screen ───
-function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpenAchievements }) {
+function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpenAchievements, onOpenDailyChallenge }) {
   const best = getBestScore();
   const total = getTotalGames();
   const unlockedCount = getUnlockedAchievements().length;
   return (
-    <div style={screenStyles.container}>
+    <div style={screenStyles.container} role="dialog" aria-label="Стартовый экран">
       <div style={screenStyles.card}>
         <h1 style={screenStyles.heading}>🧱 Jenga 3D</h1>
         <p style={screenStyles.subtext}>
@@ -350,6 +357,8 @@ function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpe
         {/* Mode selector */}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
           <button
+            aria-label="1 игрок"
+            aria-pressed={playerMode === 1}
             style={{
               ...baseStyles.btn,
               background: playerMode === 1 ? '#2a6eff' : 'rgba(42,110,255,0.15)',
@@ -361,6 +370,8 @@ function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpe
             🎯 1 игрок
           </button>
           <button
+            aria-label="2 игрока"
+            aria-pressed={playerMode === 2}
             style={{
               ...baseStyles.btn,
               background: playerMode === 2 ? '#ff4444' : 'rgba(255,68,68,0.15)',
@@ -372,13 +383,16 @@ function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpe
             👥 2 игрока
           </button>
         </div>
-        <button style={{ ...baseStyles.btn, width: '100%', marginBottom: 12 }} onClick={onStart}>▶ Начать игру</button>
+        <button aria-label="Начать игру" style={{ ...baseStyles.btn, width: '100%', marginBottom: 12 }} onClick={onStart}>▶ Начать игру</button>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-          <button style={{ ...baseStyles.btnSecondary, fontSize: 13 }} onClick={onOpenSettings}>
+          <button aria-label="Настройки" style={{ ...baseStyles.btnSecondary, fontSize: 13 }} onClick={onOpenSettings}>
             ⚙️ Настройки
           </button>
-          <button style={{ ...baseStyles.btnSecondary, fontSize: 13 }} onClick={onOpenAchievements}>
+          <button aria-label="Достижения" style={{ ...baseStyles.btnSecondary, fontSize: 13 }} onClick={onOpenAchievements}>
             🏆 {unlockedCount}/{ACHIEVEMENTS.length}
+          </button>
+          <button aria-label="Ежедневный челлендж" style={{ ...baseStyles.btnSecondary, fontSize: 13, borderColor: isDailyChallengeCompleted() ? 'rgba(68,255,136,0.4)' : 'rgba(255,204,0,0.4)', color: isDailyChallengeCompleted() ? '#44ff88' : '#ffcc00' }} onClick={onOpenDailyChallenge}>
+            📅 Челлендж
           </button>
         </div>
       </div>
@@ -398,7 +412,7 @@ function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, achieveme
     : `🧱 Jenga 3D — башня рухнула после ${turns} ходов! Мой лучший: ${best}. Попробуй побить! 🎮`;
 
   return (
-    <div style={screenStyles.container}>
+    <div style={screenStyles.container} role="dialog" aria-label="Конец игры">
       <div style={{ ...screenStyles.card, maxWidth: showQR ? 420 : 380 }}>
         <h1 style={{ ...screenStyles.heading, color: '#ff4444' }}>💥 Башня рухнула!</h1>
         {playerMode === 2 && (
@@ -438,8 +452,9 @@ function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, achieveme
         )}
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
-          <button style={baseStyles.btn} onClick={onRestart}>🔄 Играть снова</button>
-          <button 
+          <button aria-label="Играть снова" style={baseStyles.btn} onClick={onRestart}>🔄 Играть снова</button>
+          <button
+            aria-label="Показать QR код"
             style={{ ...baseStyles.btnSecondary, color: '#2a6eff' }}
             onClick={() => setShowQR(!showQR)}
           >
@@ -468,11 +483,11 @@ function UIPanel({ canMove, onMakeMove, onRestart, message, towerHeight, turnCou
   const playerColor = playerMode === 2 ? PLAYER_COLORS[currentPlayer] : '#fff';
   const playerName = playerMode === 2 ? PLAYER_NAMES[currentPlayer] : '';
   return (
-    <div style={baseStyles.overlay}>
+    <div style={baseStyles.overlay} role="status" aria-label="Игровая панель">
       <div style={baseStyles.panel}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={baseStyles.title}>🧱 Jenga</h2>
-          <button onClick={onPauseMenu} style={{
+          <button onClick={onPauseMenu} aria-label="Открыть меню паузы" style={{
             background: 'none', border: '1px solid rgba(255,255,255,0.15)',
             borderRadius: 8, color: '#fff', fontSize: 20, cursor: 'pointer',
             padding: '4px 10px', lineHeight: 1, transition: 'background 0.2s',
@@ -484,16 +499,16 @@ function UIPanel({ canMove, onMakeMove, onRestart, message, towerHeight, turnCou
           </div>
         )}
         {stabilizing && <div style={{ color: '#88aaff', fontSize: 13, marginBottom: 6 }}>⏳ Стабилизация...</div>}
-        <div style={baseStyles.info}>
+        <div style={baseStyles.info} aria-live="polite">
           {message && <div style={baseStyles.message}>{message}</div>}
           <div>Слой: {towerHeight} · Ходов: {turnCount}</div>
           {canMove && <div style={{ fontSize: 12, color: '#88ff88', marginTop: 6 }}>💡 Нажми на зелёный слот или кнопку ниже</div>}
         </div>
         <div style={baseStyles.buttons}>
-          <button style={{ ...baseStyles.btn, opacity: canMove ? 1 : 0.4 }} disabled={!canMove} onClick={onMakeMove}>
+          <button aria-label="Сделать ход" style={{ ...baseStyles.btn, opacity: canMove ? 1 : 0.4 }} disabled={!canMove} onClick={onMakeMove}>
             Сделать ход
           </button>
-          <button style={baseStyles.btnSecondary} onClick={onRestart}>↻</button>
+          <button aria-label="Начать заново" style={baseStyles.btnSecondary} onClick={onRestart}>↻</button>
         </div>
       </div>
     </div>
@@ -517,7 +532,10 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showPauseMenu, setShowPauseMenu] = useState(false);
+  const [showDailyChallenge, setShowDailyChallenge] = useState(false);
+  const [isDailyChallengeMode, setIsDailyChallengeMode] = useState(false); // playing daily challenge
   const [keyboardFocusId, setKeyboardFocusId] = useState(null); // keyboard accessibility focus
+  const [announcement, setAnnouncement] = useState(''); // screen reader announcements
   const selectionTimeRef = useRef(null); // tracks when block was selected for speed achievement
 
   const towerHeight = useMemo(() => {
@@ -620,7 +638,7 @@ function App() {
   const initGame = useCallback(() => {
     setPhase(PHASE_PLAYING);
     setMessage(playerMode === 2 ? `Ход: ${PLAYER_NAMES[0]}. Выберите блок.` : 'Выберите блок.');
-    setBlocks(generateThemedTower());
+    setBlocks(isDailyChallengeMode ? generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP) : generateThemedTower());
     setSelectedId(null);
     setTurnCount(0);
     setCurrentPlayer(0);
@@ -633,12 +651,22 @@ function App() {
   const handleStart = useCallback(() => {
     resumeAudio();
     trackGameStart('ui_button', playerMode);
+    setIsDailyChallengeMode(false);
     if (showTutorial) {
       // Tutorial will show first, then transition to playing
       return;
     }
     initGame();
   }, [showTutorial, playerMode, initGame]);
+
+  const handleStartDailyChallenge = useCallback(() => {
+    resumeAudio();
+    trackGameStart('daily_challenge', 1);
+    setIsDailyChallengeMode(true);
+    setShowDailyChallenge(false);
+    setPlayerMode(1); // Daily challenge is always 1 player
+    initGame();
+  }, [initGame]);
 
   const handleTutorialDone = useCallback(() => {
     markTutorialSeen();
@@ -738,6 +766,31 @@ function App() {
   // ─── Keyboard accessibility ───
   useEffect(() => {
     const onKeyDown = (e) => {
+      // ─── Overlay priority: Settings > Achievements > PauseMenu ───
+      // When an overlay is open, handle Escape for that overlay and ignore game keys
+      if (showSettings) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setShowSettings(false);
+          // Return to PauseMenu if we were in a game
+          if (phase === PHASE_PLAYING) setShowPauseMenu(true);
+        }
+        return; // Don't process game keys while overlay is open
+      }
+      if (showAchievements) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setShowAchievements(false);
+          if (phase === PHASE_PLAYING) setShowPauseMenu(true);
+        }
+        return;
+      }
+      if (showPauseMenu) {
+        // PauseMenu handles its own Escape (resume / cancel confirm)
+        // Just ignore all game keys while paused
+        return;
+      }
+
       if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) {
         // Only handle Escape/M for pause menu outside of playing
         if (e.key === 'Escape' || e.key === 'm' || e.key === 'М') {
@@ -753,10 +806,13 @@ function App() {
       switch (result.action) {
         case 'focus':
           setKeyboardFocusId(result.focusId);
+          const focusBlock = blocks.find(b => b.id === result.focusId);
+          if (focusBlock) setAnnouncement(`Блок ${result.focusId + 1}, слой ${focusBlock.layer + 1}`);
           break;
         case 'select':
           setKeyboardFocusId(result.focusId);
           handleBlockClick(result.focusId);
+          setAnnouncement(`Блок ${result.focusId + 1} выбран`);
           break;
         case 'move':
           handleMakeMove();
@@ -765,6 +821,7 @@ function App() {
           setSelectedId(null);
           setKeyboardFocusId(null);
           setMessage(playerMode === 2 ? `Ход: ${PLAYER_NAMES[currentPlayer]}. Выберите блок.` : 'Выберите блок.');
+          setAnnouncement('Блок отменён');
           selectionTimeRef.current = null;
           break;
         case 'pause':
@@ -778,12 +835,13 @@ function App() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [phase, simulatingBlockIds, blocks, topCompleteLayer, keyboardFocusId, selectedId, canMove, playerMode, currentPlayer, handleBlockClick, handleMakeMove, handleRestart]);
+  }, [phase, simulatingBlockIds, blocks, topCompleteLayer, keyboardFocusId, selectedId, canMove, playerMode, currentPlayer, handleBlockClick, handleMakeMove, handleRestart, showSettings, showAchievements, showPauseMenu]);
 
   const handleBackToMenu = useCallback(() => {
     setShowPauseMenu(false);
     setShowSettings(false);
     setShowAchievements(false);
+    setIsDailyChallengeMode(false);
     setPhase(PHASE_START);
     setBlocks(generateThemedTower());
     setSelectedId(null);
@@ -818,10 +876,25 @@ function App() {
         setTimeout(() => showAchievementNotification(newUnlocks), 1500);
       }
 
+      // ─── Record daily challenge attempt (if in challenge mode) ───
+      if (isDailyChallengeMode) {
+        const challengeResult = recordDailyChallengeAttempt(turnCount, towerHeight, false);
+        if (challengeResult.completed) {
+          setAnnouncement('Челлендж дня выполнен! 🎉');
+        }
+      }
+
       setPhase(PHASE_GAME_OVER);
     } else {
       playStabilize();
       setTimeout(() => playPlace(), 150);
+
+      // ─── Check daily challenge progress on successful move ───
+      if (isDailyChallengeMode && turnCount + 1 >= 1) {
+        // Challenge progress check will happen on game over or explicitly
+        // For "survive X moves" challenges, we track at game end
+      }
+
       // Switch player in 2-player mode
       if (playerMode === 2) {
         const nextPlayer = currentPlayer === 0 ? 1 : 0;
@@ -843,7 +916,7 @@ function App() {
 
   // ─── Render ───
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }} role="application" aria-label="Jenga 3D — 3D игра с физикой">
       <GameScene
         blocks={blocks}
         selectedId={selectedId}
@@ -858,13 +931,14 @@ function App() {
         envTheme={getSettings().environment}
         keyboardFocusId={keyboardFocusId}
       />
-      {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && (
+      {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && !showDailyChallenge && (
         <StartScreen
           onStart={handleStart}
           playerMode={playerMode}
           setPlayerMode={setPlayerMode}
           onOpenSettings={() => setShowSettings(true)}
           onOpenAchievements={() => setShowAchievements(true)}
+          onOpenDailyChallenge={() => setShowDailyChallenge(true)}
         />
       )}
       {phase === PHASE_START && showTutorial && (
@@ -872,14 +946,23 @@ function App() {
       )}
       {showSettings && (
         <SettingsPanel
-          onClose={() => setShowSettings(false)}
+          onClose={() => {
+            setShowSettings(false);
+            // Return to PauseMenu if we were in a game
+            if (phase === PHASE_PLAYING) setShowPauseMenu(true);
+          }}
           onSettingsChange={handleSettingsChange}
         />
       )}
       {showAchievements && (
-        <AchievementsPanel onClose={() => setShowAchievements(false)} />
+        <AchievementsPanel
+          onClose={() => {
+            setShowAchievements(false);
+            if (phase === PHASE_PLAYING) setShowPauseMenu(true);
+          }}
+        />
       )}
-      {phase === PHASE_PLAYING && !showPauseMenu && (
+      {phase === PHASE_PLAYING && !showPauseMenu && !showSettings && !showAchievements && (
         <UIPanel
           canMove={canMove}
           onMakeMove={handleMakeMove}
@@ -893,15 +976,15 @@ function App() {
           onPauseMenu={() => setShowPauseMenu(true)}
         />
       )}
-      {showPauseMenu && (
+      {showPauseMenu && !showSettings && !showAchievements && (
         <PauseMenu
           turnCount={turnCount}
           towerHeight={towerHeight}
           currentPlayer={currentPlayer}
           playerMode={playerMode}
           onResume={() => setShowPauseMenu(false)}
-          onOpenSettings={() => setShowSettings(true)}
-          onOpenAchievements={() => setShowAchievements(true)}
+          onOpenSettings={() => { setShowPauseMenu(false); setShowSettings(true); }}
+          onOpenAchievements={() => { setShowPauseMenu(false); setShowAchievements(true); }}
           onRestart={handleRestart}
           onBackToMenu={handleBackToMenu}
         />
@@ -915,6 +998,13 @@ function App() {
           onDismiss={() => setAchievementToast(null)}
         />
       )}
+      {showDailyChallenge && (
+        <DailyChallengePanel
+          onStartChallenge={handleStartDailyChallenge}
+          onClose={() => setShowDailyChallenge(false)}
+        />
+      )}
+      <AriaAnnouncer announcement={announcement} />
     </div>
   );
 }

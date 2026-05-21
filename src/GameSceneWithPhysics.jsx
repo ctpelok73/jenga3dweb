@@ -62,7 +62,7 @@ const Block = memo(function Block({
   };
 
   // Edge color depends on theme
-  const edgeColor = theme === 'neon' ? color : (theme === 'marble' ? '#8a7a6a' : '#3a2010');
+  const edgeColor = theme === 'neon' ? color : (theme === 'marble' ? '#8a7a6a' : (theme === 'ice' ? '#88c8e8' : (theme === 'bamboo' ? '#5d962d' : (theme === 'candy' ? color : '#3a2010'))));
 
   // Emissive logic — keyboard focus shows as yellow outline, different from blue select
   const emissiveColor = isSelected ? '#4488ff' : (isKeyboardFocused ? '#ffcc00' : (isHovered ? '#88ccff' : materialProps.emissiveDefault));

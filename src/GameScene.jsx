@@ -73,6 +73,7 @@ export default function GameScene({ blocks, selectedId, onBlockClick, simulating
         camera={{ position: [5, 3.5, 5], fov: 50 }}
         style={{ width: '100%', height: '100%', display: 'block', background: env.bgColor }}
         shadows
+        aria-hidden="true"
       >
         <Suspense fallback={<LoadingScene />}>
           <GameSceneWithPhysics

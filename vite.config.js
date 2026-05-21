@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   build: {
     chunkSizeWarningLimit: 1200,
+    minify: 'terser',
+    sourcemap: false,
+    target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks(id) {
