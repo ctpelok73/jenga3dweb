@@ -51,31 +51,31 @@ export function resetSettings() {
 }
 
 // Difficulty affects how many blocks become dynamic during simulation
-// easy: only blocks above removed layer + 1 layer
-// normal: blocks above removed layer (current behavior)
-// hard: ALL blocks above removed layer + neighboring blocks
+// Cascading mode: initially only the removed block's layer becomes dynamic.
+// Upper layers "hang" until the layer below them settles/falls, then cascade down layer-by-layer.
+// easy: only removed block itself (no layer siblings) — very forgiving
+// normal: blocks in the same layer as removed (siblings)
+// hard: same layer + layer below (neighbors for extra instability)
 export function getDifficultyDynamicIds(blocks, selectedBlock, removedLayer) {
   const settings = loadSettings();
   const difficulty = settings.difficulty;
   const dynamicIds = new Set();
 
+  // The moved block itself is always dynamic
+  dynamicIds.add(selectedBlock.id);
+
   for (const b of blocks) {
-    if (b.id === selectedBlock.id) {
-      dynamicIds.add(b.id);
-      continue;
-    }
+    if (b.id === selectedBlock.id) continue;
 
     if (difficulty === 'easy') {
-      // Only blocks 1 layer above removed
-      if (b.layer >= removedLayer + 1) dynamicIds.add(b.id);
+      // Only blocks in the removed layer — minimal disruption
+      if (b.layer === removedLayer) dynamicIds.add(b.id);
     } else if (difficulty === 'normal') {
-      // All blocks above removed layer (current behavior)
-      if (b.layer >= removedLayer) dynamicIds.add(b.id);
+      // Blocks in the removed layer (siblings) — upper layers will cascade
+      if (b.layer === removedLayer) dynamicIds.add(b.id);
     } else if (difficulty === 'hard') {
-      // All blocks above removed + blocks in same layer as removed (neighbors)
-      if (b.layer >= removedLayer) dynamicIds.add(b.id);
-      // Also add blocks in layers just below for extra instability
-      if (b.layer === removedLayer - 1) dynamicIds.add(b.id);
+      // Same layer + layer below for extra instability
+      if (b.layer === removedLayer || b.layer === removedLayer - 1) dynamicIds.add(b.id);
     }
   }
 

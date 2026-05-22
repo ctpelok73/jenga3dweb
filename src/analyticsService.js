@@ -96,6 +96,33 @@ export function trackAdClick(ad_type = 'banner') {
 }
 
 /**
+ * Трекинг начала rewarded video
+ */
+export function trackRewardedVideoStart() {
+  trackEvent('rewarded_video_start', {
+    'timestamp': new Date().toISOString(),
+  });
+}
+
+/**
+ * Трекинг rewarded video reward granted
+ */
+export function trackRewardedVideoReward(ad_free_continuation = false) {
+  trackEvent('rewarded_video_reward', {
+    'ad_free_continuation': ad_free_continuation,
+  });
+}
+
+/**
+ * Трекинг ошибки rewarded video
+ */
+export function trackRewardedVideoError(error_code) {
+  trackEvent('rewarded_video_error', {
+    'error_code': error_code,
+  });
+}
+
+/**
  * Трекинг установки PWA
  */
 export function trackPWAInstall() {
@@ -123,6 +150,9 @@ export default {
   trackShareClick,
   trackAdImpression,
   trackAdClick,
+  trackRewardedVideoStart,
+  trackRewardedVideoReward,
+  trackRewardedVideoError,
   trackPWAInstall,
   trackPremiumPurchase,
 };

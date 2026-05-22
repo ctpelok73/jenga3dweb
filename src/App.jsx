@@ -4,18 +4,21 @@ import SocialSharePanel from './SocialSharePanel';
 import QRCodeDisplay from './QRCodeDisplay';
 import InteractiveTutorialOverlay from './InteractiveTutorialOverlay';
 import AriaAnnouncer from './AriaAnnouncer';
+import AdBanner from './AdBanner';
+import RewardedVideoButton from './RewardedVideoButton';
 import { PauseMenu } from './PauseMenu';
 import { BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP } from './towerConfig';
 import { playSelect, playPull, playPlace, playCollapse, playStabilize, playGameOver, resumeAudio } from './soundEngine';
-import { getBestScore, getTotalGames, recordGame, resetAllScores } from './scoreTracker';
-import { initializeAnalytics, trackGameStart, trackGameOver, trackShareClick, trackAdImpression } from './analyticsService';
+import { getBestScore, getTotalGames, recordGame } from './scoreTracker';
+import { initializeAnalytics, trackGameStart, trackGameOver, trackRewardedVideoReward } from './analyticsService';
+import { initAdSDK, isAdFree } from './adService';
 import { recordMove, recordCollapse, ACHIEVEMENTS, getUnlockedAchievements, getLockedAchievements, getAchievementData } from './achievementsTracker';
 import { getSettings, updateAllSettings, getDifficultyDynamicIds, getThemeColors } from './settingsTracker';
-import { clearTextureCache, ENVIRONMENT_THEMES } from './blockTextures';
+import { clearTextureCache } from './blockTextures';
 import { updateMasterVolume } from './soundEngine';
 import { handleKeyEvent } from './keyboardController';
 import DailyChallengePanel from './DailyChallengePanel';
-import { getDailyChallenge, generateDailyTower, recordDailyChallengeAttempt, isDailyChallengeCompleted } from './dailyChallengeTracker';
+import { generateDailyTower, recordDailyChallengeAttempt, isDailyChallengeCompleted } from './dailyChallengeTracker';
 
 // ─── Game phases ───
 const PHASE_START = 'start';
@@ -401,7 +404,7 @@ function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpe
 }
 
 // ─── Game Over Screen with sharing ───
-function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, achievementToast }) {
+function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, achievementToast, onContinueAfterCollapse, continuedAfterCollapse }) {
   const best = getBestScore();
   const total = getTotalGames();
   const loser = playerMode === 2 ? PLAYER_NAMES[currentPlayer] : 'Вы';
@@ -453,6 +456,15 @@ function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, achieveme
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
           <button aria-label="Играть снова" style={baseStyles.btn} onClick={onRestart}>🔄 Играть снова</button>
+          {!continuedAfterCollapse && onContinueAfterCollapse && (
+            <RewardedVideoButton
+              onRewardGranted={onContinueAfterCollapse}
+              style={{
+                padding: '8px 16px', borderRadius: 8, border: 'none',
+                fontSize: 14, cursor: 'pointer', fontWeight: 'bold', transition: 'background 0.2s',
+              }}
+            />
+          )}
           <button
             aria-label="Показать QR код"
             style={{ ...baseStyles.btnSecondary, color: '#2a6eff' }}
@@ -536,7 +548,12 @@ function App() {
   const [isDailyChallengeMode, setIsDailyChallengeMode] = useState(false); // playing daily challenge
   const [keyboardFocusId, setKeyboardFocusId] = useState(null); // keyboard accessibility focus
   const [announcement, setAnnouncement] = useState(''); // screen reader announcements
+  const [continuedAfterCollapse, setContinuedAfterCollapse] = useState(false); // ad continuation flag
+  const [adFree, setAdFree] = useState(() => isAdFree()); // premium ad-free flag
   const selectionTimeRef = useRef(null); // tracks when block was selected for speed achievement
+  const achievementToastTimers = useRef([]); // track setTimeout IDs for achievement toast chain
+  const latestTurnCountRef = useRef(0); // track latest turnCount for simulation callback
+  const [currentSettings, setCurrentSettings] = useState(() => getSettings()); // memoized settings
 
   const towerHeight = useMemo(() => {
     let maxLayer = 0;
@@ -606,6 +623,8 @@ function App() {
   useEffect(() => {
     // Initialize Analytics
     initializeAnalytics();
+    // Initialize Ad SDK
+    initAdSDK();
     
     const handler = () => { resumeAudio(); };
     window.addEventListener('click', handler, { once: true });
@@ -619,16 +638,20 @@ function App() {
   // ─── Show achievement toast (queue: one at a time) ───
   const showAchievementNotification = useCallback((newUnlocks) => {
     if (newUnlocks && newUnlocks.length > 0) {
-      // Show first unlock, queue rest
+      // Clear any existing toast chain
+      achievementToastTimers.current.forEach(id => clearTimeout(id));
+      achievementToastTimers.current = [];
       let idx = 0;
       const showNext = () => {
         if (idx < newUnlocks.length) {
           setAchievementToast(newUnlocks[idx]);
           idx++;
-          setTimeout(() => {
+          const t1 = setTimeout(() => {
             setAchievementToast(null);
-            setTimeout(showNext, 300);
+            const t2 = setTimeout(showNext, 300);
+            achievementToastTimers.current.push(t2);
           }, 3500);
+          achievementToastTimers.current.push(t1);
         }
       };
       showNext();
@@ -641,12 +664,17 @@ function App() {
     setBlocks(isDailyChallengeMode ? generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP) : generateThemedTower());
     setSelectedId(null);
     setTurnCount(0);
+    latestTurnCountRef.current = 0;
     setCurrentPlayer(0);
     setSimulatingBlockIds(null);
     setLastMovedBlockId(null);
+    setContinuedAfterCollapse(false);
     setRestartKey((k) => k + 1);
     selectionTimeRef.current = null;
-  }, [playerMode]);
+    // Clear any pending achievement toasts
+    achievementToastTimers.current.forEach(id => clearTimeout(id));
+    achievementToastTimers.current = [];
+  }, [playerMode, isDailyChallengeMode]);
 
   const handleStart = useCallback(() => {
     resumeAudio();
@@ -732,6 +760,7 @@ function App() {
     setLastMovedBlockId(selectedBlock.id);
     const newTurnCount = turnCount + 1;
     setTurnCount(newTurnCount);
+    latestTurnCountRef.current = newTurnCount;
 
     // ─── Record achievement stats ───
     const selectionTimeMs = selectionTimeRef.current ? (Date.now() - selectionTimeRef.current) : null;
@@ -842,6 +871,7 @@ function App() {
     setShowSettings(false);
     setShowAchievements(false);
     setIsDailyChallengeMode(false);
+    setContinuedAfterCollapse(false);
     setPhase(PHASE_START);
     setBlocks(generateThemedTower());
     setSelectedId(null);
@@ -850,7 +880,24 @@ function App() {
     setRestartKey((k) => k + 1);
   }, []);
 
-  const handleSimulationComplete = useCallback((updatedBlocks) => {
+  // ─── Continue after collapse (rewarded video reward) ───
+  const handleContinueAfterCollapse = useCallback(() => {
+    // Freeze fallen blocks — snap them to ground level so tower stays as-is
+    // Use functional updater to avoid stale closure over blocks
+    setBlocks(prevBlocks => prevBlocks.map(b => {
+      if (b.position[1] < -0.5) {
+        return { ...b, position: [b.position[0], 0.01, b.position[2]], layer: -1 };
+      }
+      return b;
+    }));
+    setPhase(PHASE_PLAYING);
+    setMessage('🔄 Продолжаем! Башня стабилизирована.');
+    setContinuedAfterCollapse(true);
+    setSimulatingBlockIds(null);
+    trackRewardedVideoReward(true); // ad_free_continuation = true
+  }, []);
+
+  const handleSimulationComplete = useCallback(async (updatedBlocks) => {
     let anyFallen = false;
     for (const b of updatedBlocks) {
       if (b.position[1] < -0.5) {
@@ -862,23 +909,32 @@ function App() {
     setBlocks(updatedBlocks);
     setSimulatingBlockIds(null);
 
+    // Use ref for latest turnCount to avoid stale closure
+    const currentTurnCount = latestTurnCountRef.current;
+
     if (anyFallen) {
       playCollapse();
-      setTimeout(() => playGameOver(), 300);
-      recordGame(turnCount, true);
+      const t1 = setTimeout(() => playGameOver(), 300);
+      achievementToastTimers.current.push(t1);
+      recordGame(currentTurnCount, true);
       const best = getBestScore();
-      const isNewRecord = turnCount >= best;
-      trackGameOver(turnCount, best, isNewRecord);
+      const isNewRecord = currentTurnCount > best;
+      trackGameOver(currentTurnCount, best, isNewRecord);
 
       // ─── Record collapse for achievements ───
-      const { newUnlocks } = recordCollapse(turnCount);
+      const { newUnlocks } = recordCollapse(currentTurnCount);
       if (newUnlocks && newUnlocks.length > 0) {
-        setTimeout(() => showAchievementNotification(newUnlocks), 1500);
+        const t2 = setTimeout(() => showAchievementNotification(newUnlocks), 1500);
+        achievementToastTimers.current.push(t2);
       }
 
       // ─── Record daily challenge attempt (if in challenge mode) ───
       if (isDailyChallengeMode) {
-        const challengeResult = recordDailyChallengeAttempt(turnCount, towerHeight, false);
+        // Calculate current tower height from updatedBlocks
+        let maxLayer = 0;
+        for (const b of updatedBlocks) if (b.layer > maxLayer) maxLayer = b.layer;
+        const currentHeight = maxLayer + 1;
+        const challengeResult = await recordDailyChallengeAttempt(currentTurnCount, currentHeight, false);
         if (challengeResult.completed) {
           setAnnouncement('Челлендж дня выполнен! 🎉');
         }
@@ -887,12 +943,18 @@ function App() {
       setPhase(PHASE_GAME_OVER);
     } else {
       playStabilize();
-      setTimeout(() => playPlace(), 150);
+      const t3 = setTimeout(() => playPlace(), 150);
+      achievementToastTimers.current.push(t3);
 
-      // ─── Check daily challenge progress on successful move ───
-      if (isDailyChallengeMode && turnCount + 1 >= 1) {
-        // Challenge progress check will happen on game over or explicitly
-        // For "survive X moves" challenges, we track at game end
+      // ─── Record daily challenge progress on successful move (survived) ───
+      if (isDailyChallengeMode) {
+        let maxLayer = 0;
+        for (const b of updatedBlocks) if (b.layer > maxLayer) maxLayer = b.layer;
+        const currentHeight = maxLayer + 1;
+        const challengeResult = await recordDailyChallengeAttempt(currentTurnCount, currentHeight, true);
+        if (challengeResult.completed) {
+          setAnnouncement('Челлендж дня выполнен! 🎉');
+        }
       }
 
       // Switch player in 2-player mode
@@ -904,10 +966,11 @@ function App() {
         setMessage('Выберите блок.');
       }
     }
-  }, [turnCount, playerMode, currentPlayer, showAchievementNotification]);
+  }, [playerMode, currentPlayer, showAchievementNotification, isDailyChallengeMode]);
 
   const handleSettingsChange = useCallback(() => {
     // Theme might have changed — regenerate tower if on start screen
+    setCurrentSettings(getSettings());
     if (phase === PHASE_START) {
       setBlocks(generateThemedTower());
       setRestartKey((k) => k + 1);
@@ -927,8 +990,8 @@ function App() {
         dropSlots={dropSlots}
         onDropSlot={handleDropSlot}
         lastMovedBlockId={lastMovedBlockId}
-        blockTheme={getSettings().theme}
-        envTheme={getSettings().environment}
+        blockTheme={currentSettings.theme}
+        envTheme={currentSettings.environment}
         keyboardFocusId={keyboardFocusId}
       />
       {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && !showDailyChallenge && (
@@ -990,7 +1053,14 @@ function App() {
         />
       )}
       {phase === PHASE_GAME_OVER && (
-        <GameOverScreen turns={turnCount} onRestart={handleRestart} currentPlayer={currentPlayer} playerMode={playerMode} />
+        <GameOverScreen
+          turns={turnCount}
+          onRestart={handleRestart}
+          currentPlayer={currentPlayer}
+          playerMode={playerMode}
+          onContinueAfterCollapse={handleContinueAfterCollapse}
+          continuedAfterCollapse={continuedAfterCollapse}
+        />
       )}
       {achievementToast && (
         <AchievementToast
@@ -1005,6 +1075,8 @@ function App() {
         />
       )}
       <AriaAnnouncer announcement={announcement} />
+      {/* Ad banners — only on Start and GameOver screens, not during gameplay */}
+      <AdBanner visible={(phase === PHASE_START || phase === PHASE_GAME_OVER) && !adFree} />
     </div>
   );
 }

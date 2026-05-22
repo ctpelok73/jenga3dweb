@@ -27,6 +27,9 @@ export default defineConfig({
           if (id.includes('node_modules/@react-three/rapier')) {
             return 'rapier';
           }
+          if (id.includes('node_modules/firebase')) {
+            return 'firebase';
+          }
           return undefined;
         },
       },

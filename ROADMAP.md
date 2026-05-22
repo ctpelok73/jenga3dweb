@@ -43,15 +43,30 @@
 - ✅ **Tutorial** — `InteractiveTutorialOverlay.jsx` (3-шаговый overlay с подсветкой элементов)
   - «Кликни блок → Перетащи наверх → Не урони!»
   - localStorage-флаг `jenga3d_tutorial_done`
+- ✅ **Ежедневные челленджи** — `dailyChallengeTracker.js` + `DailyChallengePanel.jsx`
+  - Deterministic daily seed из даты → одинаковая башня для всех игроков сегодня
+  - Challenge types: survive_10, survive_15, survive_20, reach_layer_12, reach_layer_15
+  - Local leaderboard (top 10 per day) с localStorage persistence
+  - UI: описание челленджа, статус завершения, leaderboard таблица
 
 ### Дополнительные фичи (не были в ROADMAP)
 - ✅ **Settings Panel** — `settingsTracker.js` + UI
   - Громкость (0-100%), таймер хода (15/30/60 сек), сложность (easy/normal/hard), тема блоков
 - ✅ **Темы блоков** — classic (wood), neon (glow), marble (stone) — `getThemeColors()`
+- ✅ **Процедурные текстуры блоков** — `blockTextures.js` (Canvas2D генерация wood grain, neon glow, marble vein)
+  - Кэширование в Map, albedo-текстуры без внешних файлов
 - ✅ **Difficulty-зависимая физика** — `getDifficultyDynamicIds()` меняет количество dynamic блоков
 - ✅ **Particle effects** — `ParticleEffect.jsx` (взрыв зелёных звёзд при успешном ходе)
 - ✅ **QR Code** — `QRCodeDisplay.jsx` (динамическая загрузка qrcode.js из CDN)
 - ✅ **Achievement Toast** — slideInRight-анимация, auto-dismiss 3.5 сек
+- ✅ **Pause Menu** — `PauseMenu.jsx` (полноэкранное меню паузы)
+  - CSS-классы с :hover/:active/:focus, подтверждение деструктивных действий
+  - Escape для закрытия, адаптивный мобильный дизайн
+  - Player tag с индикацией текущего игрока
+- ✅ **Keyboard accessibility** — `keyboardController.js` (Tab/Shift+Tab, Enter/Space, Arrow keys, Escape, M, R)
+  - `getSelectableBlocks()`, `cycleBlock()` — навигация по блокам
+- ✅ **Screen reader support** — `AriaAnnouncer.jsx` (aria-live="assertive" region)
+  - Объявления: выбор блока, фазы игры, ачивки, результаты ходов
 
 ---
 
@@ -76,26 +91,34 @@
 
 ## 📋 Приоритетный план доработки
 
-### P0 — Готовность к публикации (осталось: Ad SDK + Deploy)
+### P0 — Готовность к публикации (осталось: Deploy)
 
-- [ ] **Ad SDK интеграция** — Google AdSense / Unity Ads
-  - Banner: внизу экрана, только на стартовом/GameOver экранах
-  - Rewarded: кнопка «Продолжить» на GameOver → видео → блоки замораживаются, можно продолжить
-  - `analyticsService.js` уже имеет `trackAdImpression()` / `trackAdClick()` — хуки готовы
+- ✅ **Ad SDK интеграция** — Google AdSense
+  - `adService.js` — dynamic script load, banner lifecycle, rewarded video, premium ad-free check
+  - `AdBanner.jsx` — fixed bottom banner, only on Start/GameOver screens (not during gameplay!)
+  - `RewardedVideoButton.jsx` — «Продолжить после падения» кнопка на GameOver → видео → заморозка упавших блоков
+  - `analyticsService.js` — `trackRewardedVideoStart()`, `trackRewardedVideoReward()`, `trackRewardedVideoError()` добавлены
+  - `App.jsx` — `handleContinueAfterCollapse()`, `AdBanner` на Start/GameOver, `continuedAfterCollapse` state
+  - `.env.production` — `VITE_ADSENSE_ID`, `VITE_AD_BANNER_SLOT`, `VITE_AD_REWARDED_SLOT` (placeholder)
+  - ⚠️ **Блокер:** Нужен реальный AdSense publisher ID и ad slot IDs от Google dashboard
 - [ ] **Deploy** — Vercel/Netlify (бесплатно для static)
+  - ✅ `vercel.json` + `netlify.toml` конфиги готовы (headers, rewrites, cache)
   - Custom domain: `jenga3d.app` или `playjenga.com`
 
-### P1 — Retention & Engagement (осталось: Daily Challenges + Leaderboard)
+### P1 — Retention & Engagement (осталось: Online Leaderboard)
 
-- [ ] **Ежедневные челленджи** — «Собери 10 ходов без падения»
+- ✅ **Ежедневные челленджи** — `dailyChallengeTracker.js` + `DailyChallengePanel.jsx`
   - Daily seed → одинаковая башня для всех игроков сегодня
-  - Leaderboard (local + опционально Firebase)
+  - Local leaderboard (top 10 per day) с localStorage
+- [ ] **Online Leaderboard** — Firebase Realtime Database
+  - Глобальный рейтинг ежедневных челленджей
+  - Опционально: анонимный вход через Firebase Auth
 
 ### P2 — Premium content (4-8 недели)
 
 - [ ] **Полные скины блоков** — набор текстур (albedo + normal + roughness)
   - Neon glow, Marble, Ice/crystal, Bamboo, Candy
-  - Сейчас есть только цветовые темы (classic/neon/marble) — нужно расширить до текстур
+  - ✅ Процедурные albedo-текстуры уже есть (`blockTextures.js`) — нужно добавить normal + roughness maps
 - [ ] **Темы окружения** — разные GroundSurface + lighting + fog
   - Space (звёзды, туман), Beach (песок, голубой свет), Library (тёмное дерево)
 - [ ] **In-app purchase flow** — Stripe или Gumroad для web
@@ -136,4 +159,4 @@
 2. ✅ **Social sharing** — кнопка «Поделиться результатом» → Twitter/Telegram
 3. ✅ **Favicon** — SVG icon → брендинг в табе браузера
 4. ✅ **Performance** — lazy load Rapier (уже сделано) → быстрый первый экран
-5. [ ] **Accessibility** — keyboard controls (Tab + Enter для ходов)
+5. ✅ **Accessibility** — keyboard controls (`keyboardController.js`) + screen reader (`AriaAnnouncer.jsx`)

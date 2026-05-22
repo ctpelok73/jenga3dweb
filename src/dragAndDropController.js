@@ -20,20 +20,31 @@ export class DragAndDropController {
       onDropSlotLeave: null,
     };
 
+    // Store bound handlers so we can remove them in destroy()
+    this._boundHandlers = {
+      mousedown: this.handleMouseDown.bind(this),
+      mousemove: this.handleMouseMove.bind(this),
+      mouseup: this.handleMouseUp.bind(this),
+      mouseleave: this.handleMouseLeave.bind(this),
+      touchstart: this.handleTouchStart.bind(this),
+      touchmove: this.handleTouchMove.bind(this),
+      touchend: this.handleTouchEnd.bind(this),
+    };
+
     this.init();
   }
 
   init() {
     // Mouse события
-    this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
-    this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
-    this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
-    this.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+    this.canvas.addEventListener('mousedown', this._boundHandlers.mousedown);
+    this.canvas.addEventListener('mousemove', this._boundHandlers.mousemove);
+    this.canvas.addEventListener('mouseup', this._boundHandlers.mouseup);
+    this.canvas.addEventListener('mouseleave', this._boundHandlers.mouseleave);
 
     // Touch события
-    this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
-    this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
-    this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+    this.canvas.addEventListener('touchstart', this._boundHandlers.touchstart, { passive: false });
+    this.canvas.addEventListener('touchmove', this._boundHandlers.touchmove, { passive: false });
+    this.canvas.addEventListener('touchend', this._boundHandlers.touchend, { passive: false });
   }
 
   /**
@@ -183,12 +194,12 @@ export class DragAndDropController {
    * Очистка обработчиков (перед удалением компонента)
    */
   destroy() {
-    this.canvas.removeEventListener('mousedown', this.handleMouseDown);
-    this.canvas.removeEventListener('mousemove', this.handleMouseMove);
-    this.canvas.removeEventListener('mouseup', this.handleMouseUp);
-    this.canvas.removeEventListener('mouseleave', this.handleMouseLeave);
-    this.canvas.removeEventListener('touchstart', this.handleTouchStart);
-    this.canvas.removeEventListener('touchmove', this.handleTouchMove);
-    this.canvas.removeEventListener('touchend', this.handleTouchEnd);
+    this.canvas.removeEventListener('mousedown', this._boundHandlers.mousedown);
+    this.canvas.removeEventListener('mousemove', this._boundHandlers.mousemove);
+    this.canvas.removeEventListener('mouseup', this._boundHandlers.mouseup);
+    this.canvas.removeEventListener('mouseleave', this._boundHandlers.mouseleave);
+    this.canvas.removeEventListener('touchstart', this._boundHandlers.touchstart);
+    this.canvas.removeEventListener('touchmove', this._boundHandlers.touchmove);
+    this.canvas.removeEventListener('touchend', this._boundHandlers.touchend);
   }
 }

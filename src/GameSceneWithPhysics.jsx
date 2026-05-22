@@ -13,7 +13,7 @@ import {
   BLOCK_PHYSICS
 } from './towerConfig';
 import ParticleEffect from './ParticleEffect';
-import { getBlockMaterialProps, clearTextureCache, getEnvironmentTheme } from './blockTextures';
+import { getBlockMaterialProps, getEnvironmentTheme } from './blockTextures';
 
 // ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
@@ -22,6 +22,14 @@ const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedBlockGeometry);
 // ─── Edges component with theme-aware color ───
 function Edges({ edgeColor = '#3a2010' }) {
   const edgeMaterial = useMemo(() => new THREE.LineBasicMaterial({ color: edgeColor }), [edgeColor]);
+
+  // Dispose old material when edgeColor changes or component unmounts
+  useEffect(() => {
+    return () => {
+      edgeMaterial.dispose();
+    };
+  }, [edgeMaterial]);
+
   return (
     <lineSegments geometry={sharedEdgesGeometry} material={edgeMaterial} raycast={() => null} />
   );
@@ -47,6 +55,18 @@ const Block = memo(function Block({
   useEffect(() => {
     if (onRigidRef && rigidRef.current) onRigidRef(id, rigidRef.current);
   }, [id, onRigidRef]);
+
+  // ─── Handle dynamic type transitions (for cascading layer-by-layer gravity) ───
+  useEffect(() => {
+    const body = rigidRef.current;
+    if (!body) return;
+    if (isDynamic) {
+      // Transition to dynamic: set body type and wake it up so gravity takes effect
+      body.setBodyType(0, true); // 0 = Dynamic, true = wake
+    } else {
+      body.setBodyType(1, true); // 1 = Fixed
+    }
+  }, [isDynamic]);
 
   // Ghost block: selected block shown semi-transparent to indicate it's "lifted"
   const opacity = isGhost ? 0.35 : 1;
@@ -110,6 +130,19 @@ const Block = memo(function Block({
 const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick, isDragHover = false }) {
   const [hovered, setHovered] = useState(false);
   const isHighlighted = hovered || isDragHover;
+
+  // Memoize line material to prevent re-creation every render
+  const lineMaterial = useMemo(
+    () => new THREE.LineBasicMaterial({
+      color: isHighlighted ? '#44ff88' : '#2a6eff',
+      linewidth: isHighlighted ? 3 : 1,
+    }),
+    [isHighlighted]
+  );
+
+  useEffect(() => {
+    return () => { lineMaterial.dispose(); };
+  }, [lineMaterial]);
   
   return (
     <group position={position} rotation={rotation}>
@@ -128,9 +161,7 @@ const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick
         />
       </mesh>
       {/* Glow outline */}
-      <lineSegments geometry={sharedEdgesGeometry} raycast={() => null}>
-        <lineBasicMaterial color={isHighlighted ? '#44ff88' : '#2a6eff'} linewidth={isHighlighted ? 3 : 1} />
-      </lineSegments>
+      <lineSegments geometry={sharedEdgesGeometry} material={lineMaterial} raycast={() => null} />
     </group>
   );
 });
@@ -201,6 +232,14 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
   const completionCalled = useRef(false);
   const [particleBlockId, setParticleBlockId] = useState(null);
 
+  // ─── Cascading state: tracks which block IDs are currently dynamic ───
+  const [cascadeDynamicIds, setCascadeDynamicIds] = useState(null);
+  // Tracks the working blocks state during cascade (updated as layers settle)
+  const cascadeBlocksRef = useRef(null);
+  // Delay timer for cascade visual effect
+  const cascadeDelayRef = useRef(0);
+  const cascadeWaiting = useRef(false);
+
   // ─── Environment theme config ───
   const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
 
@@ -219,46 +258,159 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
     return block ? block.position : null;
   }, [particleBlockId, blocks]);
 
-  // ─── Settling detection ───
-  useFrame((_, delta) => {
-    if (simulatingBlockIds && simulatingBlockIds.size > 0 && !completionCalled.current) {
-      simulateTime.current += delta * 1000;
-      if (simulateTime.current < 300) return;
+  // ─── Merge simulatingBlockIds and cascadeDynamicIds for rendering ───
+  const effectiveDynamicIds = useMemo(() => {
+    if (!simulatingBlockIds && !cascadeDynamicIds) return null;
+    const merged = new Set();
+    if (simulatingBlockIds) for (const id of simulatingBlockIds) merged.add(id);
+    if (cascadeDynamicIds) for (const id of cascadeDynamicIds) merged.add(id);
+    return merged.size > 0 ? merged : null;
+  }, [simulatingBlockIds, cascadeDynamicIds]);
 
-      let allSettled = true;
-      const VELOCITY_THRESHOLD = 0.08;
-      for (const id of simulatingBlockIds) {
-        const rigid = rigidRefs.current[id];
-        if (rigid) {
-          const linVel = rigid.linvel();
-          const angVel = rigid.angvel();
-          const linSpeed = Math.sqrt(linVel.x ** 2 + linVel.y ** 2 + linVel.z ** 2);
-          const angSpeed = Math.sqrt(angVel.x ** 2 + angVel.y ** 2 + angVel.z ** 2);
-          if (linSpeed > VELOCITY_THRESHOLD || angSpeed > VELOCITY_THRESHOLD) {
-            allSettled = false;
-            break;
+  // ─── Helper: find the next unsupported layer above the current dynamic set ───
+  const findNextUnsupportedLayer = useCallback((currentBlocks, alreadyDynamicIds) => {
+    // Build a set of layers that have active (non-fallen, non-dynamic) blocks
+    const layerBlockCounts = {};  // layer -> count of blocks that are still "fixed" (in place)
+    const layerBlocks = {};       // layer -> block ids in that layer
+    let maxLayer = 0;
+
+    for (const b of currentBlocks) {
+      if (b.layer > maxLayer) maxLayer = b.layer;
+      if (!layerBlocks[b.layer]) layerBlocks[b.layer] = [];
+      layerBlocks[b.layer].push(b);
+
+      // Count blocks that are NOT in the dynamic set and have NOT fallen
+      if (!alreadyDynamicIds.has(b.id) && b.position[1] > -0.5) {
+        layerBlockCounts[b.layer] = (layerBlockCounts[b.layer] || 0) + 1;
+      }
+    }
+
+    // Find which layers are currently dynamic (to check the layer above them)
+    const dynamicLayers = new Set();
+    for (const b of currentBlocks) {
+      if (alreadyDynamicIds.has(b.id)) {
+        dynamicLayers.add(b.layer);
+      }
+    }
+
+    // For each dynamic layer, check if the layer above has support
+    // A layer is "unsupported" if the layer below it has 0 fixed blocks
+    for (const dynLayer of dynamicLayers) {
+      const layerAbove = dynLayer + 1;
+      if (layerAbove > maxLayer) continue;
+      if (!layerBlocks[layerAbove]) continue;
+
+      // Check if layerAbove blocks are already dynamic
+      const aboveAlreadyDynamic = layerBlocks[layerAbove].every(b => alreadyDynamicIds.has(b.id));
+      if (aboveAlreadyDynamic) continue;
+
+      // The support layer is dynLayer. Check how many fixed blocks remain in dynLayer
+      const fixedInSupport = layerBlockCounts[dynLayer] || 0;
+      
+      // Check if dynamic blocks in this layer have actually fallen
+      let supportLayerCollapsed = false;
+      if (fixedInSupport === 0) {
+        // No fixed blocks in support layer — check if dynamic ones have fallen
+        const dynBlocksInLayer = layerBlocks[dynLayer].filter(b => alreadyDynamicIds.has(b.id));
+        let allFallen = true;
+        for (const b of dynBlocksInLayer) {
+          const rigid = rigidRefs.current[b.id];
+          if (rigid) {
+            const trans = rigid.translation();
+            // Check if block has dropped significantly from its original Y position
+            const originalY = b.layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
+            if (trans.y > originalY - 0.2) {
+              allFallen = false; // Block hasn't fallen yet
+              break;
+            }
           }
+        }
+        if (allFallen || dynBlocksInLayer.length === 0) {
+          supportLayerCollapsed = true;
         }
       }
 
-      if (allSettled || simulateTime.current >= 5000) {
+      if (supportLayerCollapsed) {
+        // Return the layer above as unsupported — it should cascade
+        return layerAbove;
+      }
+    }
+
+    return null; // No more layers to cascade
+  }, []);
+
+  // ─── Settling detection with cascade support ───
+  useFrame((_, delta) => {
+    const activeIds = effectiveDynamicIds;
+    if (!activeIds || activeIds.size === 0 || completionCalled.current) return;
+
+    // Handle cascade delay (brief pause between layer activations for visual effect)
+    if (cascadeWaiting.current) {
+      cascadeDelayRef.current += delta * 1000;
+      if (cascadeDelayRef.current < 150) return; // 150ms pause before next layer falls
+      cascadeWaiting.current = false;
+      cascadeDelayRef.current = 0;
+    }
+
+    simulateTime.current += delta * 1000;
+    if (simulateTime.current < 300) return;
+
+    let allSettled = true;
+    const VELOCITY_THRESHOLD = 0.08;
+    for (const id of activeIds) {
+      const rigid = rigidRefs.current[id];
+      if (rigid) {
+        const linVel = rigid.linvel();
+        const angVel = rigid.angvel();
+        const linSpeed = Math.sqrt(linVel.x ** 2 + linVel.y ** 2 + linVel.z ** 2);
+        const angSpeed = Math.sqrt(angVel.x ** 2 + angVel.y ** 2 + angVel.z ** 2);
+        if (linSpeed > VELOCITY_THRESHOLD || angSpeed > VELOCITY_THRESHOLD) {
+          allSettled = false;
+          break;
+        }
+      }
+    }
+
+    if (allSettled || simulateTime.current >= 5000) {
+      // Snapshot current positions of dynamic blocks
+      const workingBlocks = (cascadeBlocksRef.current || blocks).map(b => {
+        if (activeIds.has(b.id)) {
+          const rigid = rigidRefs.current[b.id];
+          if (rigid) {
+            const trans = rigid.translation();
+            const q = rigid.rotation();
+            const quaternion = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+            const euler = new THREE.Euler().setFromQuaternion(quaternion);
+            return { ...b, position: [trans.x, trans.y, trans.z], rotation: [euler.x, euler.y, euler.z] };
+          }
+        }
+        return b;
+      });
+
+      // Check if there's an unsupported layer above that should cascade
+      const nextLayer = findNextUnsupportedLayer(workingBlocks, activeIds);
+
+      if (nextLayer !== null) {
+        // ─── CASCADE: activate the next unsupported layer ───
+        const newDynamicIds = new Set(activeIds);
+        for (const b of workingBlocks) {
+          if (b.layer === nextLayer) {
+            newDynamicIds.add(b.id);
+          }
+        }
+        cascadeBlocksRef.current = workingBlocks;
+        setCascadeDynamicIds(newDynamicIds);
+        simulateTime.current = 0;
+        cascadeWaiting.current = true;
+        cascadeDelayRef.current = 0;
+        // Don't call completion — continue simulating
+      } else {
+        // ─── DONE: no more layers to cascade, finalize ───
         completionCalled.current = true;
         simulateTime.current = 0;
-
-        const updatedBlocks = blocks.map(b => {
-          if (simulatingBlockIds.has(b.id)) {
-            const rigid = rigidRefs.current[b.id];
-            if (rigid) {
-              const trans = rigid.translation();
-              const q = rigid.rotation();
-              const quaternion = new THREE.Quaternion(q.x, q.y, q.z, q.w);
-              const euler = new THREE.Euler().setFromQuaternion(quaternion);
-              return { ...b, position: [trans.x, trans.y, trans.z], rotation: [euler.x, euler.y, euler.z] };
-            }
-          }
-          return b;
-        });
-        onSimulationComplete(updatedBlocks);
+        cascadeBlocksRef.current = null;
+        setCascadeDynamicIds(null);
+        onSimulationComplete(workingBlocks);
       }
     }
   });
@@ -267,6 +419,10 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
     if (simulatingBlockIds && simulatingBlockIds.size > 0) {
       simulateTime.current = 0;
       completionCalled.current = false;
+      cascadeBlocksRef.current = null;
+      setCascadeDynamicIds(null);
+      cascadeWaiting.current = false;
+      cascadeDelayRef.current = 0;
     }
   }, [simulatingBlockIds]);
 
@@ -326,7 +482,7 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
           onClick={onBlockClick} isSelected={b.id === selectedId}
           isGhost={b.id === selectedId && dropSlots && dropSlots.length > 0}
           onRigidRef={(id, ref) => { rigidRefs.current[id] = ref; }}
-          isDynamic={simulatingBlockIds != null && simulatingBlockIds.has(b.id)}
+          isDynamic={effectiveDynamicIds != null && effectiveDynamicIds.has(b.id)}
           theme={blockTheme}
           isKeyboardFocused={b.id === keyboardFocusId} />
       ))}

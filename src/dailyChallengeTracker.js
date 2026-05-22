@@ -8,8 +8,19 @@
  * - Challenge completion tracking
  */
 
+import { isFirebaseEnabled, submitScore, getOnlineLeaderboard, subscribeLeaderboard } from './firebaseService';
+
 const DAILY_KEY = 'jenga3d_daily';
 const LEADERBOARD_KEY = 'jenga3d_daily_leaderboard';
+const USERNAME_KEY = 'jenga3d_username';
+
+export function getPlayerName() {
+  try { return localStorage.getItem(USERNAME_KEY) || 'Аноним'; } catch { return 'Аноним'; }
+}
+
+export function setPlayerName(name) {
+  try { localStorage.setItem(USERNAME_KEY, name); } catch {}
+}
 
 // ─── Deterministic seed from date ───
 // Simple hash: convert YYYY-MM-DD to a numeric seed
@@ -128,7 +139,7 @@ export function getDailyChallengeResult() {
 }
 
 // ─── Record daily challenge attempt ───
-export function recordDailyChallengeAttempt(turns, towerHeight, survived, timeMs) {
+export async function recordDailyChallengeAttempt(turns, towerHeight, survived, timeMs) {
   const state = loadDailyState();
   const today = getTodayDateStr();
   const challenge = getDailyChallenge();
@@ -180,13 +191,14 @@ function saveLeaderboard(lb) {
   } catch { /* quota exceeded */ }
 }
 
-function addToLeaderboard(turns, towerHeight) {
+async function addToLeaderboard(turns, towerHeight) {
   const lb = loadLeaderboard();
   const today = getTodayDateStr();
 
   if (!lb[today]) lb[today] = [];
 
-  // Add entry (anonymized — just "Вы" for local)
+  const name = getPlayerName();
+
   lb[today].push({
     name: 'Вы',
     turns,
@@ -194,11 +206,18 @@ function addToLeaderboard(turns, towerHeight) {
     timestamp: new Date().toISOString(),
   });
 
-  // Sort by turns descending, keep top 10
   lb[today].sort((a, b) => b.turns - a.turns);
   lb[today] = lb[today].slice(0, 10);
 
   saveLeaderboard(lb);
+
+  if (isFirebaseEnabled()) {
+    try {
+      await submitScore(today, name, turns, towerHeight);
+    } catch (err) {
+      console.warn('Firebase score submission failed:', err.message);
+    }
+  }
 }
 
 export function getDailyLeaderboard() {
@@ -207,7 +226,19 @@ export function getDailyLeaderboard() {
   return lb[today] || [];
 }
 
-// ─── Reset daily data (for testing) ───
+export async function getOnlineLeaderboardToday() {
+  if (!isFirebaseEnabled()) return [];
+  return getOnlineLeaderboard(getTodayDateStr());
+}
+
+export function subscribeOnlineLeaderboardToday(callback) {
+  if (!isFirebaseEnabled()) {
+    callback([]);
+    return () => {};
+  }
+  return subscribeLeaderboard(getTodayDateStr(), 50, callback);
+}
+
 export function resetDailyData() {
   localStorage.removeItem(DAILY_KEY);
   localStorage.removeItem(LEADERBOARD_KEY);

@@ -22,7 +22,8 @@ export function getSelectableBlocks(blocks, topCompleteLayer) {
       // Sort by layer first, then by id for consistent ordering
       if (a.layer !== b.layer) return a.layer - b.layer;
       return a.id - b.id;
-    });
+    })
+    .map(b => b.id);  // Return IDs, not full block objects
 }
 
 /**
