@@ -46,5 +46,5 @@ export const screenStyles = {
   statLabel: { fontSize: 12, color: '#888' },
 };
 
-export const PLAYER_COLORS = ['#2a6eff', '#ff4444'];
-export const PLAYER_NAMES = ['Игрок 1', 'Игрок 2'];
+export const PLAYER_COLORS = ['#2a6eff', '#ff4444', '#aa44ff'];
+export const PLAYER_NAMES = ['Игрок 1', 'Игрок 2', '🤖 ИИ'];

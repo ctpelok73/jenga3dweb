@@ -51,6 +51,11 @@ const CSS = `
   border: 1px solid rgba(255, 68, 68, 0.25);
 }
 
+.pm-player-tag--ai {
+  background: rgba(170, 68, 255, 0.12); color: #bb66ff;
+  border: 1px solid rgba(170, 68, 255, 0.25);
+}
+
 .pm-subtext {
   font-size: 13px; color: rgba(255,255,255,0.4);
   margin: 0 0 16px; line-height: 1.4;
@@ -303,8 +308,8 @@ export function PauseMenu({
 }) {
   const [confirmAction, setConfirmAction] = useState(null); // 'restart' | 'menu' | null
 
-  const playerName = playerMode === 2 ? (currentPlayer === 0 ? 'Игрок 1' : 'Игрок 2') : '';
-  const playerTagClass = currentPlayer === 0 ? 'pm-player-tag--p1' : 'pm-player-tag--p2';
+  const playerName = playerMode === 2 ? (currentPlayer === 0 ? 'Игрок 1' : 'Игрок 2') : playerMode === 3 ? (currentPlayer === 0 ? 'Игрок 1' : '🤖 ИИ') : '';
+  const playerTagClass = currentPlayer === 0 ? 'pm-player-tag--p1' : currentPlayer === 1 && playerMode === 3 ? 'pm-player-tag--ai' : 'pm-player-tag--p2';
 
   // Escape key to resume
   const handleKeyDown = useCallback((e) => {
@@ -342,7 +347,7 @@ export function PauseMenu({
         <div className="pm-card">
           <h2 className="pm-heading">⏸ Пауза</h2>
 
-          {playerMode === 2 && (
+          {(playerMode === 2 || playerMode === 3) && (
             <div className={`pm-player-tag ${playerTagClass}`}>
               ▸ Ход: {playerName}
             </div>

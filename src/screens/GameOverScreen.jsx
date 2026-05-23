@@ -8,10 +8,12 @@ import RewardedVideoButton from '../RewardedVideoButton';
 export default function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, onContinueAfterCollapse, continuedAfterCollapse }) {
   const best = getBestScore();
   const total = getTotalGames();
-  const loser = playerMode === 2 ? PLAYER_NAMES[currentPlayer] : 'Вы';
+  const loser = playerMode === 2 ? PLAYER_NAMES[currentPlayer] : playerMode === 3 ? PLAYER_NAMES[currentPlayer] : 'Вы';
   const [showQR, setShowQR] = useState(false);
 
   const shareText = playerMode === 2
+    ? `🧱 Jenga 3D — ${loser} уронил башню на ходу ${turns}! Мой лучший: ${best} ходов.`
+    : playerMode === 3
     ? `🧱 Jenga 3D — ${loser} уронил башню на ходу ${turns}! Мой лучший: ${best} ходов.`
     : `🧱 Jenga 3D — башня рухнула после ${turns} ходов! Мой лучший: ${best}. Попробуй побить! 🎮`;
 
@@ -22,6 +24,11 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
         {playerMode === 2 && (
           <p style={{ fontSize: 16, color: PLAYER_COLORS[currentPlayer], marginBottom: 12, fontWeight: 'bold' }}>
             {loser} проиграл!
+          </p>
+        )}
+        {playerMode === 3 && (
+          <p style={{ fontSize: 16, color: PLAYER_COLORS[currentPlayer], marginBottom: 12, fontWeight: 'bold' }}>
+            {loser === PLAYER_NAMES[1] ? '🤖 ИИ проиграл! Вы победили!' : 'Вы проиграли! 🤖 ИИ победил!'}
           </p>
         )}
         <div style={screenStyles.statRow}>

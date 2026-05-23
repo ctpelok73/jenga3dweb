@@ -55,6 +55,19 @@ export default function StartScreen({ onStart, playerMode, setPlayerMode, onOpen
           >
             👥 2 игрока
           </button>
+          <button
+            aria-label="Против ИИ"
+            aria-pressed={playerMode === 3}
+            style={{
+              ...baseStyles.btn,
+              background: playerMode === 3 ? '#aa44ff' : 'rgba(170,68,255,0.15)',
+              border: playerMode === 3 ? 'none' : '1px solid #aa44ff',
+              color: playerMode === 3 ? '#fff' : '#aa44ff',
+            }}
+            onClick={() => setPlayerMode(3)}
+          >
+            🤖 vs ИИ
+          </button>
         </div>
         <button aria-label="Начать игру" style={{ ...baseStyles.btn, width: '100%', marginBottom: 12 }} onClick={onStart}>▶ Начать игру</button>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>

@@ -23,6 +23,7 @@ import DailyChallengePanel from './DailyChallengePanel';
 import { generateDailyTower, recordDailyChallengeAttempt } from './dailyChallengeTracker';
 import PurchasePanel from './PurchasePanel';
 import { isRemoveAdsPurchased } from './purchaseService';
+import { chooseAIBlock, computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from './aiController';
 
 const PHASE_START = 'start';
 const PHASE_PLAYING = 'playing';
@@ -79,9 +80,12 @@ function App() {
   const [announcement, setAnnouncement] = useState('');
   const [continuedAfterCollapse, setContinuedAfterCollapse] = useState(false);
   const [adFree, setAdFree] = useState(() => isAdFree() || isRemoveAdsPurchased());
+  const [aiThinking, setAiThinking] = useState(false);
   const selectionTimeRef = useRef(null);
   const achievementToastTimers = useRef([]);
   const latestTurnCountRef = useRef(0);
+  const aiTimersRef = useRef([]);
+  const aiPendingMoveRef = useRef(null);
   const [currentSettings, setCurrentSettings] = useState(() => getSettings());
 
   const towerHeight = useMemo(() => {
@@ -178,7 +182,8 @@ function App() {
 
   const initGame = useCallback((isDaily = isDailyChallengeMode) => {
     setPhase(PHASE_PLAYING);
-    setMessage(playerMode === 2 ? `Ход: ${PLAYER_NAMES[0]}. Выберите блок.` : 'Выберите блок.');
+    const msg = playerMode === 2 ? `Ход: ${PLAYER_NAMES[0]}. Выберите блок.` : playerMode === 3 ? `Ход: ${PLAYER_NAMES[0]}. Выберите блок.` : 'Выберите блок.';
+    setMessage(msg);
     setBlocks(isDaily ? generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP) : generateThemedTower());
     setSelectedId(null);
     setTurnCount(0);
@@ -189,8 +194,12 @@ function App() {
     setContinuedAfterCollapse(false);
     setRestartKey((k) => k + 1);
     selectionTimeRef.current = null;
+    setAiThinking(false);
+    aiPendingMoveRef.current = null;
     achievementToastTimers.current.forEach(id => clearTimeout(id));
     achievementToastTimers.current = [];
+    aiTimersRef.current.forEach(id => clearTimeout(id));
+    aiTimersRef.current = [];
   }, [playerMode, isDailyChallengeMode]);
 
   const handleStart = useCallback(() => {
@@ -220,6 +229,7 @@ function App() {
 
   const handleBlockClick = useCallback((id) => {
     if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+    if (playerMode === 3 && currentPlayer === 1) return;
     const block = blocks.find((b) => b.id === id);
     if (!block) return;
     if (block.layer >= topCompleteLayer) { setMessage('⚠ Нельзя брать из верхнего слоя!'); return; }
@@ -287,9 +297,9 @@ function App() {
   }, [selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification]);
 
   const handleMakeMove = useCallback(() => {
-    if (!canMove) return;
+    if (!canMove || (playerMode === 3 && currentPlayer === 1) || aiThinking) return;
     executeMove(null);
-  }, [canMove, executeMove]);
+  }, [canMove, executeMove, playerMode, currentPlayer, aiThinking]);
 
   const handleDropSlot = useCallback((slotData) => {
     if (!selectedBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
@@ -301,6 +311,47 @@ function App() {
     setShowPauseMenu(false);
     initGame();
   }, [initGame]);
+
+  useEffect(() => {
+    if (playerMode !== 3 || currentPlayer !== 1 || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+    if (aiThinking) return;
+    aiPendingMoveRef.current = null;
+    setAiThinking(true);
+    setMessage('🤖 ИИ думает...');
+
+    const t1 = setTimeout(() => {
+      const aiBlock = chooseAIBlock(blocks, topCompleteLayer);
+      if (!aiBlock) {
+        setAiThinking(false);
+        setMessage('🤖 ИИ не может найти блок!');
+        return;
+      }
+      const dropSlot = computeAIDropSlot(blocks, aiBlock);
+      aiPendingMoveRef.current = { blockId: aiBlock.id, dropSlot };
+      setSelectedId(aiBlock.id);
+      setMessage(`🤖 ИИ выбрал блок ${aiBlock.id + 1}, слой ${aiBlock.layer + 1}`);
+
+      const t2 = setTimeout(() => {
+        setAiThinking(false);
+      }, AI_MOVE_DELAY);
+      aiTimersRef.current.push(t2);
+    }, AI_THINK_DELAY);
+    aiTimersRef.current.push(t1);
+
+    return () => {
+      aiTimersRef.current.forEach(id => clearTimeout(id));
+      aiTimersRef.current = [];
+    };
+  }, [playerMode, currentPlayer, phase, simulatingBlockIds, blocks, topCompleteLayer]);
+
+  useEffect(() => {
+    if (!aiPendingMoveRef.current || !selectedBlock) return;
+    if (selectedBlock.id !== aiPendingMoveRef.current.blockId) return;
+    if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+    const { dropSlot } = aiPendingMoveRef.current;
+    aiPendingMoveRef.current = null;
+    executeMove(dropSlot);
+  }, [selectedBlock, phase, simulatingBlockIds, executeMove]);
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -352,7 +403,7 @@ function App() {
         case 'deselect':
           setSelectedId(null);
           setKeyboardFocusId(null);
-          setMessage(playerMode === 2 ? `Ход: ${PLAYER_NAMES[currentPlayer]}. Выберите блок.` : 'Выберите блок.');
+setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[currentPlayer]}. Выберите блок.` : 'Выберите блок.');
           setAnnouncement('Блок отменён');
           selectionTimeRef.current = null;
           break;
@@ -381,6 +432,10 @@ function App() {
     setTurnCount(0);
     setSimulatingBlockIds(null);
     setRestartKey((k) => k + 1);
+    setAiThinking(false);
+    aiPendingMoveRef.current = null;
+    aiTimersRef.current.forEach(id => clearTimeout(id));
+    aiTimersRef.current = [];
   }, []);
 
   const handleContinueAfterCollapse = useCallback(() => {
@@ -456,6 +511,10 @@ function App() {
         const nextPlayer = currentPlayer === 0 ? 1 : 0;
         setCurrentPlayer(nextPlayer);
         setMessage(`Ход: ${PLAYER_NAMES[nextPlayer]}. Выберите блок.`);
+      } else if (playerMode === 3) {
+        const nextPlayer = currentPlayer === 0 ? 1 : 0;
+        setCurrentPlayer(nextPlayer);
+        setMessage(nextPlayer === 1 ? '🤖 ИИ думает...' : `Ход: ${PLAYER_NAMES[0]}. Выберите блок.`);
       } else {
         setMessage('Выберите блок.');
       }
@@ -533,6 +592,7 @@ function App() {
           stabilizing={simulatingBlockIds !== null}
           currentPlayer={currentPlayer}
           playerMode={playerMode}
+          aiThinking={aiThinking}
           onPauseMenu={() => setShowPauseMenu(true)}
         />
       )}
