@@ -1,8 +1,61 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: false,
+      workbox: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,svg,json}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /https:\/\/pagead2\.googlesyndication\.com/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /https:\/\/googleadservices\.com/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /https:\/\/doubleclick\.net/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /https:\/\/google-analytics\.com/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /https:\/\/googletagmanager\.com/i,
+            handler: 'NetworkOnly',
+          },
+        ],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/sw\.js$/, /^\/manifest\.json$/],
+      },
+    }),
+  ],
   build: {
     chunkSizeWarningLimit: 1200,
     minify: 'terser',
@@ -23,7 +76,6 @@ export default defineConfig({
           ) {
             return 'r3f';
           }
-          // ─── Fix #9: Rapier WASM (~500KB) gets its own chunk ───
           if (id.includes('node_modules/@react-three/rapier')) {
             return 'rapier';
           }

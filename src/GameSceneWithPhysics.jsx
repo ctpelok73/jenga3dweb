@@ -372,7 +372,7 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       }
     }
 
-    if (allSettled || simulateTime.current >= 5000) {
+    if (allSettled || simulateTime.current >= 8000) {
       // Snapshot current positions of dynamic blocks
       const workingBlocks = (cascadeBlocksRef.current || blocks).map(b => {
         if (activeIds.has(b.id)) {
@@ -502,7 +502,14 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
   );
 }
 
-export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId }) {
+export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId, onReady }) {
+  const readyCalled = useRef(false);
+  useEffect(() => {
+    if (!readyCalled.current && onReady) {
+      readyCalled.current = true;
+      onReady();
+    }
+  }, [onReady]);
   return (
     <Physics key={restartKey} gravity={[0, -9.81, 0]} debug={false}>
       <Scene

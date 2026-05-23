@@ -1,23 +1,50 @@
-import React, { Suspense, lazy, Component, useMemo } from 'react';
+import React, { Suspense, lazy, Component, useMemo, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { getEnvironmentTheme } from './blockTextures';
 
 const GameSceneWithPhysics = lazy(() => import('./GameSceneWithPhysics'));
 
-function LoadingScene() {
+function LoadingOverlay() {
+  const [dots, setDots] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setDots((d) => (d + 1) % 4), 400);
+    return () => clearInterval(t);
+  }, []);
+
   return (
-    <>
-      <ambientLight intensity={0.8} />
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color="#b5651d" />
-      </mesh>
-    </>
+    <div style={{
+      position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(26,20,16,0.95)', color: '#fff', zIndex: 15,
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+      flexDirection: 'column', gap: 16, pointerEvents: 'auto',
+    }}>
+      <div style={{ fontSize: 40 }}>🧱</div>
+      <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+        Загрузка 3D-сцены{'.'.repeat(dots)}
+      </div>
+      <div style={{
+        width: 180, height: 4, borderRadius: 2,
+        background: 'rgba(255,255,255,0.1)', overflow: 'hidden',
+      }}>
+        <div style={{
+          width: '60%', height: '100%', borderRadius: 2,
+          background: '#2a6eff',
+          animation: 'loadingSlide 1.2s ease-in-out infinite',
+        }} />
+      </div>
+      <style>{`
+        @keyframes loadingSlide {
+          0% { transform: translateX(-100%); }
+          50% { transform: translateX(80%); }
+          100% { transform: translateX(-100%); }
+        }
+      `}</style>
+    </div>
   );
 }
 
-// ─── Fix #8: ErrorBoundary around Canvas ───
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -66,16 +93,20 @@ class ErrorBoundary extends Component {
 
 export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId }) {
   const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
+  const [physicsLoaded, setPhysicsLoaded] = useState(false);
+
+  const handlePhysicsLoaded = useMemo(() => () => setPhysicsLoaded(true), []);
 
   return (
     <ErrorBoundary>
+      {!physicsLoaded && <LoadingOverlay />}
       <Canvas
         camera={{ position: [5, 3.5, 5], fov: 50 }}
         style={{ width: '100%', height: '100%', display: 'block', background: env.bgColor }}
         shadows
         aria-hidden="true"
       >
-        <Suspense fallback={<LoadingScene />}>
+        <Suspense fallback={null}>
           <GameSceneWithPhysics
             blocks={blocks}
             selectedId={selectedId}
@@ -89,6 +120,7 @@ export default function GameScene({ blocks, selectedId, onBlockClick, simulating
             blockTheme={blockTheme}
             envTheme={envTheme}
             keyboardFocusId={keyboardFocusId}
+            onReady={handlePhysicsLoaded}
           />
         </Suspense>
         <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={12} maxPolarAngle={Math.PI / 2.1} />

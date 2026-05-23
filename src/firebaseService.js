@@ -1,7 +1,3 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getDatabase, ref, push, query, orderByChild, limitToLast, get, onValue, off } from 'firebase/database';
-
 const FIREBASE_ENABLED =
   import.meta.env.VITE_FIREBASE_API_KEY &&
   import.meta.env.VITE_FIREBASE_API_KEY !== 'YOUR_API_KEY_HERE' &&
@@ -25,21 +21,48 @@ let authReady = false;
 let authReadyResolve = null;
 const authReadyPromise = new Promise((resolve) => { authReadyResolve = resolve; });
 
-function initFirebase() {
+let _appMod = null;
+let _authMod = null;
+let _dbMod = null;
+let _initialized = false;
+let _loading = null;
+
+async function loadModules() {
+  if (_appMod && _authMod && _dbMod) return;
+  if (_loading) return _loading;
+
+  _loading = Promise.all([
+    import('firebase/app'),
+    import('firebase/auth'),
+    import('firebase/database'),
+  ]).then(([appMod, authMod, dbMod]) => {
+    _appMod = appMod;
+    _authMod = authMod;
+    _dbMod = dbMod;
+    _loading = null;
+  });
+
+  await _loading;
+}
+
+async function initFirebase() {
   if (!FIREBASE_ENABLED) {
     authReady = true;
     authReadyResolve(false);
     return false;
   }
-  if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApps()[0];
-  }
-  auth = getAuth(app);
-  db = getDatabase(app);
 
-  onAuthStateChanged(auth, (user) => {
+  await loadModules();
+
+  if (_appMod.getApps().length === 0) {
+    app = _appMod.initializeApp(firebaseConfig);
+  } else {
+    app = _appMod.getApps()[0];
+  }
+  auth = _authMod.getAuth(app);
+  db = _dbMod.getDatabase(app);
+
+  _authMod.onAuthStateChanged(auth, (user) => {
     currentUser = user;
     if (!authReady) {
       authReady = true;
@@ -48,7 +71,7 @@ function initFirebase() {
   });
 
   if (!auth.currentUser) {
-    signInAnonymously(auth).catch((err) => {
+    _authMod.signInAnonymously(auth).catch((err) => {
       console.warn('Firebase anonymous auth failed:', err.message);
       if (!authReady) {
         authReady = true;
@@ -65,21 +88,19 @@ function initFirebase() {
   return true;
 }
 
-let initialized = false;
-
-function ensureFirebase() {
-  if (!initialized) {
-    initialized = initFirebase();
+async function ensureFirebase() {
+  if (!_initialized) {
+    _initialized = await initFirebase();
   }
-  return initialized;
+  return _initialized;
 }
 
 export function isFirebaseEnabled() {
-  if (!FIREBASE_ENABLED) return false;
-  return ensureFirebase();
+  return FIREBASE_ENABLED;
 }
 
 export async function waitForAuth() {
+  await ensureFirebase();
   await authReadyPromise;
   return currentUser;
 }
@@ -89,7 +110,9 @@ export function getCurrentUserId() {
 }
 
 export async function submitScore(dateStr, name, turns, towerHeight) {
-  if (!isFirebaseEnabled() || !db) return null;
+  if (!FIREBASE_ENABLED) return null;
+  const ok = await ensureFirebase();
+  if (!ok || !db) return null;
 
   await waitForAuth();
 
@@ -101,19 +124,21 @@ export async function submitScore(dateStr, name, turns, towerHeight) {
     userId: currentUser?.uid || 'unknown',
   };
 
-  const dateRef = ref(db, `leaderboard/${dateStr}`);
-  const newRef = push(dateRef, entry);
+  const dateRef = _dbMod.ref(db, `leaderboard/${dateStr}`);
+  const newRef = _dbMod.push(dateRef, entry);
   return newRef.key;
 }
 
 export async function getOnlineLeaderboard(dateStr, limit = 50) {
-  if (!isFirebaseEnabled() || !db) return [];
+  if (!FIREBASE_ENABLED) return [];
+  const ok = await ensureFirebase();
+  if (!ok || !db) return [];
 
-  const dateRef = ref(db, `leaderboard/${dateStr}`);
-  const q = query(dateRef, orderByChild('turns'), limitToLast(limit));
+  const dateRef = _dbMod.ref(db, `leaderboard/${dateStr}`);
+  const q = _dbMod.query(dateRef, _dbMod.orderByChild('turns'), _dbMod.limitToLast(limit));
 
   try {
-    const snapshot = await get(q);
+    const snapshot = await _dbMod.get(q);
     if (!snapshot.exists()) return [];
     const entries = [];
     snapshot.forEach((child) => {
@@ -127,28 +152,43 @@ export async function getOnlineLeaderboard(dateStr, limit = 50) {
 }
 
 export function subscribeLeaderboard(dateStr, limit = 50, callback) {
-  if (!isFirebaseEnabled() || !db) {
+  if (!FIREBASE_ENABLED) {
     callback([]);
     return () => {};
   }
 
-  const dateRef = ref(db, `leaderboard/${dateStr}`);
-  const q = query(dateRef, orderByChild('turns'), limitToLast(limit));
+  let cancelled = false;
+  let firebaseUnsub = null;
 
-  onValue(q, (snapshot) => {
-    if (!snapshot.exists()) {
+  ensureFirebase().then((ok) => {
+    if (cancelled || !ok || !db) {
       callback([]);
       return;
     }
-    const entries = [];
-    snapshot.forEach((child) => {
-      entries.push({ id: child.key, ...child.val() });
+
+    const dateRef = _dbMod.ref(db, `leaderboard/${dateStr}`);
+    const q = _dbMod.query(dateRef, _dbMod.orderByChild('turns'), _dbMod.limitToLast(limit));
+
+    _dbMod.onValue(q, (snapshot) => {
+      if (!snapshot.exists()) {
+        callback([]);
+        return;
+      }
+      const entries = [];
+      snapshot.forEach((child) => {
+        entries.push({ id: child.key, ...child.val() });
+      });
+      callback(entries.reverse());
+    }, (err) => {
+      console.warn('Firebase leaderboard subscribe failed:', err.message);
+      callback([]);
     });
-    callback(entries.reverse());
-  }, (err) => {
-    console.warn('Firebase leaderboard subscribe failed:', err.message);
-    callback([]);
+
+    firebaseUnsub = () => _dbMod.off(q);
   });
 
-  return () => off(q);
+  return () => {
+    cancelled = true;
+    if (firebaseUnsub) firebaseUnsub();
+  };
 }

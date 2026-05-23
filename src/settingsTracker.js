@@ -61,20 +61,21 @@ export function getDifficultyDynamicIds(blocks, selectedBlock, removedLayer) {
   const difficulty = settings.difficulty;
   const dynamicIds = new Set();
 
-  // The moved block itself is always dynamic
   dynamicIds.add(selectedBlock.id);
 
   for (const b of blocks) {
     if (b.id === selectedBlock.id) continue;
 
+    if (b.layer > removedLayer) {
+      dynamicIds.add(b.id);
+      continue;
+    }
+
     if (difficulty === 'easy') {
-      // Only blocks in the removed layer — minimal disruption
-      if (b.layer === removedLayer) dynamicIds.add(b.id);
+      // Only the moved block itself — minimal disruption (siblings stay fixed)
     } else if (difficulty === 'normal') {
-      // Blocks in the removed layer (siblings) — upper layers will cascade
       if (b.layer === removedLayer) dynamicIds.add(b.id);
     } else if (difficulty === 'hard') {
-      // Same layer + layer below for extra instability
       if (b.layer === removedLayer || b.layer === removedLayer - 1) dynamicIds.add(b.id);
     }
   }
