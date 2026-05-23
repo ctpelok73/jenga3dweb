@@ -19,6 +19,8 @@ import { updateMasterVolume } from './soundEngine';
 import { handleKeyEvent } from './keyboardController';
 import DailyChallengePanel from './DailyChallengePanel';
 import { generateDailyTower, recordDailyChallengeAttempt, isDailyChallengeCompleted } from './dailyChallengeTracker';
+import PurchasePanel from './PurchasePanel';
+import { isPurchased, isRemoveAdsPurchased, getAvailableSkins, getAvailableEnvThemes } from './purchaseService';
 
 // ─── Game phases ───
 const PHASE_START = 'start';
@@ -333,7 +335,7 @@ function AchievementsPanel({ onClose }) {
 }
 
 // ─── Start Screen ───
-function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpenAchievements, onOpenDailyChallenge }) {
+function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpenAchievements, onOpenDailyChallenge, onOpenPurchase }) {
   const best = getBestScore();
   const total = getTotalGames();
   const unlockedCount = getUnlockedAchievements().length;
@@ -396,6 +398,9 @@ function StartScreen({ onStart, playerMode, setPlayerMode, onOpenSettings, onOpe
           </button>
           <button aria-label="Ежедневный челлендж" style={{ ...baseStyles.btnSecondary, fontSize: 13, borderColor: isDailyChallengeCompleted() ? 'rgba(68,255,136,0.4)' : 'rgba(255,204,0,0.4)', color: isDailyChallengeCompleted() ? '#44ff88' : '#ffcc00' }} onClick={onOpenDailyChallenge}>
             📅 Челлендж
+          </button>
+          <button aria-label="Премиум магазин" style={{ ...baseStyles.btnSecondary, fontSize: 13, borderColor: 'rgba(42,110,255,0.4)', color: '#2a6eff' }} onClick={onOpenPurchase}>
+            💎 Премиум
           </button>
         </div>
       </div>
@@ -545,11 +550,12 @@ function App() {
   const [showAchievements, setShowAchievements] = useState(false);
   const [showPauseMenu, setShowPauseMenu] = useState(false);
   const [showDailyChallenge, setShowDailyChallenge] = useState(false);
-  const [isDailyChallengeMode, setIsDailyChallengeMode] = useState(false); // playing daily challenge
+  const [isDailyChallengeMode, setIsDailyChallengeMode] = useState(false);
+  const [showPurchase, setShowPurchase] = useState(false);
   const [keyboardFocusId, setKeyboardFocusId] = useState(null); // keyboard accessibility focus
   const [announcement, setAnnouncement] = useState(''); // screen reader announcements
   const [continuedAfterCollapse, setContinuedAfterCollapse] = useState(false); // ad continuation flag
-  const [adFree, setAdFree] = useState(() => isAdFree()); // premium ad-free flag
+  const [adFree, setAdFree] = useState(() => isAdFree() || isRemoveAdsPurchased());
   const selectionTimeRef = useRef(null); // tracks when block was selected for speed achievement
   const achievementToastTimers = useRef([]); // track setTimeout IDs for achievement toast chain
   const latestTurnCountRef = useRef(0); // track latest turnCount for simulation callback
@@ -658,10 +664,10 @@ function App() {
     }
   }, []);
 
-  const initGame = useCallback(() => {
+  const initGame = useCallback((isDaily = isDailyChallengeMode) => {
     setPhase(PHASE_PLAYING);
     setMessage(playerMode === 2 ? `Ход: ${PLAYER_NAMES[0]}. Выберите блок.` : 'Выберите блок.');
-    setBlocks(isDailyChallengeMode ? generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP) : generateThemedTower());
+    setBlocks(isDaily ? generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP) : generateThemedTower());
     setSelectedId(null);
     setTurnCount(0);
     latestTurnCountRef.current = 0;
@@ -681,10 +687,9 @@ function App() {
     trackGameStart('ui_button', playerMode);
     setIsDailyChallengeMode(false);
     if (showTutorial) {
-      // Tutorial will show first, then transition to playing
       return;
     }
-    initGame();
+    initGame(false);
   }, [showTutorial, playerMode, initGame]);
 
   const handleStartDailyChallenge = useCallback(() => {
@@ -692,14 +697,14 @@ function App() {
     trackGameStart('daily_challenge', 1);
     setIsDailyChallengeMode(true);
     setShowDailyChallenge(false);
-    setPlayerMode(1); // Daily challenge is always 1 player
-    initGame();
+    setPlayerMode(1);
+    initGame(true);
   }, [initGame]);
 
   const handleTutorialDone = useCallback(() => {
     markTutorialSeen();
     setShowTutorial(false);
-    initGame();
+    initGame(false);
   }, [initGame]);
 
   const handleBlockClick = useCallback((id) => {
@@ -968,14 +973,18 @@ function App() {
     }
   }, [playerMode, currentPlayer, showAchievementNotification, isDailyChallengeMode]);
 
-  const handleSettingsChange = useCallback(() => {
-    // Theme might have changed — regenerate tower if on start screen
+const handleSettingsChange = useCallback(() => {
     setCurrentSettings(getSettings());
     if (phase === PHASE_START) {
       setBlocks(generateThemedTower());
       setRestartKey((k) => k + 1);
     }
   }, [phase]);
+
+  const handlePurchaseChange = useCallback(() => {
+    setAdFree(isAdFree() || isRemoveAdsPurchased());
+    setCurrentSettings(getSettings());
+  }, []);
 
   // ─── Render ───
   return (
@@ -994,7 +1003,7 @@ function App() {
         envTheme={currentSettings.environment}
         keyboardFocusId={keyboardFocusId}
       />
-      {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && !showDailyChallenge && (
+      {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && !showDailyChallenge && !showPurchase && (
         <StartScreen
           onStart={handleStart}
           playerMode={playerMode}
@@ -1002,6 +1011,7 @@ function App() {
           onOpenSettings={() => setShowSettings(true)}
           onOpenAchievements={() => setShowAchievements(true)}
           onOpenDailyChallenge={() => setShowDailyChallenge(true)}
+          onOpenPurchase={() => setShowPurchase(true)}
         />
       )}
       {phase === PHASE_START && showTutorial && (
@@ -1072,6 +1082,12 @@ function App() {
         <DailyChallengePanel
           onStartChallenge={handleStartDailyChallenge}
           onClose={() => setShowDailyChallenge(false)}
+        />
+      )}
+      {showPurchase && (
+        <PurchasePanel
+          onClose={() => setShowPurchase(false)}
+          onPurchaseChange={handlePurchaseChange}
         />
       )}
       <AriaAnnouncer announcement={announcement} />

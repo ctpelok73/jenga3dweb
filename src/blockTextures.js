@@ -1,24 +1,26 @@
-/**
- * blockTextures.js — процедурная генерация текстур для блоков Дженги
- * Использует Canvas2D для создания wood grain, neon glow, marble vein текстур
- * Генерируется один раз, кэшируется в Map
- */
 import * as THREE from 'three';
 
 const textureCache = new Map();
 
-// ─── Wood grain texture ───
+function createTexture(canvas, isDataMap = false) {
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  if (isDataMap) {
+    texture.colorSpace = THREE.LinearSRGBColorSpace;
+  }
+  return texture;
+}
+
 function generateWoodTexture(baseColor, width = 256, height = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Base fill
   ctx.fillStyle = baseColor;
   ctx.fillRect(0, 0, width, height);
 
-  // Wood grain lines — horizontal streaks with slight variation
   const grainCount = 12 + Math.floor(Math.random() * 8);
   for (let i = 0; i < grainCount; i++) {
     const y = Math.random() * height;
@@ -29,7 +31,6 @@ function generateWoodTexture(baseColor, width = 256, height = 64) {
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
     ctx.moveTo(0, y);
-    // Slightly wavy line
     for (let x = 0; x < width; x += 8) {
       const dy = (Math.random() - 0.5) * 2;
       ctx.lineTo(x, y + dy);
@@ -37,7 +38,6 @@ function generateWoodTexture(baseColor, width = 256, height = 64) {
     ctx.stroke();
   }
 
-  // Knots — small dark circles
   const knotCount = Math.floor(Math.random() * 2);
   for (let i = 0; i < knotCount; i++) {
     const kx = Math.random() * width;
@@ -49,7 +49,6 @@ function generateWoodTexture(baseColor, width = 256, height = 64) {
     ctx.fill();
   }
 
-  // Subtle noise overlay
   for (let x = 0; x < width; x += 2) {
     for (let y = 0; y < height; y += 2) {
       const brightness = Math.random() * 0.06;
@@ -58,25 +57,18 @@ function generateWoodTexture(baseColor, width = 256, height = 64) {
     }
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(1, 1);
-  return texture;
+  return createTexture(canvas);
 }
 
-// ─── Neon glow texture ───
 function generateNeonTexture(baseColor, width = 256, height = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Dark base
   ctx.fillStyle = '#111122';
   ctx.fillRect(0, 0, width, height);
 
-  // Neon color fill with gradient
   const gradient = ctx.createLinearGradient(0, 0, 0, height);
   gradient.addColorStop(0, baseColor);
   gradient.addColorStop(0.3, baseColor);
@@ -86,7 +78,6 @@ function generateNeonTexture(baseColor, width = 256, height = 64) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
 
-  // Glow lines at edges
   ctx.shadowColor = baseColor;
   ctx.shadowBlur = 8;
   ctx.strokeStyle = baseColor;
@@ -100,7 +91,6 @@ function generateNeonTexture(baseColor, width = 256, height = 64) {
   ctx.lineTo(width, height - 2);
   ctx.stroke();
 
-  // Circuit-like pattern
   ctx.shadowBlur = 4;
   ctx.lineWidth = 1;
   ctx.strokeStyle = baseColor;
@@ -114,25 +104,18 @@ function generateNeonTexture(baseColor, width = 256, height = 64) {
   }
 
   ctx.shadowBlur = 0;
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  return createTexture(canvas);
 }
 
-// ─── Ice/crystal texture ───
 function generateIceTexture(baseColor, width = 256, height = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Light icy base
   ctx.fillStyle = baseColor;
   ctx.fillRect(0, 0, width, height);
 
-  // Frost streaks — diagonal translucent lines
   for (let i = 0; i < 8; i++) {
     const startX = Math.random() * width;
     const startY = Math.random() * height;
@@ -146,7 +129,6 @@ function generateIceTexture(baseColor, width = 256, height = 64) {
     ctx.stroke();
   }
 
-  // Crystal highlights — bright spots
   for (let i = 0; i < 5; i++) {
     const cx = Math.random() * width;
     const cy = Math.random() * height;
@@ -158,7 +140,6 @@ function generateIceTexture(baseColor, width = 256, height = 64) {
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
   }
 
-  // Subtle noise
   for (let x = 0; x < width; x += 3) {
     for (let y = 0; y < height; y += 3) {
       const b = Math.random() * 0.03;
@@ -167,24 +148,18 @@ function generateIceTexture(baseColor, width = 256, height = 64) {
     }
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  return createTexture(canvas);
 }
 
-// ─── Bamboo texture ───
 function generateBambooTexture(baseColor, width = 256, height = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Green bamboo base
   ctx.fillStyle = baseColor;
   ctx.fillRect(0, 0, width, height);
 
-  // Vertical bamboo segments — horizontal lines across
   const segmentCount = 3 + Math.floor(Math.random() * 3);
   for (let i = 0; i < segmentCount; i++) {
     const y = Math.random() * height;
@@ -194,13 +169,10 @@ function generateBambooTexture(baseColor, width = 256, height = 64) {
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
     ctx.stroke();
-
-    // Node ring — slightly darker band
     ctx.fillStyle = `rgba(60, 100, 30, ${0.15 + Math.random() * 0.1})`;
     ctx.fillRect(0, y - 2, width, 4);
   }
 
-  // Vertical grain lines
   for (let i = 0; i < 15; i++) {
     const x = Math.random() * width;
     ctx.strokeStyle = `rgba(100, 140, 60, ${0.08 + Math.random() * 0.08})`;
@@ -211,7 +183,6 @@ function generateBambooTexture(baseColor, width = 256, height = 64) {
     ctx.stroke();
   }
 
-  // Subtle noise
   for (let x = 0; x < width; x += 2) {
     for (let y = 0; y < height; y += 2) {
       const b = Math.random() * 0.04;
@@ -220,29 +191,22 @@ function generateBambooTexture(baseColor, width = 256, height = 64) {
     }
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  return createTexture(canvas);
 }
 
-// ─── Candy texture ───
 function generateCandyTexture(baseColor, width = 256, height = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Bright candy base
   ctx.fillStyle = baseColor;
   ctx.fillRect(0, 0, width, height);
 
-  // Swirl pattern — candy cane stripes
   const stripeCount = 6 + Math.floor(Math.random() * 4);
   for (let i = 0; i < stripeCount; i++) {
     const x = (i / stripeCount) * width;
     const stripeWidth = width / stripeCount * 0.6;
-    // Alternate lighter/darker stripes
     const isLight = i % 2 === 0;
     ctx.fillStyle = isLight
       ? `rgba(255, 255, 255, ${0.15 + Math.random() * 0.15})`
@@ -250,7 +214,6 @@ function generateCandyTexture(baseColor, width = 256, height = 64) {
     ctx.fillRect(x, 0, stripeWidth, height);
   }
 
-  // Sugar sparkles — small bright dots
   for (let i = 0; i < 12; i++) {
     const cx = Math.random() * width;
     const cy = Math.random() * height;
@@ -261,7 +224,6 @@ function generateCandyTexture(baseColor, width = 256, height = 64) {
     ctx.fill();
   }
 
-  // Glossy highlight band
   const gradient = ctx.createLinearGradient(0, 0, 0, height);
   gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
   gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0)');
@@ -270,24 +232,18 @@ function generateCandyTexture(baseColor, width = 256, height = 64) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  return createTexture(canvas);
 }
 
-// ─── Marble vein texture ───
 function generateMarbleTexture(baseColor, width = 256, height = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Base fill — warm white/cream
   ctx.fillStyle = baseColor;
   ctx.fillRect(0, 0, width, height);
 
-  // Marble veins — thin dark lines with branching
   const veinCount = 4 + Math.floor(Math.random() * 4);
   for (let i = 0; i < veinCount; i++) {
     const startX = Math.random() * width;
@@ -307,7 +263,6 @@ function generateMarbleTexture(baseColor, width = 256, height = 64) {
     ctx.stroke();
   }
 
-  // Subtle gray patches
   for (let i = 0; i < 6; i++) {
     const px = Math.random() * width;
     const py = Math.random() * height;
@@ -318,7 +273,6 @@ function generateMarbleTexture(baseColor, width = 256, height = 64) {
     ctx.fill();
   }
 
-  // Fine noise
   for (let x = 0; x < width; x += 3) {
     for (let y = 0; y < height; y += 3) {
       const b = Math.random() * 0.04;
@@ -327,57 +281,282 @@ function generateMarbleTexture(baseColor, width = 256, height = 64) {
     }
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  return createTexture(canvas);
 }
 
-// ─── Normal map generator (subtle surface detail) ───
-function generateNormalMap(width = 256, height = 64) {
+function generateNormalMap(theme, width = 256, height = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  // Base neutral normal (blue = flat surface pointing up)
   ctx.fillStyle = '#8080ff';
   ctx.fillRect(0, 0, width, height);
 
-  // Subtle bumps
-  for (let x = 0; x < width; x += 4) {
-    for (let y = 0; y < height; y += 4) {
-      const dx = (Math.random() - 0.5) * 30;
-      const dy = (Math.random() - 0.5) * 30;
-      const r = Math.floor(128 + dx);
-      const g = Math.floor(128 + dy);
-      ctx.fillStyle = `rgb(${r}, ${g}, 255)`;
-      ctx.fillRect(x, y, 4, 4);
+  switch (theme) {
+    case 'classic': {
+      for (let x = 0; x < width; x += 4) {
+        for (let y = 0; y < height; y += 4) {
+          const dx = (Math.random() - 0.5) * 40;
+          const dy = (Math.random() - 0.5) * 40;
+          ctx.fillStyle = `rgb(${Math.floor(128 + dx)}, ${Math.floor(128 + dy)}, 255)`;
+          ctx.fillRect(x, y, 4, 4);
+        }
+      }
+      break;
+    }
+    case 'neon': {
+      for (let i = 0; i < 6; i++) {
+        const y = 4 + Math.floor(Math.random() * (height - 8));
+        ctx.strokeStyle = `rgb(140, 140, 255)`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+
+        ctx.strokeStyle = `rgb(118, 118, 250)`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, y + 6);
+        ctx.lineTo(width, y + 6);
+        ctx.stroke();
+      }
+      for (let x = 0; x < width; x += 4) {
+        for (let y = 0; y < height; y += 4) {
+          const dx = (Math.random() - 0.5) * 15;
+          const dy = (Math.random() - 0.5) * 15;
+          ctx.fillStyle = `rgb(${Math.floor(128 + dx)}, ${Math.floor(128 + dy)}, 255)`;
+          ctx.fillRect(x, y, 4, 4);
+        }
+      }
+      break;
+    }
+    case 'marble': {
+      for (let i = 0; i < 6; i++) {
+        const startX = Math.random() * width;
+        const startY = Math.random() * height;
+        ctx.strokeStyle = `rgb(118, 118, 248)`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        let cx = startX, cy = startY;
+        for (let s = 0; s < 12; s++) {
+          cx += (Math.random() - 0.5) * 18;
+          cy += (Math.random() - 0.5) * 6;
+          ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'ice': {
+      for (let i = 0; i < 10; i++) {
+        const startX = Math.random() * width;
+        const startY = Math.random() * height;
+        const length = 15 + Math.random() * 35;
+        const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.4;
+        ctx.strokeStyle = `rgb(130, 130, 255)`;
+        ctx.lineWidth = 1 + Math.random() * 2;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(startX + Math.cos(angle) * length, startY + Math.sin(angle) * length);
+        ctx.stroke();
+      }
+      for (let i = 0; i < 8; i++) {
+        const cx = Math.random() * width;
+        const cy = Math.random() * height;
+        const r = 3 + Math.random() * 6;
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        gradient.addColorStop(0, 'rgb(140, 140, 255)');
+        gradient.addColorStop(1, 'rgb(128, 128, 255)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      }
+      break;
+    }
+    case 'bamboo': {
+      for (let i = 0; i < 4; i++) {
+        const y = Math.random() * height;
+        ctx.fillStyle = 'rgb(118, 118, 248)';
+        ctx.fillRect(0, y - 1, width, 3);
+        ctx.fillStyle = 'rgb(130, 130, 255)';
+        ctx.fillRect(0, y - 2, width, 5);
+      }
+      for (let i = 0; i < 18; i++) {
+        const x = Math.random() * width;
+        ctx.strokeStyle = 'rgb(126, 126, 253)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x + (Math.random() - 0.5) * 3, height);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'candy': {
+      const stripeCount = 8;
+      for (let i = 0; i < stripeCount; i++) {
+        const x = (i / stripeCount) * width;
+        const stripeWidth = width / stripeCount * 0.6;
+        ctx.fillStyle = i % 2 === 0 ? 'rgb(135, 135, 255)' : 'rgb(122, 122, 250)';
+        ctx.fillRect(x, 0, stripeWidth, height);
+      }
+      for (let i = 0; i < 20; i++) {
+        const cx = Math.random() * width;
+        const cy = Math.random() * height;
+        ctx.fillStyle = 'rgb(140, 140, 255)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    default: {
+      for (let x = 0; x < width; x += 4) {
+        for (let y = 0; y < height; y += 4) {
+          const dx = (Math.random() - 0.5) * 30;
+          const dy = (Math.random() - 0.5) * 30;
+          ctx.fillStyle = `rgb(${Math.floor(128 + dx)}, ${Math.floor(128 + dy)}, 255)`;
+          ctx.fillRect(x, y, 4, 4);
+        }
+      }
     }
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  return createTexture(canvas, true);
 }
 
-/**
- * Get or create a cached texture for a block theme + color
- * Returns { map, normalMap, roughness, metalness, emissiveDefault }
- */
+function generateRoughnessMap(theme, width = 256, height = 64) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  switch (theme) {
+    case 'classic': {
+      ctx.fillStyle = 'rgb(190, 190, 190)';
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < 14; i++) {
+        const y = Math.random() * height;
+        const lineLength = 20 + Math.random() * 40;
+        ctx.strokeStyle = `rgba(150, 150, 150, ${0.3 + Math.random() * 0.4})`;
+        ctx.lineWidth = 1 + Math.random() * 2;
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * (width - lineLength), y);
+        ctx.lineTo(Math.random() * lineLength + width - lineLength, y + (Math.random() - 0.5) * 3);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'neon': {
+      ctx.fillStyle = 'rgb(51, 51, 51)';
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < 8; i++) {
+        const y = Math.random() * height;
+        ctx.strokeStyle = 'rgba(20, 20, 20, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'marble': {
+      ctx.fillStyle = 'rgb(89, 89, 89)';
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < 8; i++) {
+        const startX = Math.random() * width;
+        const startY = Math.random() * height;
+        ctx.strokeStyle = `rgba(70, 70, 70, ${0.3 + Math.random() * 0.3})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        let cx = startX, cy = startY;
+        for (let s = 0; s < 10; s++) {
+          cx += (Math.random() - 0.5) * 18;
+          cy += (Math.random() - 0.5) * 6;
+          ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'ice': {
+      ctx.fillStyle = 'rgb(13, 13, 13)';
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < 6; i++) {
+        const cx = Math.random() * width;
+        const cy = Math.random() * height;
+        const r = 6 + Math.random() * 12;
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        gradient.addColorStop(0, 'rgba(10, 10, 10, 0.5)');
+        gradient.addColorStop(1, 'rgba(15, 15, 15, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      }
+      break;
+    }
+    case 'bamboo': {
+      ctx.fillStyle = 'rgb(153, 153, 153)';
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < 5; i++) {
+        const y = Math.random() * height;
+        ctx.fillStyle = 'rgba(140, 140, 140, 0.5)';
+        ctx.fillRect(0, y - 2, width, 4);
+      }
+      for (let i = 0; i < 18; i++) {
+        const x = Math.random() * width;
+        ctx.strokeStyle = 'rgba(160, 160, 160, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x + (Math.random() - 0.5) * 3, height);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'candy': {
+      ctx.fillStyle = 'rgb(38, 38, 38)';
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < 10; i++) {
+        const cx = Math.random() * width;
+        const cy = Math.random() * height;
+        const r = 2 + Math.random() * 5;
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        gradient.addColorStop(0, 'rgba(25, 25, 25, 0.7)');
+        gradient.addColorStop(1, 'rgba(40, 40, 40, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      }
+      break;
+    }
+    default: {
+      ctx.fillStyle = 'rgb(190, 190, 190)';
+      ctx.fillRect(0, 0, width, height);
+    }
+  }
+
+  return createTexture(canvas, true);
+}
+
 export function getBlockMaterialProps(theme, color) {
   const cacheKey = `${theme}:${color}`;
   if (textureCache.has(cacheKey)) {
     return textureCache.get(cacheKey);
   }
 
+  const normalMap = generateNormalMap(theme);
+  const roughnessMap = generateRoughnessMap(theme);
+
   let props;
   switch (theme) {
     case 'classic':
       props = {
         map: generateWoodTexture(color),
-        normalMap: generateNormalMap(),
+        normalMap,
+        roughnessMap,
         roughness: 0.75,
         metalness: 0.0,
         emissiveDefault: '#000000',
@@ -386,7 +565,8 @@ export function getBlockMaterialProps(theme, color) {
     case 'neon':
       props = {
         map: generateNeonTexture(color),
-        normalMap: null,
+        normalMap,
+        roughnessMap,
         roughness: 0.2,
         metalness: 0.6,
         emissiveDefault: color,
@@ -396,7 +576,8 @@ export function getBlockMaterialProps(theme, color) {
     case 'marble':
       props = {
         map: generateMarbleTexture(color),
-        normalMap: generateNormalMap(),
+        normalMap,
+        roughnessMap,
         roughness: 0.35,
         metalness: 0.1,
         emissiveDefault: '#000000',
@@ -405,7 +586,8 @@ export function getBlockMaterialProps(theme, color) {
     case 'ice':
       props = {
         map: generateIceTexture(color),
-        normalMap: generateNormalMap(),
+        normalMap,
+        roughnessMap,
         roughness: 0.05,
         metalness: 0.3,
         emissiveDefault: '#aaddff',
@@ -415,7 +597,8 @@ export function getBlockMaterialProps(theme, color) {
     case 'bamboo':
       props = {
         map: generateBambooTexture(color),
-        normalMap: generateNormalMap(),
+        normalMap,
+        roughnessMap,
         roughness: 0.6,
         metalness: 0.0,
         emissiveDefault: '#000000',
@@ -424,7 +607,8 @@ export function getBlockMaterialProps(theme, color) {
     case 'candy':
       props = {
         map: generateCandyTexture(color),
-        normalMap: null,
+        normalMap,
+        roughnessMap,
         roughness: 0.15,
         metalness: 0.1,
         emissiveDefault: color,
@@ -434,7 +618,8 @@ export function getBlockMaterialProps(theme, color) {
     default:
       props = {
         map: generateWoodTexture(color),
-        normalMap: generateNormalMap(),
+        normalMap,
+        roughnessMap,
         roughness: 0.75,
         metalness: 0.0,
         emissiveDefault: '#000000',
@@ -445,18 +630,15 @@ export function getBlockMaterialProps(theme, color) {
   return props;
 }
 
-/**
- * Clear texture cache (when theme changes, textures need regeneration)
- */
 export function clearTextureCache() {
   textureCache.forEach((props) => {
     if (props.map) props.map.dispose();
     if (props.normalMap) props.normalMap.dispose();
+    if (props.roughnessMap) props.roughnessMap.dispose();
   });
   textureCache.clear();
 }
 
-// ─── Environment theme configs ───
 export const ENVIRONMENT_THEMES = {
   classic: {
     name: '🪵 Классика',

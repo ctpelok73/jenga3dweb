@@ -34,27 +34,24 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Bypass ad domains — never intercept or cache ad requests
   const url = new URL(event.request.url);
   if (AD_DOMAINS.some(domain => url.hostname.includes(domain))) {
-    return; // Let the browser handle ad requests directly
+    return;
   }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
-        // Cache successful responses from our own origin
         if (response.ok && event.request.url.startsWith(self.location.origin)) {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          const writePromise = caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          event.waitUntil(writePromise);
         }
         return response;
       }).catch(() => {
-        // Fallback to cached index.html for navigation
         if (event.request.mode === 'navigate') {
           return caches.match('/index.html');
         }

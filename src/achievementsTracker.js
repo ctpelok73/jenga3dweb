@@ -42,7 +42,7 @@ export const ACHIEVEMENTS = [
   },
   {
     id: 'risk_taker',
-    title: 'Риск-тaker',
+    title: 'Риск-тейкер',
     description: 'Вытащи блок из нижних 3 слоёв',
     emoji: '⚡',
     condition: (stats) => stats.bottomLayerPulls >= 1,
@@ -136,8 +136,8 @@ export function getLockedAchievements() {
 }
 
 // ─── Update stats and check for new unlocks ───
-export function updateAchievementStats(statUpdates) {
-  const data = loadAchievements();
+export function updateAchievementStats(statUpdates, existingData = null) {
+  const data = existingData || loadAchievements();
   const stats = { ...data.stats, ...statUpdates };
 
   // Check comeback condition
@@ -183,10 +183,9 @@ export function recordMove(layer, selectionTimeMs) {
     stats.fastMoves += 1;
   }
 
-  return updateAchievementStats(stats);
+return updateAchievementStats(stats, data);
 }
 
-// ─── Record game end (collapse) ───
 export function recordCollapse(turns) {
   const data = loadAchievements();
   const stats = data.stats;
@@ -199,10 +198,9 @@ export function recordCollapse(turns) {
     stats.bestTurns = turns;
   }
 
-  return updateAchievementStats(stats);
+return updateAchievementStats(stats, data);
 }
 
-// ─── Record successful game end (no collapse — rare) ───
 export function recordSuccess(turns) {
   const data = loadAchievements();
   const stats = data.stats;
@@ -214,7 +212,7 @@ export function recordSuccess(turns) {
     stats.bestTurns = turns;
   }
 
-  return updateAchievementStats(stats);
+  return updateAchievementStats(stats, data);
 }
 
 export function resetAchievements() {

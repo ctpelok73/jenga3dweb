@@ -4,7 +4,8 @@ import { getDatabase, ref, push, query, orderByChild, limitToLast, get, onValue,
 
 const FIREBASE_ENABLED =
   import.meta.env.VITE_FIREBASE_API_KEY &&
-  import.meta.env.VITE_FIREBASE_API_KEY !== 'YOUR_API_KEY_HERE';
+  import.meta.env.VITE_FIREBASE_API_KEY !== 'YOUR_API_KEY_HERE' &&
+  import.meta.env.VITE_FIREBASE_API_KEY.length > 0;
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
@@ -40,23 +41,42 @@ function initFirebase() {
 
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
-    authReady = true;
-    authReadyResolve(true);
+    if (!authReady) {
+      authReady = true;
+      authReadyResolve(!!user);
+    }
   });
 
-  signInAnonymously(auth).catch((err) => {
-    console.warn('Firebase anonymous auth failed:', err.message);
-    authReady = true;
-    authReadyResolve(false);
-  });
+  if (!auth.currentUser) {
+    signInAnonymously(auth).catch((err) => {
+      console.warn('Firebase anonymous auth failed:', err.message);
+      if (!authReady) {
+        authReady = true;
+        authReadyResolve(false);
+      }
+    });
+  } else {
+    if (!authReady) {
+      authReady = true;
+      authReadyResolve(true);
+    }
+  }
 
   return true;
 }
 
-const initialized = initFirebase();
+let initialized = false;
+
+function ensureFirebase() {
+  if (!initialized) {
+    initialized = initFirebase();
+  }
+  return initialized;
+}
 
 export function isFirebaseEnabled() {
-  return FIREBASE_ENABLED && initialized;
+  if (!FIREBASE_ENABLED) return false;
+  return ensureFirebase();
 }
 
 export async function waitForAuth() {

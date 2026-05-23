@@ -200,7 +200,7 @@ async function addToLeaderboard(turns, towerHeight) {
   const name = getPlayerName();
 
   lb[today].push({
-    name: 'Вы',
+    name: name || 'Аноним',
     turns,
     towerHeight,
     timestamp: new Date().toISOString(),

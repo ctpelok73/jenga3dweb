@@ -1,42 +1,22 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 
-/**
- * QRCodeGenerator: генерирует QR код используя qrcode.js библиотеку
- * Загружает библиотеку динамически из CDN
- */
 export function QRCodeDisplay({ url = 'https://jenga3d.app', size = 120 }) {
-  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const qrInstanceRef = useRef(null);
   const scriptLoadedRef = useRef(false);
+  const prevUrlRef = useRef(url);
+  const prevSizeRef = useRef(size);
 
-  useEffect(() => {
-    if (scriptLoadedRef.current) {
-      generateQR();
-      return;
+  const generateQR = useCallback(() => {
+    if (!containerRef.current || !window.QRCode) return;
+
+    if (qrInstanceRef.current) {
+      qrInstanceRef.current.clear();
     }
 
-    // Загружаем QR код библиотеку
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-    script.async = true;
-    script.onload = () => {
-      scriptLoadedRef.current = true;
-      generateQR();
-    };
-    document.head.appendChild(script);
+    containerRef.current.innerHTML = '';
 
-    return () => {
-      // Не удаляем скрипт, так как он может использоваться повторно
-    };
-  }, [url, size]);
-
-  const generateQR = () => {
-    if (!canvasRef.current || !window.QRCode) return;
-
-    // Очищаем старый QR код
-    canvasRef.current.innerHTML = '';
-
-    // Генерируем новый
-    new window.QRCode(canvasRef.current, {
+    qrInstanceRef.current = new window.QRCode(containerRef.current, {
       text: url,
       width: size,
       height: size,
@@ -44,11 +24,35 @@ export function QRCodeDisplay({ url = 'https://jenga3d.app', size = 120 }) {
       colorLight: '#ffffff',
       correctLevel: window.QRCode.CorrectLevel.H,
     });
-  };
+  }, [url, size]);
+
+  useEffect(() => {
+    prevUrlRef.current = url;
+    prevSizeRef.current = size;
+  }, [url, size]);
+
+  useEffect(() => {
+    if (scriptLoadedRef.current) {
+      generateQR();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    script.async = true;
+    script.onload = () => {
+      scriptLoadedRef.current = true;
+      generateQR();
+    };
+    script.onerror = () => {
+      console.warn('[QRCodeDisplay] Failed to load qrcode.js library');
+    };
+    document.head.appendChild(script);
+  }, [generateQR]);
 
   return (
     <div
-      ref={canvasRef}
+      ref={containerRef}
       style={{
         display: 'flex',
         alignItems: 'center',

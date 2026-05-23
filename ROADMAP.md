@@ -105,24 +105,28 @@
   - ✅ `vercel.json` + `netlify.toml` конфиги готовы (headers, rewrites, cache)
   - Custom domain: `jenga3d.app` или `playjenga.com`
 
-### P1 — Retention & Engagement (осталось: Online Leaderboard)
+### P1 — Retention & Engagement (реализовано ✅)
 
 - ✅ **Ежедневные челленджи** — `dailyChallengeTracker.js` + `DailyChallengePanel.jsx`
   - Daily seed → одинаковая башня для всех игроков сегодня
   - Local leaderboard (top 10 per day) с localStorage
-- [ ] **Online Leaderboard** — Firebase Realtime Database
+- ✅ **Online Leaderboard** — Firebase Realtime Database
   - Глобальный рейтинг ежедневных челленджей
   - Опционально: анонимный вход через Firebase Auth
 
 ### P2 — Premium content (4-8 недели)
 
-- [ ] **Полные скины блоков** — набор текстур (albedo + normal + roughness)
+- [x] **Полные скины блоков** — набор текстур (albedo + normal + roughness)
   - Neon glow, Marble, Ice/crystal, Bamboo, Candy
-  - ✅ Процедурные albedo-текстуры уже есть (`blockTextures.js`) — нужно добавить normal + roughness maps
-- [ ] **Темы окружения** — разные GroundSurface + lighting + fog
+  - ✅ Процедурные albedo-текстуры + ✅ theme-aware normal maps + ✅ theme-aware roughness maps
+- [x] **Темы окружения** — разные GroundSurface + lighting + fog
   - Space (звёзды, туман), Beach (песок, голубой свет), Library (тёмное дерево)
-- [ ] **In-app purchase flow** — Stripe или Gumroad для web
-  - Или RevenueCat если оборачиваем в Capacitor/Cordova для App Store
+  - ✅ `ENVIRONMENT_THEMES` уже реализованы в `blockTextures.js`
+- [x] **In-app purchase flow** — Stripe Payment Links / Gumroad для web
+  - ✅ `purchaseService.js` — localStorage purchase tracking + unlock code validation
+  - ✅ `PurchasePanel.jsx` — магазин + активация кодов
+  - ✅ Gate skins/env themes based on purchase status
+  - ✅ "Remove ads" purchase auto-syncs with adService
 
 ### P3 — Мультиплеер (8-12 недели)
 

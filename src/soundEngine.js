@@ -51,11 +51,11 @@ function playTone(freq, duration, type = 'sine', volume = 0.15, decay = true) {
   osc.type = type;
   osc.frequency.value = freq;
   gain.gain.value = volume;
-  if (decay) {
+  if (decay && volume > 0) {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
   }
   osc.connect(gain);
-  gain.connect(master); // route through master volume
+  gain.connect(master);
   osc.start(ctx.currentTime);
   osc.stop(ctx.currentTime + duration);
 }
@@ -73,7 +73,9 @@ function playNoise(duration, volume = 0.1) {
   source.buffer = buffer;
   const gain = ctx.createGain();
   gain.gain.value = volume;
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  if (volume > 0) {
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  }
   const filter = ctx.createBiquadFilter();
   filter.type = 'lowpass';
   filter.frequency.value = 800;

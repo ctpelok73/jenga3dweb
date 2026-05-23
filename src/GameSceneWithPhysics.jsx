@@ -113,6 +113,7 @@ const Block = memo(function Block({
         <meshStandardMaterial
           map={materialProps.map}
           normalMap={materialProps.normalMap}
+          roughnessMap={materialProps.roughnessMap}
           roughness={materialProps.roughness}
           metalness={materialProps.metalness}
           transparent={isGhost}
