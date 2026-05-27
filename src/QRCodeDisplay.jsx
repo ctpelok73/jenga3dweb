@@ -53,12 +53,7 @@ export function QRCodeDisplay({ url = 'https://jenga3d.app', size = 120 }) {
   return (
     <div
       ref={containerRef}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto',
-      }}
+      className="j-qr-container"
     />
   );
 }

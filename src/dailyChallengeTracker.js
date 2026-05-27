@@ -9,6 +9,7 @@
  */
 
 import { isFirebaseEnabled, submitScore, getOnlineLeaderboard, subscribeLeaderboard } from './firebaseService';
+import { TOWER_LAYERS } from './towerConfig';
 
 const DAILY_KEY = 'jenga3d_daily';
 const LEADERBOARD_KEY = 'jenga3d_daily_leaderboard';
@@ -85,7 +86,6 @@ export function generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PE
   const colors = getThemeColors();
   const blocks = [];
   let id = 0;
-  const TOWER_LAYERS = 18;
 
   for (let layer = 0; layer < TOWER_LAYERS; layer++) {
     const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;

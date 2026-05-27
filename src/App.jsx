@@ -10,34 +10,48 @@ import GameOverScreen from './screens/GameOverScreen';
 import UIPanel from './screens/UIPanel';
 import SettingsPanel from './screens/SettingsPanel';
 import AchievementsPanel from './screens/AchievementsPanel';
-import { PLAYER_COLORS, PLAYER_NAMES } from './styles';
-import { BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP } from './towerConfig';
-import { playSelect, playPull, playPlace, playCollapse, playStabilize, playGameOver, resumeAudio } from './soundEngine';
+import { PLAYER_NAMES } from './styles';
+import { BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP, TOWER_LAYERS } from './towerConfig';
+import { playSelect, playPull, playPlace, playCollapse, playStabilize, playGameOver, playAchievementUnlock, resumeAudio } from './soundEngine';
 import { getBestScore, getTotalGames, recordGame } from './scoreTracker';
 import { initializeAnalytics, trackGameStart, trackGameOver, trackRewardedVideoReward } from './analyticsService';
 import { initAdSDK, isAdFree } from './adService';
-import { recordMove, recordCollapse } from './achievementsTracker';
+import { recordMove, recordCollapse, recordSuccessfulMove } from './achievementsTracker';
 import { getSettings, getDifficultyDynamicIds, getThemeColors } from './settingsTracker';
 import { handleKeyEvent } from './keyboardController';
 import DailyChallengePanel from './DailyChallengePanel';
 import { generateDailyTower, recordDailyChallengeAttempt } from './dailyChallengeTracker';
 import PurchasePanel from './PurchasePanel';
 import { isRemoveAdsPurchased } from './purchaseService';
-import { chooseAIBlock, computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from './aiController';
+import { computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from './aiController';
+import { chooseAIBlockAdvanced, aiPersonality } from './aiControllerAdvanced';
+import { useTouchGestures } from './touchGestureController';
+import { useMobileOptimizations } from './mobileOptimizations';
 
 const PHASE_START = 'start';
 const PHASE_PLAYING = 'playing';
 const PHASE_GAME_OVER = 'gameOver';
+const FALLEN_Y = -0.5;
+const COLLAPSE_DROP_THRESHOLD = (BLOCK_H + LAYER_GAP) * 3;
 
 const TUTORIAL_KEY = 'jenga3d_tutorial_done';
 function hasSeenTutorial() { try { return localStorage.getItem(TUTORIAL_KEY) === '1'; } catch { return false; } }
 function markTutorialSeen() { try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch {} }
 
+function isCollapsedBlock(block) {
+  if (block.position[1] < FALLEN_Y) return true;
+  if (block.layer < 0) return false;
+
+  const expectedY = block.layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
+  const hasDroppedFromLayer = block.position[1] < expectedY - COLLAPSE_DROP_THRESHOLD;
+
+  return hasDroppedFromLayer;
+}
+
 function generateThemedTower() {
   const colors = getThemeColors();
   const blocks = [];
   let id = 0;
-  const TOWER_LAYERS = 18;
   for (let layer = 0; layer < TOWER_LAYERS; layer++) {
     const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
     const isOdd = layer % 2 === 1;
@@ -81,12 +95,25 @@ function App() {
   const [continuedAfterCollapse, setContinuedAfterCollapse] = useState(false);
   const [adFree, setAdFree] = useState(() => isAdFree() || isRemoveAdsPurchased());
   const [aiThinking, setAiThinking] = useState(false);
+  const [lastExtractionPosition, setLastExtractionPosition] = useState(null);
   const selectionTimeRef = useRef(null);
   const achievementToastTimers = useRef([]);
   const latestTurnCountRef = useRef(0);
   const aiTimersRef = useRef([]);
-  const aiPendingMoveRef = useRef(null);
+  const executeMoveRef = useRef(null);
+  const blocksRef = useRef(null);
+  const topCompleteLayerRef = useRef(null);
+  const canvasRef = useRef(null);
+  const { deviceInfo, shouldOptimize } = useMobileOptimizations();
   const [currentSettings, setCurrentSettings] = useState(() => getSettings());
+  useTouchGestures(canvasRef, {
+    onSwipeLeft: () => console.log('Swipe left detected'),
+    onSwipeRight: () => console.log('Swipe right detected'),
+    onSwipeUp: () => console.log('Swipe up detected'),
+    onSwipeDown: () => console.log('Swipe down detected'),
+    onPinch: (scale) => console.log('Pinch detected, scale:', scale),
+    onLongPress: () => console.log('Long press detected'),
+  });
 
   const towerHeight = useMemo(() => {
     let maxLayer = 0;
@@ -163,6 +190,7 @@ function App() {
     if (newUnlocks && newUnlocks.length > 0) {
       achievementToastTimers.current.forEach(id => clearTimeout(id));
       achievementToastTimers.current = [];
+      playAchievementUnlock();
       let idx = 0;
       const showNext = () => {
         if (idx < newUnlocks.length) {
@@ -195,7 +223,7 @@ function App() {
     setRestartKey((k) => k + 1);
     selectionTimeRef.current = null;
     setAiThinking(false);
-    aiPendingMoveRef.current = null;
+    setLastExtractionPosition(null);
     achievementToastTimers.current.forEach(id => clearTimeout(id));
     achievementToastTimers.current = [];
     aiTimersRef.current.forEach(id => clearTimeout(id));
@@ -247,12 +275,17 @@ function App() {
     });
   }, [phase, simulatingBlockIds, blocks, topCompleteLayer, playerMode, currentPlayer]);
 
-  const executeMove = useCallback((targetSlot) => {
-    if (!selectedBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+  const executeMove = useCallback((targetSlot, block = null) => {
+    const moveBlock = block || selectedBlock;
+    if (!moveBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
 
     playPull();
 
-    const removedLayer = selectedBlock.layer;
+    // Сохраняем исходную позицию блока до обновления blocks
+    const extractionPosition = [moveBlock.position[0], moveBlock.position[1], moveBlock.position[2]];
+    setLastExtractionPosition(extractionPosition);
+
+    const removedLayer = moveBlock.layer;
 
     let targetPosition, targetRotation, targetLayer;
     if (targetSlot) {
@@ -273,13 +306,13 @@ function App() {
     }
 
     const updatedBlocks = blocks.map((b) =>
-      b.id === selectedBlock.id
+      b.id === moveBlock.id
         ? { ...b, position: targetPosition, rotation: targetRotation, layer: targetLayer }
         : b
     );
     setBlocks(updatedBlocks);
     setSelectedId(null);
-    setLastMovedBlockId(selectedBlock.id);
+    setLastMovedBlockId(moveBlock.id);
     const newTurnCount = turnCount + 1;
     setTurnCount(newTurnCount);
     latestTurnCountRef.current = newTurnCount;
@@ -291,20 +324,25 @@ function App() {
       showAchievementNotification(newUnlocks);
     }
 
-    const dynamicIds = getDifficultyDynamicIds(updatedBlocks, selectedBlock, removedLayer);
+    const dynamicIds = getDifficultyDynamicIds(updatedBlocks, moveBlock, removedLayer);
     setSimulatingBlockIds(dynamicIds);
     setMessage('⏳ Стабилизация...');
   }, [selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification]);
 
+  executeMoveRef.current = executeMove;
+  blocksRef.current = blocks;
+  topCompleteLayerRef.current = topCompleteLayer;
+
   const handleMakeMove = useCallback(() => {
-    if (!canMove || (playerMode === 3 && currentPlayer === 1) || aiThinking) return;
+    if (!canMove || (playerMode === 3 && currentPlayer === 1)) return;
     executeMove(null);
-  }, [canMove, executeMove, playerMode, currentPlayer, aiThinking]);
+  }, [canMove, executeMove, playerMode, currentPlayer]);
 
   const handleDropSlot = useCallback((slotData) => {
     if (!selectedBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+    if (playerMode === 3 && currentPlayer === 1) return;
     executeMove(slotData);
-  }, [selectedBlock, phase, simulatingBlockIds, executeMove]);
+  }, [selectedBlock, phase, simulatingBlockIds, executeMove, playerMode, currentPlayer]);
 
   const handleRestart = useCallback(() => {
     playSelect();
@@ -315,26 +353,34 @@ function App() {
   useEffect(() => {
     if (playerMode !== 3 || currentPlayer !== 1 || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
     if (aiThinking) return;
-    aiPendingMoveRef.current = null;
+
     setAiThinking(true);
     setMessage('🤖 ИИ думает...');
 
     const t1 = setTimeout(() => {
-      const aiBlock = chooseAIBlock(blocks, topCompleteLayer);
+      const currentBlocks = blocksRef.current;
+      const currentTopLayer = topCompleteLayerRef.current;
+      const difficulty = currentSettings.difficulty || 'normal';
+      const aiBlock = chooseAIBlockAdvanced(currentBlocks, currentTopLayer, aiPersonality, difficulty);
       if (!aiBlock) {
         setAiThinking(false);
         setMessage('🤖 ИИ не может найти блок!');
         return;
       }
-      const dropSlot = computeAIDropSlot(blocks, aiBlock);
-      aiPendingMoveRef.current = { blockId: aiBlock.id, dropSlot };
+      const dropSlot = computeAIDropSlot(currentBlocks, aiBlock);
       setSelectedId(aiBlock.id);
       setMessage(`🤖 ИИ выбрал блок ${aiBlock.id + 1}, слой ${aiBlock.layer + 1}`);
 
       const t2 = setTimeout(() => {
-        setAiThinking(false);
+        executeMoveRef.current(dropSlot, aiBlock);
       }, AI_MOVE_DELAY);
       aiTimersRef.current.push(t2);
+
+      // Safety timeout: if simulation doesn't complete in 8 seconds, force reset AI thinking
+      const safetyTimeout = setTimeout(() => {
+        setAiThinking(false);
+      }, 8000);
+      aiTimersRef.current.push(safetyTimeout);
     }, AI_THINK_DELAY);
     aiTimersRef.current.push(t1);
 
@@ -342,16 +388,7 @@ function App() {
       aiTimersRef.current.forEach(id => clearTimeout(id));
       aiTimersRef.current = [];
     };
-  }, [playerMode, currentPlayer, phase, simulatingBlockIds, blocks, topCompleteLayer]);
-
-  useEffect(() => {
-    if (!aiPendingMoveRef.current || !selectedBlock) return;
-    if (selectedBlock.id !== aiPendingMoveRef.current.blockId) return;
-    if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
-    const { dropSlot } = aiPendingMoveRef.current;
-    aiPendingMoveRef.current = null;
-    executeMove(dropSlot);
-  }, [selectedBlock, phase, simulatingBlockIds, executeMove]);
+  }, [playerMode, currentPlayer, phase, simulatingBlockIds]); // aiThinking excluded: setting it inside triggers cleanup
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -376,7 +413,7 @@ function App() {
       }
 
       if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) {
-        if (e.key === 'Escape' || e.key === 'm' || e.key === 'М') {
+        if ((e.key === 'Escape' || e.key === 'm' || e.key === 'М') && phase === PHASE_PLAYING) {
           e.preventDefault();
           setShowPauseMenu(true);
         }
@@ -403,7 +440,7 @@ function App() {
         case 'deselect':
           setSelectedId(null);
           setKeyboardFocusId(null);
-setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[currentPlayer]}. Выберите блок.` : 'Выберите блок.');
+          setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[currentPlayer]}. Выберите блок.` : 'Выберите блок.');
           setAnnouncement('Блок отменён');
           selectionTimeRef.current = null;
           break;
@@ -433,14 +470,14 @@ setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[curren
     setSimulatingBlockIds(null);
     setRestartKey((k) => k + 1);
     setAiThinking(false);
-    aiPendingMoveRef.current = null;
+    setLastExtractionPosition(null);
     aiTimersRef.current.forEach(id => clearTimeout(id));
     aiTimersRef.current = [];
   }, []);
 
   const handleContinueAfterCollapse = useCallback(() => {
     setBlocks(prevBlocks => prevBlocks.map(b => {
-      if (b.position[1] < -0.5) {
+      if (isCollapsedBlock(b)) {
         return { ...b, position: [b.position[0], 0.01, b.position[2]], layer: -1 };
       }
       return b;
@@ -453,21 +490,23 @@ setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[curren
   }, []);
 
   const handleSimulationComplete = useCallback(async (updatedBlocks) => {
-    let anyFallen = false;
+    let hasCollapsed = false;
     for (const b of updatedBlocks) {
-      if (b.position[1] < -0.5) {
-        anyFallen = true;
+      if (isCollapsedBlock(b)) {
+        hasCollapsed = true;
         break;
       }
     }
 
-    setBlocks(updatedBlocks);
+    const cleanedBlocks = updatedBlocks.filter(b => b.position[1] >= FALLEN_Y);
+    setBlocks(cleanedBlocks);
     setSimulatingBlockIds(null);
 
     const currentTurnCount = latestTurnCountRef.current;
 
-    if (anyFallen) {
+    if (hasCollapsed) {
       playCollapse();
+      setAiThinking(false);
       const t1 = setTimeout(() => playGameOver(), 300);
       achievementToastTimers.current.push(t1);
       recordGame(currentTurnCount, true);
@@ -497,9 +536,16 @@ setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[curren
       const t3 = setTimeout(() => playPlace(), 150);
       achievementToastTimers.current.push(t3);
 
+      // Сбрасываем consecutiveLosses и обновляем winStreak при успешной партии
+      const { newUnlocks: successUnlocks } = recordSuccessfulMove(currentTurnCount);
+      if (successUnlocks && successUnlocks.length > 0) {
+        const t4 = setTimeout(() => showAchievementNotification(successUnlocks), 300);
+        achievementToastTimers.current.push(t4);
+      }
+
       if (isDailyChallengeMode) {
         let maxLayer = 0;
-        for (const b of updatedBlocks) if (b.layer > maxLayer) maxLayer = b.layer;
+        for (const b of cleanedBlocks) if (b.layer > maxLayer) maxLayer = b.layer;
         const currentHeight = maxLayer + 1;
         const challengeResult = await recordDailyChallengeAttempt(currentTurnCount, currentHeight, true);
         if (challengeResult.completed) {
@@ -512,6 +558,7 @@ setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[curren
         setCurrentPlayer(nextPlayer);
         setMessage(`Ход: ${PLAYER_NAMES[nextPlayer]}. Выберите блок.`);
       } else if (playerMode === 3) {
+        setAiThinking(false);
         const nextPlayer = currentPlayer === 0 ? 1 : 0;
         setCurrentPlayer(nextPlayer);
         setMessage(nextPlayer === 1 ? '🤖 ИИ думает...' : `Ход: ${PLAYER_NAMES[0]}. Выберите блок.`);
@@ -535,7 +582,7 @@ setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[curren
   }, []);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }} role="application" aria-label="Jenga 3D — 3D игра с физикой">
+    <div className="j-root" ref={canvasRef} role="application" aria-label="Jenga 3D — 3D игра с физикой">
       <GameScene
         blocks={blocks}
         selectedId={selectedId}
@@ -546,6 +593,7 @@ setMessage(playerMode === 2 || playerMode === 3 ? `Ход: ${PLAYER_NAMES[curren
         dropSlots={dropSlots}
         onDropSlot={handleDropSlot}
         lastMovedBlockId={lastMovedBlockId}
+        lastExtractionPosition={lastExtractionPosition}
         blockTheme={currentSettings.theme}
         envTheme={currentSettings.environment}
         keyboardFocusId={keyboardFocusId}

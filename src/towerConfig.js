@@ -25,25 +25,3 @@ export const BLOCK_PHYSICS = {
   linearDamping: 0.4,
   angularDamping: 0.6,
 };
-
-export function generateTower() {
-  const blocks = [];
-  let id = 0;
-  for (let layer = 0; layer < TOWER_LAYERS; layer++) {
-    const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
-    const isOdd = layer % 2 === 1;
-    const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
-    for (let b = 0; b < BLOCKS_PER_LAYER; b++) {
-      const offset = -STEP + b * STEP;
-      blocks.push({
-        id,
-        position: [isOdd ? offset : 0, y, isOdd ? 0 : offset],
-        rotation: rot,
-        color: WOOD_COLORS[id % WOOD_COLORS.length],
-        layer,
-      });
-      id++;
-    }
-  }
-  return blocks;
-}

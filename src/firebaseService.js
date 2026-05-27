@@ -169,7 +169,7 @@ export function subscribeLeaderboard(dateStr, limit = 50, callback) {
     const dateRef = _dbMod.ref(db, `leaderboard/${dateStr}`);
     const q = _dbMod.query(dateRef, _dbMod.orderByChild('turns'), _dbMod.limitToLast(limit));
 
-    _dbMod.onValue(q, (snapshot) => {
+    const unsubFn = _dbMod.onValue(q, (snapshot) => {
       if (!snapshot.exists()) {
         callback([]);
         return;
@@ -184,7 +184,7 @@ export function subscribeLeaderboard(dateStr, limit = 50, callback) {
       callback([]);
     });
 
-    firebaseUnsub = () => _dbMod.off(q);
+    firebaseUnsub = unsubFn;
   });
 
   return () => {

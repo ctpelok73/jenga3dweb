@@ -51,32 +51,40 @@ export function resetSettings() {
 }
 
 // Difficulty affects how many blocks become dynamic during simulation
-// Cascading mode: initially only the removed block's layer becomes dynamic.
-// Upper layers "hang" until the layer below them settles/falls, then cascade down layer-by-layer.
-// easy: only removed block itself (no layer siblings) — very forgiving
-// normal: blocks in the same layer as removed (siblings)
-// hard: same layer + layer below (neighbors for extra instability)
+// easy: only removed block itself — very forgiving
+// normal: blocks at the same height as removed
+// hard: same height + layer below
 export function getDifficultyDynamicIds(blocks, selectedBlock, removedLayer) {
   const settings = loadSettings();
   const difficulty = settings.difficulty;
   const dynamicIds = new Set();
-
-  dynamicIds.add(selectedBlock.id);
+  
+  const holeY = selectedBlock.position[1];
+  const LAYER_HEIGHT = 0.31; // BLOCK_H (0.3) + LAYER_GAP (0.01)
 
   for (const b of blocks) {
-    if (b.id === selectedBlock.id) continue;
-
-    if (b.layer > removedLayer) {
+    if (b.id === selectedBlock.id) {
       dynamicIds.add(b.id);
       continue;
     }
 
+    // Blocks clearly above the hole should always be dynamic
+    if (b.position[1] > holeY + 0.1) {
+      dynamicIds.add(b.id);
+      continue;
+    }
+
+    // Siblings or blocks below depend on difficulty
     if (difficulty === 'easy') {
-      // Only the moved block itself — minimal disruption (siblings stay fixed)
+      // Siblings stay fixed
     } else if (difficulty === 'normal') {
-      if (b.layer === removedLayer) dynamicIds.add(b.id);
+      if (Math.abs(b.position[1] - holeY) < 0.1) {
+        dynamicIds.add(b.id);
+      }
     } else if (difficulty === 'hard') {
-      if (b.layer === removedLayer || b.layer === removedLayer - 1) dynamicIds.add(b.id);
+      if (b.position[1] > holeY - LAYER_HEIGHT - 0.1 && b.position[1] < holeY + 0.1) {
+        dynamicIds.add(b.id);
+      }
     }
   }
 

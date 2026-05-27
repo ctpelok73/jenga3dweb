@@ -70,13 +70,12 @@ npm run preview      # просмотр production-сборки
 │  ├─ AriaAnnouncer.jsx         # aria-live="assertive" для screen reader
 │  ├─ AdBanner.jsx              # Fixed bottom banner (Start/GameOver screens only)
 │  ├─ RewardedVideoButton.jsx   # «Продолжить после падения» → rewarded video
-│  ├─ QRCodeDisplay.jsx         # QR-код (dynamic CDN load qrcode.js)
-│  ├─ SocialSharePanel.jsx      # Twitter/Telegram/Facebook/WhatsApp/Copy Link
+│  ├─ QRCodeDisplay.jsx         # QR-код (dynamic CDN load qrcode.js, CSS-styled)
+│  ├─ SocialSharePanel.jsx      # Twitter/Telegram/Facebook/WhatsApp/Copy Link (CSS custom properties)
 │  ├─ InteractiveTutorialOverlay.jsx # 3-шаговый tutorial overlay
 │  ├─ PauseMenu.jsx             # Fullscreen pause menu (Escape)
 │  ├─ DailyChallengePanel.jsx   # Daily challenge UI + leaderboard tabs
 │  ├─ PurchasePanel.jsx         # Premium shop + activation codes
-│  ├─ DragVisualFeedback.jsx    # Drag trajectory visual feedback
 │  ├─ components/
 │  │  └─ AchievementToast.jsx   # Slide-in achievement notification
 │  ├─ screens/
@@ -186,7 +185,7 @@ npm run preview      # просмотр production-сборки
 | bamboo | Segments + fibers | 0.6 | 0.0 | #000000 |
 | candy | Stripes + sprinkles | 0.15 | 0.1 | color (0.1) |
 
-Все текстуры процедурно генерируются через Canvas2D, кэшируются в Map. Для каждой темы: albedo-map + normal-map + roughness-map.
+Все текстуры процедурно генерируются через Canvas2D. Оптимизация кэширования: normalMap и roughnessMap зависят только от темы (не от цвета), поэтому кэшируются отдельно в `themeMapCache`. Это снижает overhead генерации текстур примерно на 3x для multi-color тем. Для каждой темы: albedo-map (per-color) + normal-map (per-theme) + roughness-map (per-theme).
 
 ---
 
@@ -213,11 +212,7 @@ Web Audio API, процедурная генерация. 0 KB external audio fi
 | `playCollapse()` | Падение | Noise 0.8s + 80Hz sawtooth 0.5s + sub-crashes |
 | `playStabilize()` | Стабилизация | 660Hz + 880Hz sine |
 | `playGameOver()` | Game over | 440→80Hz sawtooth sweep 1.2s |
-| `playAchievementUnlock()` | Achievement | 523→659→784→1047Hz arpeggio |
-| `playTimerWarning()` | Timer warning | 660Hz + 880Hz square |
-| `playTimerExpired()` | Timer expired | 440→330→220Hz square |
-| `playCombo()` | Combo | 440→550→660Hz sine |
-| `playShake()` | Shake | 60Hz sawtooth + noise |
+| `playAchievementUnlock()` | Achievement unlock | 523→659→784→1047Hz arpeggio |
 
 Master volume: `settings.volume / 100`, single AudioContext + masterGainNode.
 
@@ -263,7 +258,9 @@ Toast-уведомления: slideInRight animation, auto-dismiss 3.5s, sequent
 | `waitForAuth()` | Anonymous auth, returns currentUser |
 | `submitScore(date, name, turns, height)` | Push entry to `leaderboard/{date}` |
 | `getOnlineLeaderboard(date, limit)` | Fetch + orderByChild('turns') |
-| `subscribeLeaderboard(date, limit, cb)` | Real-time onValue + cancelled-flag cleanup |
+| `subscribeLeaderboard(date, limit, cb)` | Real-time onValue + proper unsubscribe cleanup |
+
+**Примечание:** `subscribeLeaderboard()` использует модульный Firebase SDK (v9+), который возвращает функцию отписки напрямую из `onValue()`. Это обеспечивает корректную очистку памяти при размонтировании компонента.
 
 ---
 
@@ -318,6 +315,45 @@ Env variables: `VITE_PAYMENT_SKIN_PACK`, `VITE_PAYMENT_REMOVE_ADS`, `VITE_PAYMEN
 - Mouse + touch event listeners (passive: false для preventDefault)
 - Events: dragStart, drag, dragEnd, dropSlotEnter, dropSlotLeave
 - `destroy()` для cleanup всех listeners
+
+---
+
+## CSS Styling (`ui.css`)
+
+### QR Code Container
+
+`.j-qr-container` — flexbox контейнер для QR-кода в GameOverScreen:
+```css
+.j-qr-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+```
+
+### Share Buttons (SocialSharePanel)
+
+`.j-share-btn` — кнопки социальных сетей с динамическими цветами через CSS custom properties:
+```css
+.j-share-btn {
+  border: 1px solid var(--share-color, #888);
+  background: transparent;
+  color: var(--share-color, #888);
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
+}
+.j-share-btn:hover {
+  background: var(--share-color, #888);
+  color: #fff;
+  opacity: 0.9;
+}
+.j-share-btn--copied {
+  background: var(--share-color, #888);
+  color: #fff;
+}
+```
+
+Компонент устанавливает `--share-color` для каждой платформы, позволяя переиспользовать один стиль для всех кнопок.
 
 ---
 

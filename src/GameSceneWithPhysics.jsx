@@ -14,6 +14,7 @@ import {
 } from './towerConfig';
 import ParticleEffect from './ParticleEffect';
 import { getBlockMaterialProps, getEnvironmentTheme } from './blockTextures';
+import { physicsOptimizer } from './physicsOptimizer';
 
 // ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
@@ -56,17 +57,30 @@ const Block = memo(function Block({
     if (onRigidRef && rigidRef.current) onRigidRef(id, rigidRef.current);
   }, [id, onRigidRef]);
 
-  // ─── Handle dynamic type transitions (for cascading layer-by-layer gravity) ───
   useEffect(() => {
     const body = rigidRef.current;
     if (!body) return;
     if (isDynamic) {
-      // Transition to dynamic: set body type and wake it up so gravity takes effect
-      body.setBodyType(0, true); // 0 = Dynamic, true = wake
+      body.setBodyType(0, true);
     } else {
-      body.setBodyType(1, true); // 1 = Fixed
+      body.setBodyType(1, true);
     }
   }, [isDynamic]);
+
+  useEffect(() => {
+    const body = rigidRef.current;
+    if (!body) return;
+
+    // Always sync with props when they change. 
+    // This is crucial when transitioning to dynamic state or teleporting a block.
+    body.setTranslation({ x: position[0], y: position[1], z: position[2] }, true);
+    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(rotation[0], rotation[1], rotation[2]));
+    body.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }, true);
+    
+    // Reset velocities to prevent "teleporting momentum" and ensure a clean simulation start
+    body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+    body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+  }, [position, rotation, isDynamic]);
 
   // Ghost block: selected block shown semi-transparent to indicate it's "lifted"
   const opacity = isGhost ? 0.35 : 1;
@@ -132,14 +146,18 @@ const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick
   const [hovered, setHovered] = useState(false);
   const isHighlighted = hovered || isDragHover;
 
-  // Memoize line material to prevent re-creation every render
+  // Single material instance — update color imperatively to avoid recreation
   const lineMaterial = useMemo(
-    () => new THREE.LineBasicMaterial({
-      color: isHighlighted ? '#44ff88' : '#2a6eff',
-      linewidth: isHighlighted ? 3 : 1,
-    }),
-    [isHighlighted]
+    () => new THREE.LineBasicMaterial({ color: '#2a6eff', linewidth: 1 }),
+    []
   );
+
+  // Update material properties when highlight state changes
+  useEffect(() => {
+    lineMaterial.color.set(isHighlighted ? '#44ff88' : '#2a6eff');
+    lineMaterial.linewidth = isHighlighted ? 3 : 1;
+    lineMaterial.needsUpdate = true;
+  }, [isHighlighted, lineMaterial]);
 
   useEffect(() => {
     return () => { lineMaterial.dispose(); };
@@ -227,7 +245,7 @@ function SpaceStars() {
 }
 
 // ─── Main Scene ───
-function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId }) {
+function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot, lastMovedBlockId, lastExtractionPosition, blockTheme, envTheme, keyboardFocusId }) {
   const rigidRefs = useRef({});
   const simulateTime = useRef(0);
   const completionCalled = useRef(false);
@@ -255,9 +273,9 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
   const movedBlockPos = useMemo(() => {
     if (!particleBlockId) return null;
-    const block = blocks.find(b => b.id === particleBlockId);
-    return block ? block.position : null;
-  }, [particleBlockId, blocks]);
+    // Используем позицию, где блок БЫЛ до извлечения, а не где он сейчас (наверху башни)
+    return lastExtractionPosition;
+  }, [particleBlockId, lastExtractionPosition]);
 
   // ─── Merge simulatingBlockIds and cascadeDynamicIds for rendering ───
   const effectiveDynamicIds = useMemo(() => {
@@ -340,10 +358,20 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
     return null; // No more layers to cascade
   }, []);
 
-  // ─── Settling detection with cascade support ───
-  useFrame((_, delta) => {
+  // ─── Settling detection with cascade support and physics optimization ───
+  useFrame((state, delta) => {
     const activeIds = effectiveDynamicIds;
     if (!activeIds || activeIds.size === 0 || completionCalled.current) return;
+
+    // Update physics optimizer state
+    physicsOptimizer.updateSimulationState(true, activeIds.size);
+    physicsOptimizer.updateCameraPosition(state.camera.position.toArray());
+
+    // Get optimized frame parameters
+    const frameParams = physicsOptimizer.getFrameParams(activeIds.size);
+
+    // Skip physics update on low-priority frames (adaptive frame rate)
+    if (!frameParams.shouldUpdatePhysics) return;
 
     // Handle cascade delay (brief pause between layer activations for visual effect)
     if (cascadeWaiting.current) {
@@ -357,7 +385,7 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
     if (simulateTime.current < 300) return;
 
     let allSettled = true;
-    const VELOCITY_THRESHOLD = 0.08;
+    const VELOCITY_THRESHOLD = frameParams.velocityThreshold;
     for (const id of activeIds) {
       const rigid = rigidRefs.current[id];
       if (rigid) {
@@ -372,7 +400,9 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       }
     }
 
-    if (allSettled || simulateTime.current >= 8000) {
+    // Use a more conservative timeout to prevent hanging (max 5 seconds)
+    const maxTimeout = Math.min(frameParams.timeout, 5000);
+    if (allSettled || simulateTime.current >= maxTimeout) {
       // Snapshot current positions of dynamic blocks
       const workingBlocks = (cascadeBlocksRef.current || blocks).map(b => {
         if (activeIds.has(b.id)) {
@@ -389,14 +419,22 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       });
 
       // Check if there's an unsupported layer above that should cascade
-      const nextLayer = findNextUnsupportedLayer(workingBlocks, activeIds);
+      const nextResult = findNextUnsupportedLayer(workingBlocks, activeIds);
 
-      if (nextLayer !== null) {
+      if (nextResult !== null) {
         // ─── CASCADE: activate the next unsupported layer ───
         const newDynamicIds = new Set(activeIds);
-        for (const b of workingBlocks) {
-          if (b.layer === nextLayer) {
-            newDynamicIds.add(b.id);
+        // If nextResult is an array of IDs, use them. If it's a number (old style), handle it too.
+        if (Array.isArray(nextResult)) {
+          for (const id of nextResult) {
+            if (id !== lastMovedBlockId) newDynamicIds.add(id);
+          }
+        } else {
+          const nextLayer = nextResult;
+          for (const b of workingBlocks) {
+            if (b.layer === nextLayer && b.id !== lastMovedBlockId) {
+              newDynamicIds.add(b.id);
+            }
           }
         }
         cascadeBlocksRef.current = workingBlocks;
@@ -411,6 +449,14 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
         simulateTime.current = 0;
         cascadeBlocksRef.current = null;
         setCascadeDynamicIds(null);
+        physicsOptimizer.updateSimulationState(false);
+        // Reset all dynamic blocks to fixed state to prevent hanging blocks
+        for (const id of activeIds) {
+          const rigid = rigidRefs.current[id];
+          if (rigid) {
+            rigid.setBodyType(1, true); // 1 = fixed
+          }
+        }
         onSimulationComplete(workingBlocks);
       }
     }
@@ -426,6 +472,23 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       cascadeDelayRef.current = 0;
     }
   }, [simulatingBlockIds]);
+
+  useEffect(() => {
+    if (!simulatingBlockIds || simulatingBlockIds.size === 0) {
+      for (const b of blocks) {
+        const rigid = rigidRefs.current[b.id];
+        if (rigid) {
+          // Ensure block is fixed (not dynamic) when simulation ends
+          rigid.setBodyType(1, true); // 1 = fixed
+          rigid.setTranslation({ x: b.position[0], y: b.position[1], z: b.position[2] }, true);
+          const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(b.rotation[0], b.rotation[1], b.rotation[2]));
+          rigid.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }, true);
+          rigid.setLinvel({ x: 0, y: 0, z: 0 }, true);
+          rigid.setAngvel({ x: 0, y: 0, z: 0 }, true);
+        }
+      }
+    }
+  }, [blocks, simulatingBlockIds]);
 
   return (
     <>
@@ -502,7 +565,7 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
   );
 }
 
-export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId, onReady }) {
+export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, lastExtractionPosition, blockTheme, envTheme, keyboardFocusId, onReady }) {
   const readyCalled = useRef(false);
   useEffect(() => {
     if (!readyCalled.current && onReady) {
@@ -521,6 +584,7 @@ export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick,
         dropSlots={dropSlots}
         onDropSlot={onDropSlot}
         lastMovedBlockId={lastMovedBlockId}
+        lastExtractionPosition={lastExtractionPosition}
         blockTheme={blockTheme}
         envTheme={envTheme}
         keyboardFocusId={keyboardFocusId}

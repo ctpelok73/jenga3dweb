@@ -1,5 +1,4 @@
 import React from 'react';
-import { screenStyles, baseStyles, PLAYER_COLORS, PLAYER_NAMES } from '../styles';
 import { getBestScore, getTotalGames } from '../scoreTracker';
 import { getUnlockedAchievements, ACHIEVEMENTS } from '../achievementsTracker';
 import { isDailyChallengeCompleted } from '../dailyChallengeTracker';
@@ -8,36 +7,32 @@ export default function StartScreen({ onStart, playerMode, setPlayerMode, onOpen
   const best = getBestScore();
   const total = getTotalGames();
   const unlockedCount = getUnlockedAchievements().length;
+  const dailyDone = isDailyChallengeCompleted();
   return (
-    <div style={screenStyles.container} role="dialog" aria-label="Стартовый экран">
-      <div style={screenStyles.card}>
-        <h1 style={screenStyles.heading}>🧱 Jenga 3D</h1>
-        <p style={screenStyles.subtext}>
+    <div className="j-overlay" role="dialog" aria-label="Стартовый экран">
+      <div className="j-card">
+        <h1 className="j-heading">🧱 Jenga 3D</h1>
+        <p className="j-subtext">
           Вытаскивай блоки, ставь наверх.<br/>
           Не урони башню!
         </p>
         {total > 0 && (
-          <div style={screenStyles.statRow}>
-            <div style={screenStyles.statItem}>
-              <div style={screenStyles.statValue}>{best}</div>
-              <div style={screenStyles.statLabel}>Лучший результат</div>
+          <div className="j-stats">
+            <div className="j-stat">
+              <div className="j-stat__val">{best}</div>
+              <div className="j-stat__label">Лучший результат</div>
             </div>
-            <div style={screenStyles.statItem}>
-              <div style={screenStyles.statValue}>{total}</div>
-              <div style={screenStyles.statLabel}>Игр сыграно</div>
+            <div className="j-stat">
+              <div className="j-stat__val">{total}</div>
+              <div className="j-stat__label">Игр сыграно</div>
             </div>
           </div>
         )}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+        <div className="j-mode-group">
           <button
             aria-label="1 игрок"
             aria-pressed={playerMode === 1}
-            style={{
-              ...baseStyles.btn,
-              background: playerMode === 1 ? '#2a6eff' : 'rgba(42,110,255,0.15)',
-              border: playerMode === 1 ? 'none' : '1px solid #2a6eff',
-              color: playerMode === 1 ? '#fff' : '#2a6eff',
-            }}
+            className={`j-mode-btn j-mode-btn--solo${playerMode === 1 ? ' is-active' : ''}`}
             onClick={() => setPlayerMode(1)}
           >
             🎯 1 игрок
@@ -45,12 +40,7 @@ export default function StartScreen({ onStart, playerMode, setPlayerMode, onOpen
           <button
             aria-label="2 игрока"
             aria-pressed={playerMode === 2}
-            style={{
-              ...baseStyles.btn,
-              background: playerMode === 2 ? '#ff4444' : 'rgba(255,68,68,0.15)',
-              border: playerMode === 2 ? 'none' : '1px solid #ff4444',
-              color: playerMode === 2 ? '#fff' : '#ff4444',
-            }}
+            className={`j-mode-btn j-mode-btn--duo${playerMode === 2 ? ' is-active' : ''}`}
             onClick={() => setPlayerMode(2)}
           >
             👥 2 игрока
@@ -58,29 +48,24 @@ export default function StartScreen({ onStart, playerMode, setPlayerMode, onOpen
           <button
             aria-label="Против ИИ"
             aria-pressed={playerMode === 3}
-            style={{
-              ...baseStyles.btn,
-              background: playerMode === 3 ? '#aa44ff' : 'rgba(170,68,255,0.15)',
-              border: playerMode === 3 ? 'none' : '1px solid #aa44ff',
-              color: playerMode === 3 ? '#fff' : '#aa44ff',
-            }}
+            className={`j-mode-btn j-mode-btn--ai${playerMode === 3 ? ' is-active' : ''}`}
             onClick={() => setPlayerMode(3)}
           >
             🤖 vs ИИ
           </button>
         </div>
-        <button aria-label="Начать игру" style={{ ...baseStyles.btn, width: '100%', marginBottom: 12 }} onClick={onStart}>▶ Начать игру</button>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-          <button aria-label="Настройки" style={{ ...baseStyles.btnSecondary, fontSize: 13 }} onClick={onOpenSettings}>
+        <button className="j-btn j-btn--primary j-btn--full j-mb-14" aria-label="Начать игру" onClick={onStart}>▶ Начать игру</button>
+        <div className="j-actions-row">
+          <button className="j-action-btn" aria-label="Настройки" onClick={onOpenSettings}>
             ⚙️ Настройки
           </button>
-          <button aria-label="Достижения" style={{ ...baseStyles.btnSecondary, fontSize: 13 }} onClick={onOpenAchievements}>
+          <button className="j-action-btn" aria-label="Достижения" onClick={onOpenAchievements}>
             🏆 {unlockedCount}/{ACHIEVEMENTS.length}
           </button>
-          <button aria-label="Ежедневный челлендж" style={{ ...baseStyles.btnSecondary, fontSize: 13, borderColor: isDailyChallengeCompleted() ? 'rgba(68,255,136,0.4)' : 'rgba(255,204,0,0.4)', color: isDailyChallengeCompleted() ? '#44ff88' : '#ffcc00' }} onClick={onOpenDailyChallenge}>
+          <button className={`j-action-btn ${dailyDone ? 'j-action-btn--green' : 'j-action-btn--yellow'}`} aria-label="Ежедневный челлендж" onClick={onOpenDailyChallenge}>
             📅 Челлендж
           </button>
-          <button aria-label="Премиум магазин" style={{ ...baseStyles.btnSecondary, fontSize: 13, borderColor: 'rgba(42,110,255,0.4)', color: '#2a6eff' }} onClick={onOpenPurchase}>
+          <button className="j-action-btn j-action-btn--blue" aria-label="Премиум магазин" onClick={onOpenPurchase}>
             💎 Премиум
           </button>
         </div>

@@ -541,14 +541,28 @@ function generateRoughnessMap(theme, width = 256, height = 64) {
   return createTexture(canvas, true);
 }
 
+// Separate cache for theme-only maps (normalMap, roughnessMap don't depend on color)
+const themeMapCache = new Map();
+
+function getThemeMaps(theme) {
+  if (themeMapCache.has(theme)) {
+    return themeMapCache.get(theme);
+  }
+  const maps = {
+    normalMap: generateNormalMap(theme),
+    roughnessMap: generateRoughnessMap(theme),
+  };
+  themeMapCache.set(theme, maps);
+  return maps;
+}
+
 export function getBlockMaterialProps(theme, color) {
   const cacheKey = `${theme}:${color}`;
   if (textureCache.has(cacheKey)) {
     return textureCache.get(cacheKey);
   }
 
-  const normalMap = generateNormalMap(theme);
-  const roughnessMap = generateRoughnessMap(theme);
+  const { normalMap, roughnessMap } = getThemeMaps(theme);
 
   let props;
   switch (theme) {
@@ -633,10 +647,13 @@ export function getBlockMaterialProps(theme, color) {
 export function clearTextureCache() {
   textureCache.forEach((props) => {
     if (props.map) props.map.dispose();
-    if (props.normalMap) props.normalMap.dispose();
-    if (props.roughnessMap) props.roughnessMap.dispose();
   });
   textureCache.clear();
+  themeMapCache.forEach((maps) => {
+    if (maps.normalMap) maps.normalMap.dispose();
+    if (maps.roughnessMap) maps.roughnessMap.dispose();
+  });
+  themeMapCache.clear();
 }
 
 export const ENVIRONMENT_THEMES = {

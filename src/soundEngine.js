@@ -144,30 +144,3 @@ export function playAchievementUnlock() {
   setTimeout(() => playTone(784, 0.15, 'sine', 0.08), 240);
   setTimeout(() => playTone(1047, 0.2, 'sine', 0.12), 360);
 }
-
-export function playTimerWarning() {
-  // Urgent beep — timer running low
-  playTone(660, 0.1, 'square', 0.10);
-  setTimeout(() => playTone(660, 0.1, 'square', 0.10), 150);
-  setTimeout(() => playTone(880, 0.15, 'square', 0.12), 300);
-}
-
-export function playTimerExpired() {
-  // Time's up — descending buzz
-  playTone(440, 0.2, 'square', 0.15);
-  setTimeout(() => playTone(330, 0.2, 'square', 0.12), 200);
-  setTimeout(() => playTone(220, 0.3, 'square', 0.10), 400);
-}
-
-export function playCombo() {
-  // Combo streak sound — escalating pitch
-  playTone(440, 0.1, 'sine', 0.08);
-  setTimeout(() => playTone(550, 0.1, 'sine', 0.08), 80);
-  setTimeout(() => playTone(660, 0.12, 'sine', 0.10), 160);
-}
-
-export function playShake() {
-  // Low rumble for camera shake effect
-  playTone(60, 0.4, 'sawtooth', 0.10);
-  playNoise(0.3, 0.08);
-}

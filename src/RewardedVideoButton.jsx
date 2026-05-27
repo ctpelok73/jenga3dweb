@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { showRewardedVideo, isAdFree } from './adService';
 
-export default function RewardedVideoButton({ onRewardGranted, style }) {
+export default function RewardedVideoButton({ onRewardGranted }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -44,11 +44,7 @@ export default function RewardedVideoButton({ onRewardGranted, style }) {
     return (
       <button
         aria-label="Продолжить игру"
-        style={{
-          ...style,
-          background: '#44ff88',
-          color: '#000',
-        }}
+        className="j-reward-btn j-reward-btn--free"
         onClick={onRewardGranted}
       >
         🔄 Продолжить
@@ -57,33 +53,17 @@ export default function RewardedVideoButton({ onRewardGranted, style }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+    <div className="j-flex-col-center">
       <button
         aria-label="Продолжить игру (просмотр рекламы)"
-        style={{
-          ...style,
-          background: loading ? '#555' : '#ff8800',
-          color: loading ? '#999' : '#fff',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? 0.6 : 1,
-          minWidth: 160,
-        }}
+        className="j-reward-btn j-reward-btn--ad"
         disabled={loading}
         onClick={handleClick}
       >
         {loading ? '⏳ Загрузка видео...' : '▶ Продолжить (ad)'}
       </button>
       {error && (
-        <div style={{
-          fontSize: 12,
-          color: '#ff6666',
-          background: 'rgba(255,0,0,0.1)',
-          padding: '4px 12px',
-          borderRadius: 6,
-          border: '1px solid rgba(255,0,0,0.2)',
-        }}>
-          {error}
-        </div>
+        <div className="j-reward-error">{error}</div>
       )}
     </div>
   );

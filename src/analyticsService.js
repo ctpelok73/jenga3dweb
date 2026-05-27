@@ -140,19 +140,3 @@ export function trackPremiumPurchase(price, currency = 'USD') {
     'currency': currency,
   });
 }
-
-export default {
-  initializeAnalytics,
-  trackEvent,
-  trackGameStart,
-  trackBlockPlaced,
-  trackGameOver,
-  trackShareClick,
-  trackAdImpression,
-  trackAdClick,
-  trackRewardedVideoStart,
-  trackRewardedVideoReward,
-  trackRewardedVideoError,
-  trackPWAInstall,
-  trackPremiumPurchase,
-};

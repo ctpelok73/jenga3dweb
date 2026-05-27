@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { screenStyles, baseStyles } from '../styles';
 import { getSettings, updateAllSettings } from '../settingsTracker';
 import { updateMasterVolume } from '../soundEngine';
 import { clearTextureCache } from '../blockTextures';
@@ -52,74 +51,66 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
     { label: '📚 Библиотека', value: 'library' },
   ];
 
-  const selectStyle = (isActive) => ({
-    padding: '6px 12px', borderRadius: 6, border: 'none',
-    background: isActive ? '#2a6eff' : 'rgba(255,255,255,0.08)',
-    color: isActive ? '#fff' : '#aaa', fontSize: 13,
-    cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal',
-    transition: 'all 0.2s',
-  });
-
   return (
-    <div style={screenStyles.container} role="dialog" aria-label="Настройки">
-      <div style={{ ...screenStyles.card, maxWidth: 400, textAlign: 'left' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ ...screenStyles.heading, margin: 0, fontSize: 22 }}>⚙️ Настройки</h2>
-          <button onClick={onClose} aria-label="Закрыть настройки" style={{ background: 'none', border: 'none', color: '#888', fontSize: 22, cursor: 'pointer' }}>✕</button>
+    <div className="j-overlay" role="dialog" aria-label="Настройки">
+      <div className="j-card j-card--wide j-card--left">
+        <div className="j-header">
+          <h2 className="j-heading j-heading--sm">⚙️ Настройки</h2>
+          <button onClick={onClose} aria-label="Закрыть настройки" className="j-close-btn">✕</button>
         </div>
 
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 13, color: '#aaa', marginBottom: 6 }}>🔊 Громкость: {settings.volume}%</div>
+        <div className="j-settings-section">
+          <div className="j-settings-label">🔊 Громкость: {settings.volume}%</div>
           <input type="range" min="0" max="100" value={settings.volume}
             onChange={(e) => handleChange('volume', Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#2a6eff' }}
+            className="j-settings-range"
             aria-label="Громкость"
           />
         </div>
 
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 13, color: '#aaa', marginBottom: 6 }}>⏱️ Таймер хода</div>
-          <div style={{ display: 'flex', gap: 6 }}>
+        <div className="j-settings-section">
+          <div className="j-settings-label">⏱️ Таймер хода</div>
+          <div className="j-opt-group">
             {timerOptions.map(opt => (
-              <button key={opt.value} style={selectStyle(settings.moveTimer === opt.value)}
+              <button key={opt.value} className={`j-opt-btn${settings.moveTimer === opt.value ? ' is-active' : ''}`}
                 onClick={() => handleChange('moveTimer', opt.value)}>{opt.label}</button>
             ))}
           </div>
         </div>
 
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 13, color: '#aaa', marginBottom: 6 }}>📐 Сложность</div>
-          <div style={{ display: 'flex', gap: 6 }}>
+        <div className="j-settings-section">
+          <div className="j-settings-label">📐 Сложность</div>
+          <div className="j-opt-group">
             {diffOptions.map(opt => (
-              <button key={opt.value} style={selectStyle(settings.difficulty === opt.value)}
+              <button key={opt.value} className={`j-opt-btn${settings.difficulty === opt.value ? ' is-active' : ''}`}
                 onClick={() => handleChange('difficulty', opt.value)}>{opt.label}</button>
             ))}
           </div>
         </div>
 
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 13, color: '#aaa', marginBottom: 6 }}>🎨 Тема блоков</div>
-          <div style={{ display: 'flex', gap: 6 }}>
+        <div className="j-settings-section">
+          <div className="j-settings-label">🎨 Тема блоков</div>
+          <div className="j-opt-group">
             {themeOptions.map(opt => (
-              <button key={opt.value} style={selectStyle(settings.theme === opt.value)}
+              <button key={opt.value} className={`j-opt-btn${settings.theme === opt.value ? ' is-active' : ''}`}
                 onClick={() => { handleChange('theme', opt.value); clearTextureCache(); }}>{opt.label}</button>
             ))}
           </div>
         </div>
 
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 13, color: '#aaa', marginBottom: 6 }}>🌍 Окружение</div>
-          <div style={{ display: 'flex', gap: 6 }}>
+        <div className="j-settings-section">
+          <div className="j-settings-label">🌍 Окружение</div>
+          <div className="j-opt-group">
             {envOptions.map(opt => (
-              <button key={opt.value} style={selectStyle(settings.environment === opt.value)}
+              <button key={opt.value} className={`j-opt-btn${settings.environment === opt.value ? ' is-active' : ''}`}
                 onClick={() => handleChange('environment', opt.value)}>{opt.label}</button>
             ))}
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button style={{ ...baseStyles.btnSecondary, fontSize: 13 }} onClick={handleReset}>Сбросить</button>
-          <button style={{ ...baseStyles.btn, fontSize: 13 }} onClick={onClose}>Готово</button>
+        <div className="j-flex-end">
+          <button className="j-btn j-btn--ghost" onClick={handleReset}>Сбросить</button>
+          <button className="j-btn j-btn--primary" onClick={onClose}>Готово</button>
         </div>
       </div>
     </div>

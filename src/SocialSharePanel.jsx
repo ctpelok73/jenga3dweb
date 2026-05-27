@@ -5,11 +5,11 @@ import { trackShareClick } from './analyticsService';
  * SocialSharePanel: компонент для шеринга результата игры
  * Поддерживает: Twitter, Telegram, Facebook, WhatsApp, Copy Link
  */
-export function SocialSharePanel({ 
-  shareText, 
-  shareTitle = '🎮 Jenga 3D', 
+export function SocialSharePanel({
+  shareText,
+  shareTitle = '🎮 Jenga 3D',
   shareUrl = 'https://jenga3d.app',
-  onCopySuccess = null 
+  onCopySuccess = null
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -91,23 +91,13 @@ export function SocialSharePanel({
   ];
 
   return (
-    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+    <div className="j-share-row">
       {socialPlatforms.map((platform) => (
         <button
           key={platform.id}
           onClick={platform.onClick}
-          style={{
-            padding: '6px 12px',
-            fontSize: 12,
-            fontWeight: 'bold',
-            border: `1px solid ${platform.color}`,
-            borderRadius: 6,
-            background: copied && platform.id === 'copy' ? platform.color : 'transparent',
-            color: copied && platform.id === 'copy' ? '#fff' : platform.color,
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            whiteSpace: 'nowrap',
-          }}
+          className={`j-share-btn${copied && platform.id === 'copy' ? ' j-share-btn--copied' : ''}`}
+          style={{ '--share-color': platform.color }}
           title={`Share on ${platform.name}`}
         >
           {platform.emoji} {platform.name}

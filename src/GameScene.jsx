@@ -1,46 +1,37 @@
-import React, { Suspense, lazy, Component, useMemo, useState, useEffect } from 'react';
+import React, { Suspense, lazy, Component, useMemo, useCallback, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { getEnvironmentTheme } from './blockTextures';
+import LoadingProgressBar from './components/LoadingProgressBar';
+import { wasmLoader } from './wasmLoader';
 
 const GameSceneWithPhysics = lazy(() => import('./GameSceneWithPhysics'));
 
 function LoadingOverlay() {
   const [dots, setDots] = useState(0);
+  const [wasmProgress, setWasmProgress] = useState(0);
+
   useEffect(() => {
     const t = setInterval(() => setDots((d) => (d + 1) % 4), 400);
     return () => clearInterval(t);
   }, []);
 
+  useEffect(() => {
+    const progressInterval = setInterval(() => {
+      setWasmProgress(wasmLoader.getProgress());
+    }, 100);
+    return () => clearInterval(progressInterval);
+  }, []);
+
   return (
-    <div style={{
-      position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(26,20,16,0.95)', color: '#fff', zIndex: 15,
-      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
-      flexDirection: 'column', gap: 16, pointerEvents: 'auto',
-    }}>
-      <div style={{ fontSize: 40 }}>🧱</div>
-      <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+    <div className="j-loading-overlay">
+      <div className="j-loading-overlay__icon">🧱</div>
+      <div className="j-loading-overlay__text">
         Загрузка 3D-сцены{'.'.repeat(dots)}
       </div>
-      <div style={{
-        width: 180, height: 4, borderRadius: 2,
-        background: 'rgba(255,255,255,0.1)', overflow: 'hidden',
-      }}>
-        <div style={{
-          width: '60%', height: '100%', borderRadius: 2,
-          background: '#2a6eff',
-          animation: 'loadingSlide 1.2s ease-in-out infinite',
-        }} />
+      <div className="j-loading-overlay__bar">
+        <div className="j-loading-overlay__progress" style={{ width: `${wasmProgress}%` }} />
       </div>
-      <style>{`
-        @keyframes loadingSlide {
-          0% { transform: translateX(-100%); }
-          50% { transform: translateX(80%); }
-          100% { transform: translateX(-100%); }
-        }
-      `}</style>
     </div>
   );
 }
@@ -62,25 +53,17 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          width: '100vw', height: '100vh',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: '#1a1410', color: '#fff', fontFamily: 'Arial, sans-serif',
-          flexDirection: 'column', gap: 16
-        }}>
+        <div className="j-error-boundary">
           <h2>⚠ Ошибка 3D-сцены</h2>
-          <p style={{ color: '#ff6666', maxWidth: 400, textAlign: 'center', fontSize: 14 }}>
+          <p className="j-error-boundary__message">
             {this.state.error?.message || 'Неизвестная ошибка'}
           </p>
-          <p style={{ fontSize: 13, color: '#aaa' }}>
+          <p className="j-error-boundary__hint">
             Попробуйте перезагрузить страницу или проверить поддержку WebGL.
           </p>
           <button
             onClick={() => this.setState({ hasError: false, error: null })}
-            style={{
-              padding: '8px 20px', borderRadius: 6, border: 'none',
-              background: '#2a6eff', color: '#fff', fontSize: 14, cursor: 'pointer'
-            }}
+            className="j-error-boundary__retry"
           >
             Попробовать снова
           </button>
@@ -91,17 +74,17 @@ class ErrorBoundary extends Component {
   }
 }
 
-export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, blockTheme, envTheme, keyboardFocusId }) {
+export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, lastExtractionPosition, blockTheme, envTheme, keyboardFocusId }) {
   const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
   const [physicsLoaded, setPhysicsLoaded] = useState(false);
 
-  const handlePhysicsLoaded = useMemo(() => () => setPhysicsLoaded(true), []);
+  const handlePhysicsLoaded = useCallback(() => setPhysicsLoaded(true), []);
 
   return (
     <ErrorBoundary>
       {!physicsLoaded && <LoadingOverlay />}
       <Canvas
-        camera={{ position: [5, 3.5, 5], fov: 50 }}
+        camera={{ position: [7, 4, 7], fov: 60 }}
         style={{ width: '100%', height: '100%', display: 'block', background: env.bgColor }}
         shadows
         aria-hidden="true"
@@ -117,13 +100,14 @@ export default function GameScene({ blocks, selectedId, onBlockClick, simulating
             dropSlots={dropSlots}
             onDropSlot={onDropSlot}
             lastMovedBlockId={lastMovedBlockId}
+            lastExtractionPosition={lastExtractionPosition}
             blockTheme={blockTheme}
             envTheme={envTheme}
             keyboardFocusId={keyboardFocusId}
             onReady={handlePhysicsLoaded}
           />
         </Suspense>
-        <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={12} maxPolarAngle={Math.PI / 2.1} />
+        <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={15} maxPolarAngle={Math.PI / 2.1} target={[0, 2.7, 0]} />
       </Canvas>
     </ErrorBoundary>
   );

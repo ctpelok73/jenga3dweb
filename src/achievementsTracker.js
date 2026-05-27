@@ -1,95 +1,12 @@
 // ─── Achievements Tracker: unlockable achievements with localStorage ───
 // Tracks progress and unlocks achievements based on game events
 
+import { ACHIEVEMENTS_EXTENDED } from './achievementsExtended';
+
 const ACHIEVEMENTS_KEY = 'jenga3d_achievements';
 
 // ─── Achievement definitions ───
-export const ACHIEVEMENTS = [
-  {
-    id: 'first_move',
-    title: 'Первый ход',
-    description: 'Сделай первый ход в игре',
-    emoji: '👆',
-    condition: (stats) => stats.totalMoves >= 1,
-  },
-  {
-    id: 'five_moves',
-    title: 'Начинающий',
-    description: 'Сделай 5 ходов без падения',
-    emoji: '🎯',
-    condition: (stats) => stats.bestTurns >= 5,
-  },
-  {
-    id: 'ten_moves',
-    title: 'Строитель',
-    description: 'Сделай 10 ходов без падения',
-    emoji: '🏗️',
-    condition: (stats) => stats.bestTurns >= 10,
-  },
-  {
-    id: 'twenty_moves',
-    title: 'Мастер',
-    description: 'Сделай 20 ходов без падения',
-    emoji: '🧠',
-    condition: (stats) => stats.bestTurns >= 20,
-  },
-  {
-    id: 'thirty_moves',
-    title: 'Гроссмейстер',
-    description: 'Сделай 30 ходов без падения',
-    emoji: '🏆',
-    condition: (stats) => stats.bestTurns >= 30,
-  },
-  {
-    id: 'risk_taker',
-    title: 'Риск-тейкер',
-    description: 'Вытащи блок из нижних 3 слоёв',
-    emoji: '⚡',
-    condition: (stats) => stats.bottomLayerPulls >= 1,
-  },
-  {
-    id: 'speed_demon',
-    title: 'Быстрый',
-    description: 'Сделай ход за 3 секунды после выбора',
-    emoji: '⏱️',
-    condition: (stats) => stats.fastMoves >= 1,
-  },
-  {
-    id: 'steady_hand',
-    title: 'Уверенная рука',
-    description: 'Сделай 5 ходов подряд без падения',
-    emoji: '🤚',
-    condition: (stats) => stats.streak >= 5,
-  },
-  {
-    id: 'veteran',
-    title: 'Ветеран',
-    description: 'Сыграй 10 партий',
-    emoji: '🎖️',
-    condition: (stats) => stats.totalGames >= 10,
-  },
-  {
-    id: 'centurion',
-    title: 'Центурион',
-    description: 'Сыграй 100 партий',
-    emoji: '💯',
-    condition: (stats) => stats.totalGames >= 100,
-  },
-  {
-    id: 'comeback',
-    title: 'Камбэк',
-    description: 'После 3 падений подряд сделай 10+ ходов',
-    emoji: '🔄',
-    condition: (stats) => stats.comebackAchieved,
-  },
-  {
-    id: 'perfect_game',
-    title: 'Идеальная игра',
-    description: 'Сделай 25+ ходов без единого падения',
-    emoji: '✨',
-    condition: (stats) => stats.bestTurns >= 25,
-  },
-];
+export const ACHIEVEMENTS = ACHIEVEMENTS_EXTENDED;
 
 function loadAchievements() {
   try {
@@ -118,6 +35,11 @@ function getDefaultStats() {
     currentStreak: 0,
     consecutiveLosses: 0,
     comebackAchieved: false,
+    winStreak: 0,
+    speedRuns: 0,
+    hardModeWins: 0,
+    skinsUnlocked: 0,
+    themesUnlocked: 0,
   };
 }
 
@@ -183,7 +105,7 @@ export function recordMove(layer, selectionTimeMs) {
     stats.fastMoves += 1;
   }
 
-return updateAchievementStats(stats, data);
+  return updateAchievementStats(stats, data);
 }
 
 export function recordCollapse(turns) {
@@ -198,7 +120,7 @@ export function recordCollapse(turns) {
     stats.bestTurns = turns;
   }
 
-return updateAchievementStats(stats, data);
+  return updateAchievementStats(stats, data);
 }
 
 export function recordSuccess(turns) {
@@ -217,4 +139,31 @@ export function recordSuccess(turns) {
 
 export function resetAchievements() {
   localStorage.removeItem(ACHIEVEMENTS_KEY);
+}
+
+/**
+ * Сбросить счётчик consecutiveLosses для корректного отслеживания winStreak
+ */
+export function resetConsecutiveLosses() {
+  const data = loadAchievements();
+  data.stats.consecutiveLosses = 0;
+  saveAchievements(data);
+}
+
+/**
+ * Зафиксировать успешный ход без падения: увеличить winStreak и сбросить consecutiveLosses.
+ * Не увеличивает totalGames — это делает только recordCollapse при завершении игры.
+ */
+export function recordSuccessfulMove(turns) {
+  const data = loadAchievements();
+  const stats = data.stats;
+
+  // winStreak = количество успешных ходов подряд без падения
+  stats.winStreak = (stats.winStreak || 0) + 1;
+
+  if (turns > stats.bestTurns) {
+    stats.bestTurns = turns;
+  }
+
+  return updateAchievementStats(stats, data);
 }
