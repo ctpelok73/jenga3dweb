@@ -32,6 +32,10 @@
   height: 100vh;
   position: relative;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 /* ─── Code input overrides ─── */
@@ -66,6 +70,23 @@
   to { transform: translateX(0); opacity: 1; }
 }
 
+/* ─── Screen shake on collapse ─── */
+@keyframes j-screenShake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-4px, -2px) rotate(-0.5deg); }
+  20% { transform: translate(3px, 3px) rotate(0.5deg); }
+  30% { transform: translate(-5px, 1px) rotate(-0.3deg); }
+  40% { transform: translate(4px, -3px) rotate(0.4deg); }
+  50% { transform: translate(-2px, 4px) rotate(-0.6deg); }
+  60% { transform: translate(3px, -2px) rotate(0.3deg); }
+  70% { transform: translate(-3px, 2px) rotate(-0.2deg); }
+  80% { transform: translate(2px, -1px) rotate(0.2deg); }
+  90% { transform: translate(-1px, 1px) rotate(-0.1deg); }
+}
+.j-shake {
+  animation: j-screenShake 0.6s ease-out;
+}
+
 /* ─── Fullscreen Overlay ─── */
 .j-overlay {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -76,6 +97,52 @@
   animation: j-fadeIn 0.25s ease-out;
   font-family: var(--j-font);
 }
+
+/* ─── Start screen overlay variant ─── */
+.j-overlay--start {
+  background: radial-gradient(ellipse at 30% 20%, rgba(42, 110, 255, 0.12) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(170, 68, 255, 0.08) 0%, transparent 50%),
+              rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+}
+.j-overlay--start::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(42, 110, 255, 0.03) 60deg,
+    transparent 120deg,
+    rgba(170, 68, 255, 0.03) 180deg,
+    transparent 240deg,
+    rgba(42, 110, 255, 0.02) 300deg,
+    transparent 360deg
+  );
+  animation: j-bgRotate 30s linear infinite;
+  pointer-events: none;
+}
+@keyframes j-bgRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Gradient heading for start screen ─── */
+.j-heading--gradient {
+  background: linear-gradient(135deg, #5b9aff 0%, #aa44ff 50%, #ff6b6b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 32px;
+  letter-spacing: 1px;
+}
+
+/* ─── Staggered slide-up animations ─── */
+.j-stagger-1 { animation: j-slideUp 0.4s ease-out 0.1s both; }
+.j-stagger-2 { animation: j-slideUp 0.4s ease-out 0.2s both; }
+.j-stagger-3 { animation: j-slideUp 0.4s ease-out 0.3s both; }
+.j-stagger-4 { animation: j-slideUp 0.4s ease-out 0.4s both; }
 
 /* ─── Card (shared for screens) ─── */
 .j-card {
@@ -96,6 +163,14 @@
 }
 .j-card--wide { max-width: 420px; }
 .j-card--left { text-align: left; }
+
+.j-card::-webkit-scrollbar { width: 4px; }
+.j-card::-webkit-scrollbar-track { background: transparent; }
+.j-card::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+}
+.j-card::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
 /* ─── Typography ─── */
 .j-heading {
@@ -450,6 +525,24 @@
   box-shadow: 0 2px 10px rgba(42,110,255,0.25);
 }
 
+/* Locked premium option buttons */
+.j-opt-btn--locked {
+  position: relative;
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.j-opt-btn--locked::after {
+  content: '\1F512';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 10px;
+}
+.j-opt-btn--locked:hover {
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.5);
+}
+
 /* ─── Settings section ─── */
 .j-settings-section {
   margin-bottom: 18px;
@@ -606,6 +699,66 @@
   background: rgba(255,255,255,0.12);
 }
 
+/* ─── HUD Achievement Progress Widget ─── */
+.j-hud__achievement {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--j-divider);
+}
+.j-hud__achievement-label {
+  font-size: 11px;
+  color: var(--j-text-dim);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.j-hud__achievement-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.j-hud__achievement-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--j-blue), var(--j-green));
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+}
+
+.j-hud__header-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.j-hud__timer {
+  font-size: 16px;
+  font-weight: 700;
+  color: #5b9aff;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.j-hud__timer--warning {
+  color: var(--j-red-light);
+  animation: j-pulse 0.5s ease-in-out infinite;
+}
+
+/* ─── Speed Run Timer ─── */
+.j-hud__speed-timer {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--j-green);
+  text-align: center;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+.j-hud__speed-timer--critical {
+  color: var(--j-red);
+  animation: j-pulse 0.5s ease-in-out infinite;
+}
+
 /* ─── Player tag colors ─── */
 .j-player--p1 { color: #5b9aff; }
 .j-player--p2 { color: var(--j-red-light); }
@@ -632,6 +785,49 @@
   font-size: 12px;
   color: rgba(255,255,255,0.35);
   margin-bottom: 10px;
+}
+
+/* ─── Game Over improvements ─── */
+@keyframes j-collapse-bounce {
+  0% { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+  50% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes j-newRecord {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.j-gameover-icon {
+  font-size: 56px;
+  margin-bottom: 8px;
+  animation: j-collapse-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+.j-gameover-record {
+  display: inline-block;
+  padding: 6px 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--j-yellow) 0%, var(--j-orange) 100%);
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  animation: j-newRecord 1.5s ease-in-out infinite;
+  letter-spacing: 0.5px;
+}
+.j-gameover-score {
+  font-size: 42px;
+  font-weight: 800;
+  color: #5b9aff;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.j-gameover-score-label {
+  font-size: 12px;
+  color: var(--j-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
 }
 
 /* ─── Social share buttons ─── */
@@ -1493,6 +1689,11 @@
   .j-hud__title { font-size: 18px; }
   .j-tutorial-card { padding: 24px 20px; }
   .j-ach-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .j-hud-btn--move { min-height: 44px; min-width: 44px; font-size: 15px; }
+  .j-hud-btn--restart { min-height: 44px; min-width: 44px; }
+  .j-hud__menu-btn { min-height: 44px; min-width: 44px; font-size: 20px; }
+  .j-close-btn { min-height: 44px; min-width: 44px; }
+  .j-btn--primary { min-height: 48px; }
 }
 
 @media (max-width: 360px) {
@@ -1528,25 +1729,6 @@
 }
 
 /* ─── Loading Progress Bar ─── */
-.j-loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 .j-loading-container {
   display: flex;
   flex-direction: column;
@@ -2032,5 +2214,26 @@
     font-size: 0.85rem;
     padding: 0.4rem 0.6rem;
   }
+}
+
+/* ─── Landscape phone optimization ─── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .j-card {
+    max-height: 95vh;
+    padding: 16px 20px;
+    max-width: 480px;
+  }
+  .j-card .j-heading { font-size: 18px; margin-bottom: 4px; }
+  .j-card .j-subtext { font-size: 12px; margin-bottom: 10px; }
+  .j-card .j-stats { padding: 8px 0; margin-bottom: 12px; gap: 16px; }
+  .j-card .j-stat__val { font-size: 16px; }
+  .j-card .j-mode-group { margin-bottom: 10px; }
+  .j-card .j-btn--primary { padding: 10px 16px; font-size: 14px; }
+  .j-card .j-mb-14 { margin-bottom: 8px; }
+  .j-hud { top: 6px; left: 6px; padding: 8px 12px; min-width: 130px; }
+  .j-hud__title { font-size: 16px; }
+  .j-hud__info { font-size: 12px; margin-bottom: 6px; }
+  .j-hud-btn { padding: 6px 12px; font-size: 13px; }
+  .j-toast { top: 8px; right: 8px; max-width: 250px; padding: 10px 14px; }
 }
 

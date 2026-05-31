@@ -34,9 +34,10 @@ if not exist "node_modules" (
 )
 echo.
 echo [+] Запуск сервера разработки...
-echo [*] Откройте браузер: http://localhost:5173
+echo [*] Локально: http://localhost:5173
+echo [*] Из локальной сети: http://IP_ЭТОГО_КОМПЬЮТЕРА:5173
 echo.
-call npm run dev
+call npm run dev -- --host 0.0.0.0
 pause
 goto menu
 
@@ -46,9 +47,10 @@ echo [*] Остановка текущего сервера...
 taskkill /F /IM node.exe >nul 2>&1
 timeout /t 2 >nul
 echo [+] Перезапуск сервера...
-echo [*] Откройте браузер: http://localhost:5173
+echo [*] Локально: http://localhost:5173
+echo [*] Из локальной сети: http://IP_ЭТОГО_КОМПЬЮТЕРА:5173
 echo.
-call npm run dev
+call npm run dev -- --host 0.0.0.0
 pause
 goto menu
 

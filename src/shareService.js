@@ -7,6 +7,9 @@
  * - Replay-функция — сохранять и воспроизводить ходы
  */
 
+/** Максимальное количество хранимых replays в localStorage */
+const MAX_REPLAYS = 10;
+
 /**
  * Кодировать конфигурацию башни в URL-safe строку
  */
@@ -75,7 +78,9 @@ export function getChallengeFromUrl() {
 }
 
 /**
- * Сохранить ходы игры для replay
+ * Сохранить ходы игры для replay.
+ * После сохранения автоматически удаляет самые старые записи,
+ * если их количество превышает MAX_REPLAYS.
  */
 export function saveGameReplay(gameId, moves, config) {
   try {
@@ -89,10 +94,32 @@ export function saveGameReplay(gameId, moves, config) {
 
     const key = `jenga3d_replay_${gameId}`;
     localStorage.setItem(key, JSON.stringify(replay));
+
+    // Pruning: удалить самые старые replays сверх лимита
+    _pruneReplays();
+
     return gameId;
   } catch (error) {
     console.error('[ShareService] Failed to save replay:', error);
     return null;
+  }
+}
+
+/**
+ * Удалить самые старые replays, если их больше MAX_REPLAYS.
+ * @private
+ */
+function _pruneReplays() {
+  try {
+    const all = listGameReplays(); // уже отсортированы по убыванию даты
+    if (all.length > MAX_REPLAYS) {
+      const toDelete = all.slice(MAX_REPLAYS); // самые старые
+      for (const replay of toDelete) {
+        localStorage.removeItem(`jenga3d_replay_${replay.id}`);
+      }
+    }
+  } catch (e) {
+    // Pruning — некритичная операция, игнорируем ошибки
   }
 }
 
@@ -112,17 +139,32 @@ export function loadGameReplay(gameId) {
 }
 
 /**
- * Получить список всех сохранённых replays
+ * Получить список всех сохранённых replays.
+ * Безопасно обрабатывает повреждённые записи в localStorage.
  */
 export function listGameReplays() {
   try {
     const replays = [];
+    // Снимаем снапшот ключей, чтобы избежать проблем при итерации с изменяемым storage
+    const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('jenga3d_replay_')) {
+        keys.push(key);
+      }
+    }
+    for (const key of keys) {
+      try {
         const raw = localStorage.getItem(key);
+        if (!raw) continue;
         const replay = JSON.parse(raw);
-        replays.push(replay);
+        if (replay && replay.id) {
+          replays.push(replay);
+        }
+      } catch (parseError) {
+        // Запись повреждена — удаляем её и продолжаем
+        console.warn('[ShareService] Removing corrupted replay entry:', key);
+        try { localStorage.removeItem(key); } catch (_) { /* ignore */ }
       }
     }
     return replays.sort((a, b) => b.timestamp - a.timestamp);

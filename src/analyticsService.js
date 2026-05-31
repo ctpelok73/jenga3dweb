@@ -4,8 +4,15 @@
  */
 
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_ID || 'G-XXXXXXXXXX';
+const GA_PLACEHOLDER_ID = 'G-XXXXXXXXXX';
+
+export function isAnalyticsConfigured() {
+  return Boolean(GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== GA_PLACEHOLDER_ID);
+}
 
 export function initializeAnalytics() {
+  if (!isAnalyticsConfigured()) return;
+
   // Загружаем GA скрипт динамически
   if (typeof window !== 'undefined' && !window.gtag) {
     const script = document.createElement('script');

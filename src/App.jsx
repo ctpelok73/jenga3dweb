@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import GameScene from './GameScene';
+import React, { Suspense, lazy, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import InteractiveTutorialOverlay from './InteractiveTutorialOverlay';
 import AriaAnnouncer from './AriaAnnouncer';
 import AdBanner from './AdBanner';
@@ -13,20 +12,23 @@ import AchievementsPanel from './screens/AchievementsPanel';
 import { PLAYER_NAMES } from './styles';
 import { BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP, TOWER_LAYERS } from './towerConfig';
 import { playSelect, playPull, playPlace, playCollapse, playStabilize, playGameOver, playAchievementUnlock, resumeAudio } from './soundEngine';
-import { getBestScore, getTotalGames, recordGame } from './scoreTracker';
+import { getBestScore, getTotalGames, getRecentHistory, recordGame } from './scoreTracker';
 import { initializeAnalytics, trackGameStart, trackGameOver, trackRewardedVideoReward } from './analyticsService';
 import { initAdSDK, isAdFree } from './adService';
 import { recordMove, recordCollapse, recordSuccessfulMove } from './achievementsTracker';
 import { getSettings, getDifficultyDynamicIds, getThemeColors } from './settingsTracker';
-import { handleKeyEvent } from './keyboardController';
+import { cycleBlock, cycleInLayer, getSelectableBlocks, handleKeyEvent, jumpToLayer } from './keyboardController';
 import DailyChallengePanel from './DailyChallengePanel';
 import { generateDailyTower, recordDailyChallengeAttempt } from './dailyChallengeTracker';
 import PurchasePanel from './PurchasePanel';
-import { isRemoveAdsPurchased } from './purchaseService';
+import { isPremiumStoreAvailable, isRemoveAdsPurchased } from './purchaseService';
 import { computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from './aiController';
-import { chooseAIBlockAdvanced, aiPersonality } from './aiControllerAdvanced';
+import { chooseAIBlockAdvanced, aiPersonality, minimaxAI } from './aiControllerAdvanced';
 import { useTouchGestures } from './touchGestureController';
 import { useMobileOptimizations } from './mobileOptimizations';
+import { saveGameReplay, generateGameId, getChallengeFromUrl } from './shareService';
+
+const GameScene = lazy(() => import('./GameScene'));
 
 const PHASE_START = 'start';
 const PHASE_PLAYING = 'playing';
@@ -37,6 +39,18 @@ const COLLAPSE_DROP_THRESHOLD = (BLOCK_H + LAYER_GAP) * 3;
 const TUTORIAL_KEY = 'jenga3d_tutorial_done';
 function hasSeenTutorial() { try { return localStorage.getItem(TUTORIAL_KEY) === '1'; } catch { return false; } }
 function markTutorialSeen() { try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch {} }
+
+function SceneLoadingFallback() {
+  return (
+    <div className="j-loading-overlay">
+      <div className="j-loading-overlay__icon">3D</div>
+      <div className="j-loading-overlay__text">Загрузка сцены...</div>
+      <div className="j-loading-overlay__bar">
+        <div className="j-loading-overlay__progress" style={{ width: '45%' }} />
+      </div>
+    </div>
+  );
+}
 
 function isCollapsedBlock(block) {
   if (block.position[1] < FALLEN_Y) return true;
@@ -71,6 +85,37 @@ function generateThemedTower() {
   return blocks;
 }
 
+// ─── Функция ограничения динамических блоков для мобильных устройств ───
+// Использует maxDynamicBlocks из настроек рендеринга
+function capDynamicIdsForMobile(blocks, dynamicIds, moveBlock, removedLayer, maxDynamicBlocks = 7) {
+  if (!dynamicIds || dynamicIds.size <= maxDynamicBlocks) return dynamicIds;
+
+  const extractionX = moveBlock.position[0];
+  const extractionZ = moveBlock.position[2];
+  const candidates = blocks
+    .filter((block) => dynamicIds.has(block.id))
+    .map((block) => {
+      const dx = block.position[0] - extractionX;
+      const dz = block.position[2] - extractionZ;
+      return {
+        id: block.id,
+        selected: block.id === moveBlock.id ? 0 : 1,
+        layerDistance: Math.abs(block.layer - removedLayer),
+        horizontalDistance: Math.sqrt(dx * dx + dz * dz),
+      };
+    })
+    .sort((a, b) => (
+      a.selected - b.selected ||
+      a.layerDistance - b.layerDistance ||
+      a.horizontalDistance - b.horizontalDistance ||
+      a.id - b.id
+    ));
+
+  const capped = new Set(candidates.slice(0, maxDynamicBlocks).map((item) => item.id));
+  capped.add(moveBlock.id);
+  return capped;
+}
+
 function App() {
   const [phase, setPhase] = useState(PHASE_START);
   const [blocks, setBlocks] = useState(() => generateThemedTower());
@@ -95,8 +140,15 @@ function App() {
   const [continuedAfterCollapse, setContinuedAfterCollapse] = useState(false);
   const [adFree, setAdFree] = useState(() => isAdFree() || isRemoveAdsPurchased());
   const [aiThinking, setAiThinking] = useState(false);
+  const [screenShake, setScreenShake] = useState(false);
   const [lastExtractionPosition, setLastExtractionPosition] = useState(null);
+  const [moveTimeLeft, setMoveTimeLeft] = useState(null);
+  const [gameMode, setGameMode] = useState('classic');
+  const [speedTimeLeft, setSpeedTimeLeft] = useState(null);
+  const [speedDuration, setSpeedDuration] = useState(60);
   const selectionTimeRef = useRef(null);
+  const moveTimerRef = useRef(null);
+  const speedTimerRef = useRef(null);
   const achievementToastTimers = useRef([]);
   const latestTurnCountRef = useRef(0);
   const aiTimersRef = useRef([]);
@@ -104,16 +156,39 @@ function App() {
   const blocksRef = useRef(null);
   const topCompleteLayerRef = useRef(null);
   const canvasRef = useRef(null);
-  const { deviceInfo, shouldOptimize } = useMobileOptimizations();
+  const replayMovesRef = useRef([]);
+  const gameIdRef = useRef(generateGameId());
+  const { shouldOptimize, renderSettings, deviceLevel, maxDynamicBlocks } = useMobileOptimizations();
   const [currentSettings, setCurrentSettings] = useState(() => getSettings());
-  useTouchGestures(canvasRef, {
-    onSwipeLeft: () => console.log('Swipe left detected'),
-    onSwipeRight: () => console.log('Swipe right detected'),
-    onSwipeUp: () => console.log('Swipe up detected'),
-    onSwipeDown: () => console.log('Swipe down detected'),
-    onPinch: (scale) => console.log('Pinch detected, scale:', scale),
-    onLongPress: () => console.log('Long press detected'),
-  });
+
+  const clearRuntimeTimers = useCallback(() => {
+    achievementToastTimers.current.forEach(id => clearTimeout(id));
+    achievementToastTimers.current = [];
+    aiTimersRef.current.forEach(id => clearTimeout(id));
+    aiTimersRef.current = [];
+  }, []);
+
+  const resetRoundState = useCallback(() => {
+    setSelectedId(null);
+    setTurnCount(0);
+    latestTurnCountRef.current = 0;
+    setCurrentPlayer(0);
+    setSimulatingBlockIds(null);
+    setLastMovedBlockId(null);
+    setContinuedAfterCollapse(false);
+    setKeyboardFocusId(null);
+    setAnnouncement('');
+    setAiThinking(false);
+    setLastExtractionPosition(null);
+    setMoveTimeLeft(null);
+    clearInterval(moveTimerRef.current);
+    setSpeedTimeLeft(null);
+    clearInterval(speedTimerRef.current);
+    selectionTimeRef.current = null;
+    replayMovesRef.current = [];
+    gameIdRef.current = generateGameId();
+    clearRuntimeTimers();
+  }, [clearRuntimeTimers]);
 
   const towerHeight = useMemo(() => {
     let maxLayer = 0;
@@ -186,6 +261,16 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    try {
+      const challenge = getChallengeFromUrl();
+      if (challenge) {
+        // Auto-start with challenge configuration
+        setMessage('Вызов от друга принят!');
+      }
+    } catch (e) { /* ignore */ }
+  }, []);
+
   const showAchievementNotification = useCallback((newUnlocks) => {
     if (newUnlocks && newUnlocks.length > 0) {
       achievementToastTimers.current.forEach(id => clearTimeout(id));
@@ -213,22 +298,24 @@ function App() {
     const msg = playerMode === 2 ? `Ход: ${PLAYER_NAMES[0]}. Выберите блок.` : playerMode === 3 ? `Ход: ${PLAYER_NAMES[0]}. Выберите блок.` : 'Выберите блок.';
     setMessage(msg);
     setBlocks(isDaily ? generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP) : generateThemedTower());
-    setSelectedId(null);
-    setTurnCount(0);
-    latestTurnCountRef.current = 0;
-    setCurrentPlayer(0);
-    setSimulatingBlockIds(null);
-    setLastMovedBlockId(null);
-    setContinuedAfterCollapse(false);
     setRestartKey((k) => k + 1);
-    selectionTimeRef.current = null;
-    setAiThinking(false);
-    setLastExtractionPosition(null);
-    achievementToastTimers.current.forEach(id => clearTimeout(id));
-    achievementToastTimers.current = [];
-    aiTimersRef.current.forEach(id => clearTimeout(id));
-    aiTimersRef.current = [];
-  }, [playerMode, isDailyChallengeMode]);
+    resetRoundState();
+    if (gameMode === 'speed') {
+      setSpeedTimeLeft(speedDuration);
+      speedTimerRef.current = setInterval(() => {
+        setSpeedTimeLeft(prev => {
+          if (prev === null || prev <= 1) {
+            clearInterval(speedTimerRef.current);
+            setPhase(PHASE_GAME_OVER);
+            playGameOver();
+            recordGame(latestTurnCountRef.current, false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+  }, [playerMode, isDailyChallengeMode, resetRoundState, gameMode, speedDuration]);
 
   const handleStart = useCallback(() => {
     resumeAudio();
@@ -324,10 +411,22 @@ function App() {
       showAchievementNotification(newUnlocks);
     }
 
-    const dynamicIds = getDifficultyDynamicIds(updatedBlocks, moveBlock, removedLayer);
+    replayMovesRef.current.push({
+      blockId: moveBlock.id,
+      fromLayer: removedLayer,
+      fromPosition: [...moveBlock.position],
+      toPosition: targetPosition,
+      toLayer: targetLayer,
+      timestamp: Date.now(),
+    });
+
+    const rawDynamicIds = getDifficultyDynamicIds(updatedBlocks, moveBlock, removedLayer);
+    const dynamicIds = shouldOptimize
+      ? capDynamicIdsForMobile(updatedBlocks, rawDynamicIds, moveBlock, removedLayer, maxDynamicBlocks)
+      : rawDynamicIds;
     setSimulatingBlockIds(dynamicIds);
     setMessage('⏳ Стабилизация...');
-  }, [selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification]);
+  }, [selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification, shouldOptimize, maxDynamicBlocks]);
 
   executeMoveRef.current = executeMove;
   blocksRef.current = blocks;
@@ -343,6 +442,65 @@ function App() {
     if (playerMode === 3 && currentPlayer === 1) return;
     executeMove(slotData);
   }, [selectedBlock, phase, simulatingBlockIds, executeMove, playerMode, currentPlayer]);
+
+  const focusBlockById = useCallback((id) => {
+    if (id === null || id === undefined) return;
+    const block = blocks.find((b) => b.id === id);
+    if (!block) return;
+
+    setKeyboardFocusId(id);
+    setMessage(`Блок ${id + 1}, слой ${block.layer + 1}`);
+    setAnnouncement(`Блок ${id + 1}, слой ${block.layer + 1}`);
+  }, [blocks]);
+
+  const handleTouchFocusMove = useCallback((direction) => {
+    if (!shouldOptimize) return;
+    if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+    if (playerMode === 3 && currentPlayer === 1) return;
+
+    const selectableIds = getSelectableBlocks(blocks, topCompleteLayer);
+    const currentFocusId = keyboardFocusId ?? selectedId;
+    let nextId = null;
+
+    if (direction === 'left' || direction === 'right') {
+      nextId = cycleInLayer(blocks, selectableIds, currentFocusId, direction);
+    } else {
+      nextId = jumpToLayer(blocks, selectableIds, currentFocusId, direction);
+    }
+
+    focusBlockById(nextId);
+  }, [shouldOptimize, phase, simulatingBlockIds, playerMode, currentPlayer, blocks, topCompleteLayer, keyboardFocusId, selectedId, focusBlockById]);
+
+  const handleTouchLongPress = useCallback(() => {
+    if (!shouldOptimize) return;
+    if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+    if (playerMode === 3 && currentPlayer === 1) return;
+
+    const selectableIds = getSelectableBlocks(blocks, topCompleteLayer);
+    const focusId = keyboardFocusId ?? selectedId ?? cycleBlock(selectableIds, null, 'next');
+    if (focusId === null || focusId === undefined) return;
+
+    if (selectedId !== focusId) {
+      handleBlockClick(focusId);
+      setKeyboardFocusId(focusId);
+      setAnnouncement(`Блок ${focusId + 1} выбран`);
+      return;
+    }
+
+    if (canMove) {
+      handleMakeMove();
+    }
+  }, [shouldOptimize, phase, simulatingBlockIds, playerMode, currentPlayer, blocks, topCompleteLayer, keyboardFocusId, selectedId, handleBlockClick, canMove, handleMakeMove]);
+
+  useTouchGestures(canvasRef, {
+    onSwipeLeft: () => handleTouchFocusMove('left'),
+    onSwipeRight: () => handleTouchFocusMove('right'),
+    onSwipeUp: () => handleTouchFocusMove('up'),
+    onSwipeDown: () => handleTouchFocusMove('down'),
+    onLongPress: handleTouchLongPress,
+  }, {
+    enabled: shouldOptimize && phase === PHASE_PLAYING && !showPauseMenu && !showSettings && !showAchievements,
+  });
 
   const handleRestart = useCallback(() => {
     playSelect();
@@ -361,7 +519,24 @@ function App() {
       const currentBlocks = blocksRef.current;
       const currentTopLayer = topCompleteLayerRef.current;
       const difficulty = currentSettings.difficulty || 'normal';
-      const aiBlock = chooseAIBlockAdvanced(currentBlocks, currentTopLayer, aiPersonality, difficulty);
+
+      // Адаптируем AI-личность к результатам игрока
+      const history = getRecentHistory(10);
+      if (history.length > 0) {
+        const wins = history.filter(h => !h.collapsed).length;
+        aiPersonality.adaptToPlayer({ playerWinRate: wins / history.length });
+      }
+
+      // Для hard-сложности используем Minimax, для остальных — heuristic
+      let aiBlock;
+      if (difficulty === 'hard') {
+        aiBlock = minimaxAI.findBestMove(currentBlocks, currentTopLayer, false);
+      }
+      // Fallback: если minimax вернул null или сложность не hard
+      if (!aiBlock) {
+        aiBlock = chooseAIBlockAdvanced(currentBlocks, currentTopLayer, aiPersonality, difficulty);
+      }
+
       if (!aiBlock) {
         setAiThinking(false);
         setMessage('🤖 ИИ не может найти блок!');
@@ -376,7 +551,7 @@ function App() {
       }, AI_MOVE_DELAY);
       aiTimersRef.current.push(t2);
 
-      // Safety timeout: if simulation doesn't complete in 8 seconds, force reset AI thinking
+      // Safety timeout: если симуляция не завершилась за 8 секунд, сбрасываем AI
       const safetyTimeout = setTimeout(() => {
         setAiThinking(false);
       }, 8000);
@@ -389,6 +564,46 @@ function App() {
       aiTimersRef.current = [];
     };
   }, [playerMode, currentPlayer, phase, simulatingBlockIds]); // aiThinking excluded: setting it inside triggers cleanup
+
+  useEffect(() => {
+    const timerSetting = currentSettings.moveTimer || 0;
+    if (timerSetting === 0 || phase !== PHASE_PLAYING || simulatingBlockIds !== null) {
+      setMoveTimeLeft(null);
+      clearInterval(moveTimerRef.current);
+      return;
+    }
+
+    setMoveTimeLeft(timerSetting);
+    moveTimerRef.current = setInterval(() => {
+      setMoveTimeLeft(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(moveTimerRef.current);
+          // Time's up — auto-move or collapse
+          if (selectedId !== null) {
+            executeMoveRef.current(null);
+          }
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(moveTimerRef.current);
+  }, [phase, simulatingBlockIds, currentSettings.moveTimer, turnCount]);
+
+  const handleBackToMenu = useCallback(() => {
+    setShowPauseMenu(false);
+    setShowSettings(false);
+    setShowAchievements(false);
+    setIsDailyChallengeMode(false);
+    clearInterval(speedTimerRef.current);
+    setSpeedTimeLeft(null);
+    setGameMode('classic');
+    setPhase(PHASE_START);
+    setBlocks(generateThemedTower());
+    setRestartKey((k) => k + 1);
+    resetRoundState();
+  }, [resetRoundState]);
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -409,6 +624,17 @@ function App() {
         return;
       }
       if (showPauseMenu) {
+        return;
+      }
+
+      if (phase === PHASE_GAME_OVER) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleBackToMenu();
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleRestart();
+        }
         return;
       }
 
@@ -455,33 +681,10 @@ function App() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [phase, simulatingBlockIds, blocks, topCompleteLayer, keyboardFocusId, selectedId, canMove, playerMode, currentPlayer, handleBlockClick, handleMakeMove, handleRestart, showSettings, showAchievements, showPauseMenu]);
-
-  const handleBackToMenu = useCallback(() => {
-    setShowPauseMenu(false);
-    setShowSettings(false);
-    setShowAchievements(false);
-    setIsDailyChallengeMode(false);
-    setContinuedAfterCollapse(false);
-    setPhase(PHASE_START);
-    setBlocks(generateThemedTower());
-    setSelectedId(null);
-    setTurnCount(0);
-    setSimulatingBlockIds(null);
-    setRestartKey((k) => k + 1);
-    setAiThinking(false);
-    setLastExtractionPosition(null);
-    aiTimersRef.current.forEach(id => clearTimeout(id));
-    aiTimersRef.current = [];
-  }, []);
+  }, [phase, simulatingBlockIds, blocks, topCompleteLayer, keyboardFocusId, selectedId, canMove, playerMode, currentPlayer, handleBlockClick, handleMakeMove, handleRestart, handleBackToMenu, showSettings, showAchievements, showPauseMenu]);
 
   const handleContinueAfterCollapse = useCallback(() => {
-    setBlocks(prevBlocks => prevBlocks.map(b => {
-      if (isCollapsedBlock(b)) {
-        return { ...b, position: [b.position[0], 0.01, b.position[2]], layer: -1 };
-      }
-      return b;
-    }));
+    setBlocks(prevBlocks => prevBlocks.filter(b => !isCollapsedBlock(b)));
     setPhase(PHASE_PLAYING);
     setMessage('🔄 Продолжаем! Башня стабилизирована.');
     setContinuedAfterCollapse(true);
@@ -529,6 +732,22 @@ function App() {
           setAnnouncement('Челлендж дня выполнен! 🎉');
         }
       }
+
+      // Save replay for this game
+      if (replayMovesRef.current.length > 0) {
+        try {
+          saveGameReplay(gameIdRef.current, replayMovesRef.current, {
+            totalMoves: currentTurnCount,
+            collapsed: true,
+            playerMode,
+            date: Date.now(),
+          });
+        } catch (e) { /* ignore storage errors */ }
+      }
+
+      setScreenShake(true);
+      const shakeTimer = setTimeout(() => setScreenShake(false), 600);
+      achievementToastTimers.current.push(shakeTimer);
 
       setPhase(PHASE_GAME_OVER);
     } else {
@@ -582,31 +801,42 @@ function App() {
   }, []);
 
   return (
-    <div className="j-root" ref={canvasRef} role="application" aria-label="Jenga 3D — 3D игра с физикой">
-      <GameScene
-        blocks={blocks}
-        selectedId={selectedId}
-        onBlockClick={handleBlockClick}
-        simulatingBlockIds={simulatingBlockIds}
-        onSimulationComplete={handleSimulationComplete}
-        restartKey={restartKey}
-        dropSlots={dropSlots}
-        onDropSlot={handleDropSlot}
-        lastMovedBlockId={lastMovedBlockId}
-        lastExtractionPosition={lastExtractionPosition}
-        blockTheme={currentSettings.theme}
-        envTheme={currentSettings.environment}
-        keyboardFocusId={keyboardFocusId}
-      />
+    <div className={`j-root${screenShake ? ' j-shake' : ''}`} ref={canvasRef} role="application" aria-label="Jenga 3D — 3D игра с физикой">
+      {phase !== PHASE_START && (
+        <Suspense fallback={<SceneLoadingFallback />}>
+          <GameScene
+            blocks={blocks}
+            selectedId={selectedId}
+            onBlockClick={handleBlockClick}
+            simulatingBlockIds={simulatingBlockIds}
+            onSimulationComplete={handleSimulationComplete}
+            restartKey={restartKey}
+            dropSlots={dropSlots}
+            onDropSlot={handleDropSlot}
+            lastMovedBlockId={lastMovedBlockId}
+            lastExtractionPosition={lastExtractionPosition}
+            blockTheme={currentSettings.theme}
+            envTheme={currentSettings.environment}
+            keyboardFocusId={keyboardFocusId}
+            lowPowerMode={shouldOptimize}
+            maxDynamicBlocks={maxDynamicBlocks}
+          />
+        </Suspense>
+      )}
       {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && !showDailyChallenge && !showPurchase && (
         <StartScreen
           onStart={handleStart}
           playerMode={playerMode}
           setPlayerMode={setPlayerMode}
+          gameMode={gameMode}
+          setGameMode={setGameMode}
+          speedDuration={speedDuration}
+          setSpeedDuration={setSpeedDuration}
           onOpenSettings={() => setShowSettings(true)}
           onOpenAchievements={() => setShowAchievements(true)}
           onOpenDailyChallenge={() => setShowDailyChallenge(true)}
           onOpenPurchase={() => setShowPurchase(true)}
+          showPurchaseButton={isPremiumStoreAvailable()}
         />
       )}
       {phase === PHASE_START && showTutorial && (
@@ -642,6 +872,9 @@ function App() {
           playerMode={playerMode}
           aiThinking={aiThinking}
           onPauseMenu={() => setShowPauseMenu(true)}
+          moveTimeLeft={moveTimeLeft}
+          gameMode={gameMode}
+          speedTimeLeft={speedTimeLeft}
         />
       )}
       {showPauseMenu && !showSettings && !showAchievements && (
@@ -665,6 +898,7 @@ function App() {
           playerMode={playerMode}
           onContinueAfterCollapse={handleContinueAfterCollapse}
           continuedAfterCollapse={continuedAfterCollapse}
+          gameMode={gameMode}
         />
       )}
       {achievementToast && (

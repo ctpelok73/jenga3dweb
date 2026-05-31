@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "playwright test",
+    "check:build-budget": "node scripts/check-build-budget.mjs"
   },
   "keywords": [
     "jenga",
@@ -26,8 +30,13 @@
     "three": "^0.184.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@vitejs/plugin-react": "^6.0.2",
+    "jsdom": "^27.2.0",
     "terser": "^5.47.1",
+    "vitest": "^4.0.14",
     "vite": "^8.0.13",
     "vite-plugin-pwa": "^1.3.0"
   }

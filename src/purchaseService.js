@@ -1,5 +1,6 @@
 const PURCHASE_KEY = 'jenga3d_purchases';
 const UNLOCK_CODES_KEY = 'jenga3d_unlock_codes';
+const PURCHASE_VERIFICATION_URL = import.meta.env.VITE_PURCHASE_VERIFICATION_URL || '';
 
 const PREMIUM_ITEMS = [
   {
@@ -31,6 +32,13 @@ const PREMIUM_ITEMS = [
 const VALID_CODES = {};
 // Production: populate VALID_CODES from remote API or server config
 // Keys are normalized uppercase codes, values are { items: ['skin_pack_all', ...] }
+
+export const PURCHASE_STATUS = {
+  AVAILABLE: 'available',
+  DISABLED: 'disabled',
+  PURCHASED: 'purchased',
+  REQUIRES_SERVER_VERIFICATION: 'requiresServerVerification',
+};
 
 function loadPurchases() {
   try {
@@ -65,7 +73,26 @@ function saveUsedCodes(codes) {
 }
 
 export function getPremiumItems() {
-  return PREMIUM_ITEMS;
+  return PREMIUM_ITEMS.map((item) => ({
+    ...item,
+    status: getItemStatus(item),
+  }));
+}
+
+export function isPremiumStoreAvailable() {
+  return PREMIUM_ITEMS.some((item) => Boolean(item.paymentUrl));
+}
+
+export function getItemStatus(itemOrId) {
+  const item = typeof itemOrId === 'string'
+    ? PREMIUM_ITEMS.find((premiumItem) => premiumItem.id === itemOrId)
+    : itemOrId;
+
+  if (!item) return PURCHASE_STATUS.DISABLED;
+  if (isPurchased(item.id)) return PURCHASE_STATUS.PURCHASED;
+  if (!item.paymentUrl) return PURCHASE_STATUS.DISABLED;
+  if (!PURCHASE_VERIFICATION_URL) return PURCHASE_STATUS.REQUIRES_SERVER_VERIFICATION;
+  return PURCHASE_STATUS.AVAILABLE;
 }
 
 export function isPurchased(itemId) {
@@ -108,7 +135,11 @@ export function getAvailableEnvThemes() {
   return base;
 }
 
-export function purchaseItem(itemId) {
+export function purchaseItem(itemId, { verified = false } = {}) {
+  if (!verified) {
+    return false;
+  }
+
   const purchases = loadPurchases();
   purchases[itemId] = {
     purchased: true,
@@ -135,27 +166,11 @@ export function redeemCode(code) {
 
   const entry = VALID_CODES[normalized];
   if (!entry) {
-    const items = [];
-    for (const item of PREMIUM_ITEMS) {
-      const itemCode = normalized.startsWith(item.id.toUpperCase().replace(/_/g, '') + '-') ||
-        normalized === `${item.id.toUpperCase().replace(/_/g, '')}-DEMO`;
-      if (itemCode) items.push(item.id);
-    }
-
-    if (items.length > 0) {
-      for (const itemId of items) {
-        purchaseItem(itemId);
-      }
-      usedCodes.push(normalized);
-      saveUsedCodes(usedCodes);
-      return { success: true, items };
-    }
-
     return { success: false, error: 'Неверный код' };
   }
 
   for (const itemId of entry.items) {
-    purchaseItem(itemId);
+    purchaseItem(itemId, { verified: true });
   }
   usedCodes.push(normalized);
   saveUsedCodes(usedCodes);
@@ -167,6 +182,7 @@ export function getPurchaseStatus() {
   const purchases = loadPurchases();
   return PREMIUM_ITEMS.map((item) => ({
     ...item,
+    status: getItemStatus(item),
     purchased: purchases[item.id]?.purchased || false,
     purchasedAt: purchases[item.id]?.purchasedAt,
   }));

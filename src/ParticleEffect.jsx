@@ -1,113 +1,199 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+const WOOD_COLORS = ['#b5651d', '#a0522d', '#8b4513', '#cd853f', '#deb887', '#d2b48c'];
+const MAIN_PARTICLE_COUNT = 40;
+const DUST_PARTICLE_COUNT = 15;
+const TOTAL_PARTICLES = MAIN_PARTICLE_COUNT + DUST_PARTICLE_COUNT;
+
 /**
- * ParticleEffect: визуальный эффект частиц при успешном ходе
- * Создает взрыв зелёных звезд в позиции блока
+ * ParticleEffect: visually impressive wood-debris + dust cloud effect
+ * on successful block move. Each particle has its own color, size, and velocity.
  */
 export function ParticleEffect({ position, enabled = true, duration = 0.6 }) {
-  const particlesRef = useRef(null);
+  const groupRef = useRef(null);
   const elapsedRef = useRef(0);
+  const dataRef = useRef(null);
 
+  // Build particle data once when position/enabled changes
   useEffect(() => {
-    if (!enabled || !particlesRef.current) return;
+    if (!enabled || !groupRef.current) return;
 
-    const particleGeometry = new THREE.BufferGeometry();
-    const particleCount = 20;
-    const positions = [];
-    const velocities = [];
+    const positions = new Float32Array(TOTAL_PARTICLES * 3);
+    const colors = new Float32Array(TOTAL_PARTICLES * 3);
+    const sizes = new Float32Array(TOTAL_PARTICLES);
 
-    for (let i = 0; i < particleCount; i++) {
-      // Стартовая позиция = позиция блока
-      positions.push(position[0], position[1], position[2]);
+    const velocities = new Float32Array(TOTAL_PARTICLES * 3);
+    const isDust = new Uint8Array(TOTAL_PARTICLES); // 0 = main, 1 = dust
 
-      // Случайные скорости (разлёт в стороны)
-      const angle = (Math.random() * Math.PI * 2);
-      const elevAngle = Math.random() * Math.PI * 0.4 + 0.2; // 20-70 градусов вверх
-      const speed = Math.random() * 3 + 1;
+    const tmpColor = new THREE.Color();
 
-      const vx = Math.cos(angle) * Math.cos(elevAngle) * speed;
-      const vy = Math.sin(elevAngle) * speed + 1; // добавляем вертикальную скорость
-      const vz = Math.sin(angle) * Math.cos(elevAngle) * speed;
+    for (let i = 0; i < TOTAL_PARTICLES; i++) {
+      const idx3 = i * 3;
+      const dust = i >= MAIN_PARTICLE_COUNT;
+      isDust[i] = dust ? 1 : 0;
 
-      velocities.push(vx, vy, vz);
+      // Start at block position with slight jitter
+      positions[idx3]     = position[0] + (Math.random() - 0.5) * 0.2;
+      positions[idx3 + 1] = position[1] + (Math.random() - 0.5) * 0.1;
+      positions[idx3 + 2] = position[2] + (Math.random() - 0.5) * 0.2;
+
+      // Pick a random wood color
+      tmpColor.set(WOOD_COLORS[Math.floor(Math.random() * WOOD_COLORS.length)]);
+      colors[idx3]     = tmpColor.r;
+      colors[idx3 + 1] = tmpColor.g;
+      colors[idx3 + 2] = tmpColor.b;
+
+      if (dust) {
+        // Dust cloud: small, slow, wider horizontal spread
+        sizes[i] = 0.015 + Math.random() * 0.015; // 0.015 - 0.03
+
+        const angle = Math.random() * Math.PI * 2;
+        const hSpeed = Math.random() * 1.2 + 0.3;
+        velocities[idx3]     = Math.cos(angle) * hSpeed;
+        velocities[idx3 + 1] = Math.random() * 0.6 + 0.1; // gentle upward drift
+        velocities[idx3 + 2] = Math.sin(angle) * hSpeed;
+      } else {
+        // Main debris: varied sizes, wider horizontal, less vertical initially
+        sizes[i] = 0.02 + Math.random() * 0.08; // 0.02 - 0.10
+
+        const angle = Math.random() * Math.PI * 2;
+        const elevAngle = Math.random() * Math.PI * 0.25 + 0.1; // 6-20 degrees — mostly horizontal
+        const speed = Math.random() * 3.5 + 1.5;
+
+        velocities[idx3]     = Math.cos(angle) * Math.cos(elevAngle) * speed;
+        velocities[idx3 + 1] = Math.sin(elevAngle) * speed * 0.6; // reduced initial vertical
+        velocities[idx3 + 2] = Math.sin(angle) * Math.cos(elevAngle) * speed;
+      }
     }
 
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-    particleGeometry.userData.velocities = velocities;
+    // Build geometry
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-    const particleMaterial = new THREE.PointsMaterial({
-      color: '#44ff88',
-      size: 0.08,
+    // Custom ShaderMaterial so each particle can have its own color + size
+    const material = new THREE.ShaderMaterial({
       transparent: true,
-      opacity: 1,
-      sizeAttenuation: true,
+      depthWrite: false,
+      uniforms: {
+        uOpacity: { value: 1.0 },
+      },
+      vertexShader: /* glsl */ `
+        attribute float size;
+        varying vec3 vColor;
+        void main() {
+          vColor = color;
+          vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = size * (300.0 / -mvPos.z);
+          gl_Position = projectionMatrix * mvPos;
+        }
+      `,
+      fragmentShader: /* glsl */ `
+        uniform float uOpacity;
+        varying vec3 vColor;
+        void main() {
+          // Soft circular particle
+          float d = length(gl_PointCoord - vec2(0.5));
+          if (d > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.2, d) * uOpacity;
+          gl_FragColor = vec4(vColor, alpha);
+        }
+      `,
+      vertexColors: true,
     });
 
-    const particles = new THREE.Points(particleGeometry, particleMaterial);
-    const ref = particlesRef.current;
-    ref.add(particles);
+    const points = new THREE.Points(geometry, material);
+    const ref = groupRef.current;
+    ref.add(points);
 
+    dataRef.current = {
+      geometry,
+      material,
+      points,
+      velocities,
+      isDust,
+      startPositions: new Float32Array(positions), // copy for rotation reference
+    };
     elapsedRef.current = 0;
 
     return () => {
-      particleGeometry.dispose();
-      particleMaterial.dispose();
-      if (ref) ref.remove(particles);
+      geometry.dispose();
+      material.dispose();
+      if (ref) ref.remove(points);
+      dataRef.current = null;
     };
   }, [position, enabled]);
 
   useFrame((_, delta) => {
-    if (!enabled || !particlesRef.current || !particlesRef.current.children[0]) return;
+    if (!enabled || !dataRef.current) return;
 
+    const data = dataRef.current;
     elapsedRef.current += delta;
     const progress = elapsedRef.current / duration;
 
     if (progress >= 1) {
-      // Удалить частицы
-      const child = particlesRef.current.children[0];
-      if (child) {
-        particlesRef.current.remove(child);
+      // Remove particles when done
+      if (groupRef.current && data.points.parent) {
+        groupRef.current.remove(data.points);
       }
       return;
     }
 
-    const particles = particlesRef.current.children[0];
-    if (!particles) return;
-
-    const positions = particles.geometry.attributes.position.array;
-    const velocities = particles.geometry.userData.velocities;
-    const particleCount = positions.length / 3;
+    const posAttr = data.geometry.attributes.position;
+    const positions = posAttr.array;
+    const velocities = data.velocities;
+    const isDust = data.isDust;
 
     const gravity = -9.81;
+    const rotationSpeed = 0.8; // radians per second for subtle orbital rotation
 
-    for (let i = 0; i < particleCount; i++) {
-      const posIdx = i * 3;
-      const velIdx = i * 3;
+    for (let i = 0; i < TOTAL_PARTICLES; i++) {
+      const idx3 = i * 3;
+      const dust = isDust[i] === 1;
 
-      // Обновляем позицию (масштабируем на delta)
-      positions[posIdx] += velocities[velIdx] * delta;
-      positions[posIdx + 1] += velocities[velIdx + 1] * delta;
-      positions[posIdx + 2] += velocities[velIdx + 2] * delta;
+      // Apply velocity
+      positions[idx3]     += velocities[idx3]     * delta;
+      positions[idx3 + 1] += velocities[idx3 + 1] * delta;
+      positions[idx3 + 2] += velocities[idx3 + 2] * delta;
 
-      // Применяем гравитацию
-      velocities[velIdx + 1] += gravity * delta;
+      // Apply gravity (weaker for dust)
+      const gFactor = dust ? 0.15 : 1.0;
+      velocities[idx3 + 1] += gravity * gFactor * delta;
 
-      // Затухание скорости
-      const damping = Math.pow(0.98, delta * 60);
-      velocities[velIdx] *= damping;
-      velocities[velIdx + 1] *= damping;
-      velocities[velIdx + 2] *= damping;
+      // Damping (dust fades slower / less damping)
+      const dampBase = dust ? 0.985 : 0.975;
+      const damping = Math.pow(dampBase, delta * 60);
+      velocities[idx3]     *= damping;
+      velocities[idx3 + 1] *= damping;
+      velocities[idx3 + 2] *= damping;
+
+      // Add slight rotation around the origin (spiral effect)
+      if (!dust) {
+        const dx = positions[idx3]     - position[0];
+        const dz = positions[idx3 + 2] - position[2];
+        const angle = rotationSpeed * delta;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        const newDx = dx * cosA - dz * sinA;
+        const newDz = dx * sinA + dz * cosA;
+        positions[idx3]     = position[0] + newDx;
+        positions[idx3 + 2] = position[2] + newDz;
+      }
     }
 
-    particles.geometry.attributes.position.needsUpdate = true;
+    posAttr.needsUpdate = true;
 
-    // Затухание прозрачности
-    particles.material.opacity = 1 - progress;
+    // Opacity: main particles fade linearly, dust fades slower (quadratic ease)
+    // We use a single uniform for simplicity — dust's slower fade is handled
+    // by its reduced gravity keeping it visible longer
+    const mainOpacity = 1 - progress;
+    data.material.uniforms.uOpacity.value = mainOpacity;
   });
 
-  return <group ref={particlesRef} />;
+  return <group ref={groupRef} />;
 }
 
 export default ParticleEffect;

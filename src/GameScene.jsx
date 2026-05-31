@@ -1,9 +1,11 @@
-import React, { Suspense, lazy, Component, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { Suspense, lazy, Component, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Environment } from '@react-three/drei';
+import * as THREE from 'three';
 import { getEnvironmentTheme } from './blockTextures';
 import LoadingProgressBar from './components/LoadingProgressBar';
 import { wasmLoader } from './wasmLoader';
+import { useMobileOptimizations, RENDER_QUALITY, DEVICE_LEVELS } from './mobileOptimizations';
 
 const GameSceneWithPhysics = lazy(() => import('./GameSceneWithPhysics'));
 
@@ -74,41 +76,147 @@ class ErrorBoundary extends Component {
   }
 }
 
-export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, lastExtractionPosition, blockTheme, envTheme, keyboardFocusId }) {
+export default function GameScene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, lastExtractionPosition, blockTheme, envTheme, keyboardFocusId, lowPowerMode = false, maxDynamicBlocks = null, onReady }) {
   const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
   const [physicsLoaded, setPhysicsLoaded] = useState(false);
+  const [webglResetKey, setWebglResetKey] = useState(0);
+  const [webglDegraded, setWebglDegraded] = useState(false);
+  const canvasCleanupRef = useRef(null);
+  const contextRestoreTimeoutRef = useRef(null);
+
+  // Используем новые настройки мобильной оптимизации
+  const { renderSettings, deviceLevel, shouldOptimize } = useMobileOptimizations();
+
+  // Приоритет: явный lowPowerMode > автоматические настройки
+  const effectiveLowPowerMode = lowPowerMode || shouldOptimize || webglDegraded;
+  const activeRenderSettings = useMemo(() => {
+    if (webglDegraded) {
+      return RENDER_QUALITY.LOW;
+    }
+
+    if (effectiveLowPowerMode) {
+      return { ...renderSettings, antialias: false, shadows: false };
+    }
+
+    return RENDER_QUALITY.HIGH;
+  }, [effectiveLowPowerMode, renderSettings, webglDegraded]);
+
+  // Используем переданный maxDynamicBlocks или значение из настроек рендеринга
+  const effectiveMaxDynamicBlocks = maxDynamicBlocks ?? activeRenderSettings.maxDynamicBlocks;
 
   const handlePhysicsLoaded = useCallback(() => setPhysicsLoaded(true), []);
 
+  const handleCanvasCreated = useCallback(({ gl }) => {
+    if (canvasCleanupRef.current) {
+      canvasCleanupRef.current();
+      canvasCleanupRef.current = null;
+    }
+
+    gl.shadowMap.type = THREE.PCFShadowMap;
+
+    const canvas = gl.domElement;
+    const handleContextLost = (event) => {
+      event.preventDefault();
+      console.warn('[Jenga 3D] WebGL context lost; rebuilding the renderer.');
+      window.clearTimeout(contextRestoreTimeoutRef.current);
+      contextRestoreTimeoutRef.current = window.setTimeout(() => {
+        setWebglDegraded(true);
+        setPhysicsLoaded(false);
+        setWebglResetKey((key) => key + 1);
+      }, 250);
+    };
+
+    const handleContextRestored = () => {
+      console.info('[Jenga 3D] WebGL context restored.');
+    };
+
+    canvas.addEventListener('webglcontextlost', handleContextLost, false);
+    canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
+
+    canvasCleanupRef.current = () => {
+      window.clearTimeout(contextRestoreTimeoutRef.current);
+      canvas.removeEventListener('webglcontextlost', handleContextLost, false);
+      canvas.removeEventListener('webglcontextrestored', handleContextRestored, false);
+    };
+  }, []);
+
+  useEffect(() => () => {
+    if (canvasCleanupRef.current) {
+      canvasCleanupRef.current();
+      canvasCleanupRef.current = null;
+    }
+  }, []);
+
+  // Настройки Canvas на основе уровня устройства
+  // ВАЖНО: frameloop всегда 'always' — иначе в режиме 'demand' canvas
+  // перестаёт рендерить кадры после симуляции и экран становится белым.
+  // simulatingBlockIds намеренно убран из зависимостей, чтобы Canvas
+  // не пересоздавался при каждом ходе.
+  const canvasConfig = useMemo(() => ({
+    camera: { position: [7, 4, 7], fov: 60 },
+    dpr: activeRenderSettings.dpr,
+    gl: {
+      antialias: activeRenderSettings.antialias,
+      powerPreference: effectiveLowPowerMode ? 'default' : 'high-performance',
+      stencil: false,
+      depth: true,
+    },
+    frameloop: 'always',
+    performance: {
+      min: effectiveLowPowerMode ? 0.35 : 0.5,
+    },
+    style: { width: '100%', height: '100%', display: 'block', background: env.bgColor },
+    shadows: activeRenderSettings.shadows ? { type: THREE.PCFShadowMap } : false,
+    'aria-hidden': 'true',
+  }), [activeRenderSettings, effectiveLowPowerMode, env.bgColor]);
+
   return (
-    <ErrorBoundary>
-      {!physicsLoaded && <LoadingOverlay />}
-      <Canvas
-        camera={{ position: [7, 4, 7], fov: 60 }}
-        style={{ width: '100%', height: '100%', display: 'block', background: env.bgColor }}
-        shadows
-        aria-hidden="true"
-      >
-        <Suspense fallback={null}>
-          <GameSceneWithPhysics
-            blocks={blocks}
-            selectedId={selectedId}
-            onBlockClick={onBlockClick}
-            simulatingBlockIds={simulatingBlockIds}
-            onSimulationComplete={onSimulationComplete}
-            restartKey={restartKey}
-            dropSlots={dropSlots}
-            onDropSlot={onDropSlot}
-            lastMovedBlockId={lastMovedBlockId}
-            lastExtractionPosition={lastExtractionPosition}
-            blockTheme={blockTheme}
-            envTheme={envTheme}
-            keyboardFocusId={keyboardFocusId}
-            onReady={handlePhysicsLoaded}
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <ErrorBoundary>
+        {!physicsLoaded && <LoadingOverlay />}
+        <Canvas key={webglResetKey} {...canvasConfig} onCreated={handleCanvasCreated}>
+          <Suspense fallback={null}>
+            <GameSceneWithPhysics
+              blocks={blocks}
+              selectedId={selectedId}
+              onBlockClick={onBlockClick}
+              simulatingBlockIds={simulatingBlockIds}
+              onSimulationComplete={onSimulationComplete}
+              restartKey={restartKey}
+              dropSlots={dropSlots}
+              onDropSlot={onDropSlot}
+              lastMovedBlockId={lastMovedBlockId}
+              lastExtractionPosition={lastExtractionPosition}
+              blockTheme={blockTheme}
+              envTheme={envTheme}
+              keyboardFocusId={keyboardFocusId}
+              onReady={handlePhysicsLoaded}
+              lowPowerMode={effectiveLowPowerMode}
+              maxDynamicBlocks={effectiveMaxDynamicBlocks}
+            />
+          </Suspense>
+          <OrbitControls
+            enableDamping={!effectiveLowPowerMode}
+            dampingFactor={effectiveLowPowerMode ? 0.05 : 0.1}
+            minDistance={2}
+            maxDistance={15}
+            maxPolarAngle={Math.PI / 2.1}
+            target={[0, 2.7, 0]}
           />
-        </Suspense>
-        <OrbitControls enableDamping dampingFactor={0.1} minDistance={2} maxDistance={15} maxPolarAngle={Math.PI / 2.1} target={[0, 2.7, 0]} />
-      </Canvas>
-    </ErrorBoundary>
+          {!effectiveLowPowerMode && !webglDegraded && (
+            <Environment
+              preset={
+                envTheme === 'space' ? 'night' :
+                envTheme === 'beach' ? 'sunset' :
+                envTheme === 'library' ? 'warehouse' :
+                'apartment'
+              }
+              background={false}
+              environmentIntensity={0.4}
+            />
+          )}
+        </Canvas>
+      </ErrorBoundary>
+    </div>
   );
 }

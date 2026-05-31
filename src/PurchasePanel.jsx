@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getPremiumItems, isPurchased, redeemCode } from './purchaseService';
+import { getPremiumItems, PURCHASE_STATUS, redeemCode } from './purchaseService';
 
 export default function PurchasePanel({ onClose, onPurchaseChange }) {
   const items = getPremiumItems();
@@ -8,12 +8,8 @@ export default function PurchasePanel({ onClose, onPurchaseChange }) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleBuy = (item) => {
-    if (item.paymentUrl) {
+    if (item.status === PURCHASE_STATUS.AVAILABLE && item.paymentUrl) {
       window.open(item.paymentUrl, '_blank', 'noopener');
-    } else {
-      redeemCode('DEMO-' + item.id.toUpperCase().replace(/_/g, ''));
-      setRefreshKey((k) => k + 1);
-      if (onPurchaseChange) onPurchaseChange();
     }
   };
 
@@ -34,7 +30,9 @@ export default function PurchasePanel({ onClose, onPurchaseChange }) {
 
         <div className="j-purchase-grid">
           {items.map((item) => {
-            const purchased = isPurchased(item.id);
+            const purchased = item.status === PURCHASE_STATUS.PURCHASED;
+            const disabled = item.status === PURCHASE_STATUS.DISABLED;
+            const needsVerification = item.status === PURCHASE_STATUS.REQUIRES_SERVER_VERIFICATION;
             return (
               <div key={item.id} className={`j-purchase-item ${purchased ? 'j-purchase-item--purchased' : 'j-purchase-item--available'}`}>
                 <div className="j-purchase-item__info">
@@ -43,6 +41,10 @@ export default function PurchasePanel({ onClose, onPurchaseChange }) {
                 </div>
                 {purchased ? (
                   <span className="j-purchase-item__status">✅ Куплено</span>
+                ) : disabled ? (
+                  <span className="j-purchase-item__status">Недоступно</span>
+                ) : needsVerification ? (
+                  <span className="j-purchase-item__status">Нужна проверка сервера</span>
                 ) : (
                   <button className="j-btn j-btn--primary j-purchase-item__buy" onClick={() => handleBuy(item)}>
                     {item.price}

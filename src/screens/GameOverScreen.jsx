@@ -7,9 +7,10 @@ import RewardedVideoButton from '../RewardedVideoButton';
 import ReplayPlayer from '../components/ReplayPlayer';
 import { generateShareLink, listGameReplays } from '../shareService';
 
-export default function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, onContinueAfterCollapse, continuedAfterCollapse }) {
+export default function GameOverScreen({ turns, onRestart, currentPlayer, playerMode, onContinueAfterCollapse, continuedAfterCollapse, gameMode }) {
   const best = getBestScore();
   const total = getTotalGames();
+  const isNewRecord = turns >= best && turns > 0;
   const loser = playerMode === 2 ? PLAYER_NAMES[currentPlayer] : playerMode === 3 ? PLAYER_NAMES[currentPlayer] : 'Вы';
   const [showQR, setShowQR] = useState(false);
   const [showReplays, setShowReplays] = useState(false);
@@ -35,7 +36,14 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
   return (
     <div className="j-overlay" role="dialog" aria-label="Конец игры">
       <div className={`j-card${showQR ? ' j-card--wide' : ''}`}>
-        <h1 className="j-heading j-heading--danger">💥 Башня рухнула!</h1>
+        <div className="j-gameover-icon">{gameMode === 'speed' ? '⏱' : '💥'}</div>
+        <h1 className="j-heading j-heading--danger">{gameMode === 'speed' ? 'Время вышло!' : 'Башня рухнула!'}</h1>
+        {gameMode === 'speed' && (
+          <div className="j-gameover-result" style={{ color: 'var(--j-purple-light)' }}>Speed Run</div>
+        )}
+        {isNewRecord && (
+          <div className="j-gameover-record">NEW RECORD!</div>
+        )}
         {playerMode === 2 && (
           <div className={`j-gameover-result ${playerClass}`}>
             {loser} проиграл!
@@ -43,14 +51,12 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
         )}
         {playerMode === 3 && (
           <div className={`j-gameover-result ${playerClass}`}>
-            {loser === PLAYER_NAMES[1] ? '🤖 ИИ проиграл! Вы победили!' : 'Вы проиграли! 🤖 ИИ победил!'}
+            {loser === PLAYER_NAMES[1] ? 'ИИ проиграл! Вы победили!' : 'Вы проиграли! ИИ победил!'}
           </div>
         )}
+        <div className="j-gameover-score">{turns}</div>
+        <div className="j-gameover-score-label">ходов сделано</div>
         <div className="j-stats">
-          <div className="j-stat">
-            <div className="j-stat__val">{turns}</div>
-            <div className="j-stat__label">Ходов</div>
-          </div>
           <div className="j-stat">
             <div className="j-stat__val">{best}</div>
             <div className="j-stat__label">Лучший</div>

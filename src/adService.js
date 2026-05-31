@@ -9,6 +9,18 @@ const ADS_ENABLED = ADSENSE_ID !== 'ca-pub-XXXXXXX' && ADSENSE_ID.length > 0;
 let sdkLoaded = false;
 let rewardedCallback = null;
 
+export function areAdsConfigured() {
+  return ADS_ENABLED;
+}
+
+export function isBannerAdConfigured(slotId = BANNER_SLOT_ID) {
+  return ADS_ENABLED && Boolean(slotId);
+}
+
+export function isRewardedAdConfigured() {
+  return ADS_ENABLED && Boolean(REWARDED_SLOT_ID);
+}
+
 export function isAdFree() {
   try {
     return localStorage.getItem(AD_FREE_KEY) === '1';
@@ -44,7 +56,7 @@ export function initAdSDK() {
 }
 
 export function showBannerAd(containerEl, slotId = BANNER_SLOT_ID) {
-  if (isAdFree() || !sdkLoaded || !containerEl || !BANNER_SLOT_ID) return;
+  if (isAdFree() || !sdkLoaded || !containerEl || !isBannerAdConfigured(slotId)) return;
 
   containerEl.innerHTML = '';
 
@@ -81,7 +93,7 @@ export function showRewardedVideo(onReward, onError) {
 
   rewardedCallback = { onReward, onError };
 
-  if (!sdkLoaded || !REWARDED_SLOT_ID) {
+  if (!sdkLoaded || !isRewardedAdConfigured()) {
     trackRewardedVideoError('sdk_not_loaded');
     if (onError) onError('sdk_not_loaded');
     rewardedCallback = null;

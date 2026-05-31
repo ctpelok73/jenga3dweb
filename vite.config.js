@@ -11,7 +11,17 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,svg,json}'],
+        globIgnores: ['**/rapier-*.js', '**/r3f-*.js'],
         runtimeCaching: [
+          {
+            urlPattern: /\/assets\/(rapier|r3f)-.*\.js$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'heavy-3d-runtime-cache',
+              expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',

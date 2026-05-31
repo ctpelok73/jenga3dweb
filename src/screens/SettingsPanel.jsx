@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { getSettings, updateAllSettings } from '../settingsTracker';
 import { updateMasterVolume } from '../soundEngine';
 import { clearTextureCache } from '../blockTextures';
+import { getAvailableSkins, getAvailableEnvThemes } from '../purchaseService';
 
 export default function SettingsPanel({ onClose, onSettingsChange }) {
   const [settings, setSettings] = useState(() => getSettings());
+  const availableSkins = useMemo(() => getAvailableSkins(), []);
+  const availableEnvThemes = useMemo(() => getAvailableEnvThemes(), []);
 
   const handleChange = (key, value) => {
     const updated = { ...settings, [key]: value };
@@ -91,20 +94,34 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
         <div className="j-settings-section">
           <div className="j-settings-label">🎨 Тема блоков</div>
           <div className="j-opt-group">
-            {themeOptions.map(opt => (
-              <button key={opt.value} className={`j-opt-btn${settings.theme === opt.value ? ' is-active' : ''}`}
-                onClick={() => { handleChange('theme', opt.value); clearTextureCache(); }}>{opt.label}</button>
-            ))}
+            {themeOptions.map(opt => {
+              const locked = !availableSkins.includes(opt.value);
+              return (
+                <button key={opt.value}
+                  className={`j-opt-btn${settings.theme === opt.value ? ' is-active' : ''}${locked ? ' j-opt-btn--locked' : ''}`}
+                  onClick={() => { if (!locked) { handleChange('theme', opt.value); clearTextureCache(); } }}
+                  disabled={locked}
+                  title={locked ? 'Премиум — доступно после покупки' : ''}
+                >{opt.label}</button>
+              );
+            })}
           </div>
         </div>
 
         <div className="j-settings-section">
           <div className="j-settings-label">🌍 Окружение</div>
           <div className="j-opt-group">
-            {envOptions.map(opt => (
-              <button key={opt.value} className={`j-opt-btn${settings.environment === opt.value ? ' is-active' : ''}`}
-                onClick={() => handleChange('environment', opt.value)}>{opt.label}</button>
-            ))}
+            {envOptions.map(opt => {
+              const locked = !availableEnvThemes.includes(opt.value);
+              return (
+                <button key={opt.value}
+                  className={`j-opt-btn${settings.environment === opt.value ? ' is-active' : ''}${locked ? ' j-opt-btn--locked' : ''}`}
+                  onClick={() => { if (!locked) handleChange('environment', opt.value); }}
+                  disabled={locked}
+                  title={locked ? 'Премиум — доступно после покупки' : ''}
+                >{opt.label}</button>
+              );
+            })}
           </div>
         </div>
 
