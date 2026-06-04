@@ -1,6 +1,7 @@
-import React, { useRef, useMemo, useState, useEffect, useCallback, memo } from 'react';
+import React, { useRef, useMemo, useState, useEffect, useCallback, memo, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
+
 import * as THREE from 'three';
 import {
   BLOCK_W,
@@ -16,6 +17,7 @@ import ParticleEffect from './ParticleEffect';
 import { getBlockMaterialProps, getEnvironmentTheme } from './blockTextures';
 import { physicsOptimizer } from './physicsOptimizer';
 import { getPhysicsSettingsForMobile, getDynamicBlockLimit } from './mobileOptimizations';
+import { profiler } from './performanceProfiler';
 
 // ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
@@ -37,6 +39,10 @@ function Edges({ edgeColor = '#3a2010' }) {
   );
 }
 
+// ─── Reusable math objects (avoid per-frame allocations) ───
+const _q = new THREE.Quaternion();
+const _euler = new THREE.Euler();
+
 const Block = memo(function Block({
   id,
   position,
@@ -53,33 +59,29 @@ const Block = memo(function Block({
 }) {
   const rigidRef = useRef(null);
   const meshRef = useRef(null);
+  const materialRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Создаём material один раз при монтировании (устранение 54 аллокаций за рендер)
+  if (!materialRef.current) {
+    materialRef.current = new THREE.MeshStandardMaterial();
+  }
 
   useEffect(() => {
     if (onRigidRef && rigidRef.current) onRigidRef(id, rigidRef.current);
   }, [id, onRigidRef]);
 
+  // Combine body type, position, rotation, and velocity sync into a single effect
   useEffect(() => {
     const body = rigidRef.current;
     if (!body) return;
-    if (isDynamic) {
-      body.setBodyType(0, true);
-    } else {
-      body.setBodyType(1, true);
-    }
-  }, [isDynamic]);
-
-  useEffect(() => {
-    const body = rigidRef.current;
-    if (!body) return;
-
-    // Always sync with props when they change. 
-    // This is crucial when transitioning to dynamic state or teleporting a block.
+    // Set body type based on dynamic flag
+    body.setBodyType(isDynamic ? 0 : 1, true);
+    // Sync position & rotation
     body.setTranslation({ x: position[0], y: position[1], z: position[2] }, true);
-    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(rotation[0], rotation[1], rotation[2]));
-    body.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }, true);
-    
-    // Reset velocities to prevent "teleporting momentum" and ensure a clean simulation start
+    _q.setFromEuler(_euler.set(rotation[0], rotation[1], rotation[2]));
+    body.setRotation({ x: _q.x, y: _q.y, z: _q.z, w: _q.w }, true);
+    // Reset velocities to avoid residual momentum
     body.setLinvel({ x: 0, y: 0, z: 0 }, true);
     body.setAngvel({ x: 0, y: 0, z: 0 }, true);
   }, [position, rotation, isDynamic]);
@@ -99,26 +101,83 @@ const Block = memo(function Block({
       : getBlockMaterialProps(theme, color)
   ), [theme, color, lowPowerMode]);
 
-  const handlePointerDown = (e) => {
+  // ─── Императивное обновление материала (устранение per-render allocation) ───
+  useEffect(() => {
+    const mat = materialRef.current;
+    if (!mat) return;
+
+    // Textures (только если не lowPowerMode)
+    if (lowPowerMode) {
+      mat.map = null;
+      mat.normalMap = null;
+      mat.roughnessMap = null;
+    } else {
+      mat.map = materialProps.map || null;
+      mat.normalMap = materialProps.normalMap || null;
+      mat.roughnessMap = materialProps.roughnessMap || null;
+    }
+
+    // Basic properties
+    if (lowPowerMode) {
+      mat.color.set(color);
+    } else {
+      mat.color.set('#ffffff'); // Текстура определяет цвет
+    }
+    mat.roughness = materialProps.roughness;
+    mat.metalness = materialProps.metalness;
+
+    // Transparency
+    mat.transparent = isGhost;
+    mat.opacity = opacity;
+
+    // Emissive (selection/hover/focus states)
+    const emissiveColor = isSelected ? '#4488ff' : (isKeyboardFocused ? '#ffcc00' : (isHovered ? '#88ccff' : materialProps.emissiveDefault));
+    const emissiveIntensity = isSelected ? 0.3 : (isKeyboardFocused ? 0.25 : (isHovered ? 0.15 : (materialProps.emissiveIntensityDefault || 0)));
+    mat.emissive.set(emissiveColor);
+    mat.emissiveIntensity = emissiveIntensity;
+
+    mat.needsUpdate = true;
+  }, [color, materialProps, isGhost, opacity, isSelected, isKeyboardFocused, isHovered, lowPowerMode]);
+
+  // Dispose material on unmount
+  useEffect(() => {
+    return () => {
+      if (materialRef.current) {
+        materialRef.current.dispose();
+        materialRef.current = null;
+      }
+    };
+  }, []);
+
+  // Edge color depends on theme — вычисляем один раз через useMemo
+  const edgeColor = useMemo(() => {
+    const EDGE_COLOR_MAP = {
+      neon: color,
+      marble: '#8a7a6a',
+      ice: '#88c8e8',
+      bamboo: '#5d962d',
+      candy: color,
+    };
+    return EDGE_COLOR_MAP[theme] ?? '#3a2010';
+  }, [theme, color]);
+
+  // Мемоизированные обработчики (устранение inline функций)
+  const handlePointerDown = useCallback((e) => {
     e.stopPropagation();
     if (!isDynamic && !isGhost) {
       onClick(id);
     }
-  };
+  }, [id, onClick, isDynamic, isGhost]);
 
-  // Edge color depends on theme
-  const EDGE_COLOR_MAP = {
-    neon: color,
-    marble: '#8a7a6a',
-    ice: '#88c8e8',
-    bamboo: '#5d962d',
-    candy: color,
-  };
-  const edgeColor = EDGE_COLOR_MAP[theme] ?? '#3a2010';
+  const handlePointerOver = useCallback((e) => {
+    e.stopPropagation();
+    setIsHovered(true);
+  }, []);
 
-  // Emissive logic — keyboard focus shows as yellow outline, different from blue select
-  const emissiveColor = isSelected ? '#4488ff' : (isKeyboardFocused ? '#ffcc00' : (isHovered ? '#88ccff' : materialProps.emissiveDefault));
-  const emissiveIntensity = isSelected ? 0.3 : (isKeyboardFocused ? 0.25 : (isHovered ? 0.15 : (materialProps.emissiveIntensityDefault || 0)));
+  const handlePointerOut = useCallback((e) => {
+    e.stopPropagation();
+    setIsHovered(false);
+  }, []);
 
   return (
     <RigidBody
@@ -128,32 +187,23 @@ const Block = memo(function Block({
       rotation={rotation}
       colliders={false}
       mass={BLOCK_PHYSICS.mass}
-      restitution={BLOCK_PHYSICS.restitution}
-      friction={BLOCK_PHYSICS.friction}
       linearDamping={BLOCK_PHYSICS.linearDamping}
       angularDamping={BLOCK_PHYSICS.angularDamping}
       userData={{ id }}
     >
-      <CuboidCollider args={[BLOCK_W / 2, BLOCK_H / 2, BLOCK_D / 2]} />
+      <CuboidCollider
+        args={[BLOCK_W / 2, BLOCK_H / 2, BLOCK_D / 2]}
+        restitution={BLOCK_PHYSICS.restitution}
+        friction={BLOCK_PHYSICS.friction}
+      />
       <mesh
         ref={meshRef}
         geometry={sharedBlockGeometry}
+        material={materialRef.current}
         onPointerDown={handlePointerDown}
-        onPointerOver={(e) => { e.stopPropagation(); setIsHovered(true); }}
-        onPointerOut={(e) => { e.stopPropagation(); setIsHovered(false); }}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
       >
-        <meshStandardMaterial
-          color={lowPowerMode ? color : undefined}
-          map={lowPowerMode ? null : materialProps.map}
-          normalMap={lowPowerMode ? null : materialProps.normalMap}
-          roughnessMap={lowPowerMode ? null : materialProps.roughnessMap}
-          roughness={materialProps.roughness}
-          metalness={materialProps.metalness}
-          transparent={isGhost}
-          opacity={opacity}
-          emissive={emissiveColor}
-          emissiveIntensity={emissiveIntensity}
-        />
         {(!lowPowerMode || isSelected || isKeyboardFocused) && <Edges edgeColor={edgeColor} />}
       </mesh>
     </RigidBody>
@@ -251,6 +301,11 @@ function GroundSurface({ envTheme, lowPowerMode = false }) {
     return tex;
   }, [theme.groundColor, lowPowerMode]);
 
+  // Освобождаем GPU-память текстуры при смене темы
+  useEffect(() => {
+    return () => { if (groundTexture) groundTexture.dispose(); };
+  }, [groundTexture]);
+
   return (
     <mesh position={[0, -0.025, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow raycast={() => null}>
       <circleGeometry args={[theme.groundSize / 2, lowPowerMode ? 24 : 48]} />
@@ -283,7 +338,7 @@ function GroundCollider({ envTheme }) {
   const halfSize = theme.groundSize / 2;
   return (
     <RigidBody type="fixed" position={[0, -0.05, 0]}>
-      <CuboidCollider args={[halfSize, 0.05, halfSize]} />
+      <CuboidCollider args={[halfSize, 0.05, halfSize]} restitution={0} friction={0.9} />
     </RigidBody>
   );
 }
@@ -291,7 +346,7 @@ function GroundCollider({ envTheme }) {
 function FloorCollider() {
   return (
     <RigidBody type="fixed" position={[0, -5, 0]}>
-      <CuboidCollider args={[10, 0.1, 10]} />
+      <CuboidCollider args={[10, 0.1, 10]} restitution={0} friction={0.9} />
     </RigidBody>
   );
 }
@@ -333,6 +388,28 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
   const simulateTime = useRef(0);
   const completionCalled = useRef(false);
   const [particleBlockId, setParticleBlockId] = useState(null);
+
+  // ─── Батчевая загрузка блоков: рендерим по 9 блоков за кадр (≈6 кадров на 54 блока)
+  // Предотвращает spike первого кадра при создании 54 RigidBody одновременно.
+  const [visibleCount, setVisibleCount] = useState(9);
+  const visibleCountRef = useRef(9);
+  // Сбрасываем батч при рестарте (длина blocks меняется только при reset)
+  const prevBlocksLenRef = useRef(blocks.length);
+  useEffect(() => {
+    if (blocks.length !== prevBlocksLenRef.current) {
+      prevBlocksLenRef.current = blocks.length;
+      visibleCountRef.current = 9;
+      setVisibleCount(9);
+      return;
+    }
+    if (visibleCountRef.current >= blocks.length) return;
+    const id = requestAnimationFrame(() => {
+      visibleCountRef.current = Math.min(visibleCountRef.current + 9, blocks.length);
+      setVisibleCount(visibleCountRef.current);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [visibleCount, blocks.length]);
+  const visibleBlocks = visibleCount >= blocks.length ? blocks : blocks.slice(0, visibleCount);
 
   // ─── Cascading state: tracks which block IDs are currently dynamic ───
   const [cascadeDynamicIds, setCascadeDynamicIds] = useState(null);
@@ -443,66 +520,85 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
   // ─── Settling detection with cascade support and physics optimization ───
   useFrame((state, delta) => {
+    profiler.mark('frame_start');
+
     const activeIds = effectiveDynamicIds;
     if (!activeIds || activeIds.size === 0 || completionCalled.current) return;
 
-    // Update physics optimizer state
+    profiler.mark('physics_start');
+    // Update physics optimizer state — только когда идёт симуляция
     physicsOptimizer.updateSimulationState(true, activeIds.size);
-    physicsOptimizer.updateCameraPosition(state.camera.position.toArray());
+    const cam = state.camera.position;
+    physicsOptimizer.updateCameraPosition([cam.x, cam.y, cam.z]);
 
     // Get optimized frame parameters
     const frameParams = physicsOptimizer.getFrameParams(activeIds.size);
 
     // Skip physics update on low-priority frames (adaptive frame rate)
-    if (!frameParams.shouldUpdatePhysics) return;
+    if (!frameParams.shouldUpdatePhysics) {
+      profiler.measure('frame_total', 'frame_start', 'total');
+      return;
+    }
 
     // Handle cascade delay (brief pause between layer activations for visual effect)
     if (cascadeWaiting.current) {
       cascadeDelayRef.current += delta * 1000;
-      if (cascadeDelayRef.current < 150) return; // 150ms pause before next layer falls
+      if (cascadeDelayRef.current < 150) {
+        profiler.measure('frame_total', 'frame_start', 'total');
+        return; // 150ms pause before next layer falls
+      }
       cascadeWaiting.current = false;
       cascadeDelayRef.current = 0;
     }
 
     simulateTime.current += delta * 1000;
-    if (simulateTime.current < 300) return;
+    if (simulateTime.current < 300) {
+      profiler.measure('frame_total', 'frame_start', 'total');
+      return;
+    }
 
     let allSettled = true;
-    const VELOCITY_THRESHOLD = frameParams.velocityThreshold;
+    const VT = frameParams.velocityThreshold;
+    const VT2 = VT * VT; // сравниваем квадраты — избегаем Math.sqrt на каждый блок
     for (const id of activeIds) {
       const rigid = rigidRefs.current[id];
       if (rigid) {
         const linVel = rigid.linvel();
         const angVel = rigid.angvel();
-        const linSpeed = Math.sqrt(linVel.x ** 2 + linVel.y ** 2 + linVel.z ** 2);
-        const angSpeed = Math.sqrt(angVel.x ** 2 + angVel.y ** 2 + angVel.z ** 2);
-        if (linSpeed > VELOCITY_THRESHOLD || angSpeed > VELOCITY_THRESHOLD) {
+        const linSpeed2 = linVel.x * linVel.x + linVel.y * linVel.y + linVel.z * linVel.z;
+        const angSpeed2 = angVel.x * angVel.x + angVel.y * angVel.y + angVel.z * angVel.z;
+        if (linSpeed2 > VT2 || angSpeed2 > VT2) {
           allSettled = false;
           break;
         }
       }
     }
+    profiler.measure('physics_check', 'physics_start', 'physics');
 
     // Use a more conservative timeout to prevent hanging (max 5 seconds)
     const maxTimeout = Math.min(frameParams.timeout, 5000);
     if (allSettled || simulateTime.current >= maxTimeout) {
+      profiler.mark('snapshot_start');
       // Snapshot current positions of dynamic blocks
       const workingBlocks = (cascadeBlocksRef.current || blocks).map(b => {
         if (activeIds.has(b.id)) {
           const rigid = rigidRefs.current[b.id];
           if (rigid) {
             const trans = rigid.translation();
-            const q = rigid.rotation();
-            const quaternion = new THREE.Quaternion(q.x, q.y, q.z, q.w);
-            const euler = new THREE.Euler().setFromQuaternion(quaternion);
-            return { ...b, position: [trans.x, trans.y, trans.z], rotation: [euler.x, euler.y, euler.z] };
+            const rot = rigid.rotation();
+            _q.set(rot.x, rot.y, rot.z, rot.w);
+            _euler.setFromQuaternion(_q);
+            return { ...b, position: [trans.x, trans.y, trans.z], rotation: [_euler.x, _euler.y, _euler.z] };
           }
         }
         return b;
       });
+      profiler.measure('snapshot', 'snapshot_start', 'logic');
 
       // Check if there's an unsupported layer above that should cascade
+      profiler.mark('cascade_check_start');
       const nextResult = findNextUnsupportedLayer(workingBlocks, activeIds);
+      profiler.measure('cascade_check', 'cascade_check_start', 'logic');
 
       if (nextResult !== null) {
         // ─── CASCADE: activate the next unsupported layer ───
@@ -543,6 +639,8 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
         onSimulationComplete(workingBlocks);
       }
     }
+
+    profiler.measure('frame_total', 'frame_start', 'total');
   });
 
   useEffect(() => {
@@ -562,10 +660,10 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
         const rigid = rigidRefs.current[b.id];
         if (rigid) {
           // Ensure block is fixed (not dynamic) when simulation ends
-          rigid.setBodyType(1, true); // 1 = fixed
+          rigid.setBodyType(1, true);
           rigid.setTranslation({ x: b.position[0], y: b.position[1], z: b.position[2] }, true);
-          const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(b.rotation[0], b.rotation[1], b.rotation[2]));
-          rigid.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }, true);
+          _q.setFromEuler(_euler.set(b.rotation[0], b.rotation[1], b.rotation[2]));
+          rigid.setRotation({ x: _q.x, y: _q.y, z: _q.z, w: _q.w }, true);
           rigid.setLinvel({ x: 0, y: 0, z: 0 }, true);
           rigid.setAngvel({ x: 0, y: 0, z: 0 }, true);
         }
@@ -667,8 +765,8 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
         <ParticleEffect position={movedBlockPos} enabled={particleBlockId !== null} duration={0.6} />
       )}
 
-      {/* Tower blocks — selected block shown as ghost (semi-transparent) */}
-      {blocks.map((b) => (
+      {/* Tower blocks — первые кадры загружаем батчами по 9 для снижения spike */}
+      {visibleBlocks.map((b) => (
         <Block key={b.id} id={b.id} position={b.position} rotation={b.rotation} color={b.color}
           onClick={onBlockClick} isSelected={b.id === selectedId}
           isGhost={b.id === selectedId && dropSlots && dropSlots.length > 0}
@@ -717,25 +815,26 @@ export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick,
 
   // Используем переданный maxDynamicBlocks или значение по умолчанию
   const effectiveMaxDynamicBlocks = maxDynamicBlocks ?? getDynamicBlockLimit();
-
   return (
-    <Physics key={restartKey} gravity={[0, -9.81, 0]} debug={false} timeStep={physicsSettings.timeStep}>
-      <Scene
-        blocks={blocks}
-        selectedId={selectedId}
-        onBlockClick={onBlockClick}
-        simulatingBlockIds={simulatingBlockIds}
-        onSimulationComplete={onSimulationComplete}
-        dropSlots={dropSlots}
-        onDropSlot={onDropSlot}
-        lastMovedBlockId={lastMovedBlockId}
-        lastExtractionPosition={lastExtractionPosition}
-        blockTheme={blockTheme}
-        envTheme={envTheme}
-        keyboardFocusId={keyboardFocusId}
-        lowPowerMode={lowPowerMode}
-        maxDynamicBlocks={effectiveMaxDynamicBlocks}
-      />
-    </Physics>
-  );
+      <Suspense fallback={null}>
+        <Physics key={restartKey} gravity={[0, -9.81, 0]} debug={false} timeStep={physicsSettings.timeStep}>
+          <Scene
+            blocks={blocks}
+            selectedId={selectedId}
+            onBlockClick={onBlockClick}
+            simulatingBlockIds={simulatingBlockIds}
+            onSimulationComplete={onSimulationComplete}
+            dropSlots={dropSlots}
+            onDropSlot={onDropSlot}
+            lastMovedBlockId={lastMovedBlockId}
+            lastExtractionPosition={lastExtractionPosition}
+            blockTheme={blockTheme}
+            envTheme={envTheme}
+            keyboardFocusId={keyboardFocusId}
+            lowPowerMode={lowPowerMode}
+            maxDynamicBlocks={effectiveMaxDynamicBlocks}
+          />
+        </Physics>
+      </Suspense>
+    );
 }
