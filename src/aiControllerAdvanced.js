@@ -196,14 +196,18 @@ export class MinimaxAI {
   }
 
   /**
-   * Оценить позицию
+   * Оценить позицию.
+   *
+   * Convention: lower score = better (safer). Both `risk` and `impact` are
+   * already in [0, 1] where 0 = safe, 1 = dangerous. `findBestMove` runs with
+   * `isMaximizing=false` and picks the lowest-scoring block — i.e. the safest.
+   * Mirrors the "lower risk wins" sign used in `chooseAIBlockAdvanced`.
    */
   evaluatePosition(blocks, selectedBlock) {
     const risk = evaluateBlockRisk(selectedBlock, blocks);
     const impact = evaluateTowerImpact(selectedBlock, blocks);
 
-    // Минимизировать риск и влияние (для AI)
-    return -(risk * 0.5 + impact * 0.5);
+    return risk * 0.5 + impact * 0.5;
   }
 }
 
