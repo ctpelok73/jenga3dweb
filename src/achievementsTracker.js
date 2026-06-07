@@ -1,28 +1,12 @@
 // ─── Achievements Tracker: unlockable achievements with localStorage ───
-// Tracks progress and unlocks achievements based on game events
+// Tracks progress and unlocks achievements based on game events.
+// Storage skeleton lives in `createPersistedStore`.
 
 import { ACHIEVEMENTS_EXTENDED } from './achievementsExtended';
-
-const ACHIEVEMENTS_KEY = 'jenga3d_achievements';
+import { createPersistedStore } from './storage/createPersistedStore';
 
 // ─── Achievement definitions ───
 export const ACHIEVEMENTS = ACHIEVEMENTS_EXTENDED;
-
-function loadAchievements() {
-  try {
-    const raw = localStorage.getItem(ACHIEVEMENTS_KEY);
-    if (!raw) return { unlocked: {}, stats: getDefaultStats() };
-    return JSON.parse(raw);
-  } catch {
-    return { unlocked: {}, stats: getDefaultStats() };
-  }
-}
-
-function saveAchievements(data) {
-  try {
-    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(data));
-  } catch { /* quota exceeded */ }
-}
 
 function getDefaultStats() {
   return {
@@ -43,23 +27,29 @@ function getDefaultStats() {
   };
 }
 
+const store = createPersistedStore({
+  key: 'jenga3d_achievements',
+  version: 1,
+  defaults: () => ({ unlocked: {}, stats: getDefaultStats() }),
+});
+
 export function getAchievementData() {
-  return loadAchievements();
+  return store.load();
 }
 
 export function getUnlockedAchievements() {
-  const data = loadAchievements();
+  const data = store.load();
   return ACHIEVEMENTS.filter((a) => data.unlocked[a.id]);
 }
 
 export function getLockedAchievements() {
-  const data = loadAchievements();
+  const data = store.load();
   return ACHIEVEMENTS.filter((a) => !data.unlocked[a.id]);
 }
 
 // ─── Update stats and check for new unlocks ───
 export function updateAchievementStats(statUpdates, existingData = null) {
-  const data = existingData || loadAchievements();
+  const data = existingData || store.load();
   const stats = { ...data.stats, ...statUpdates };
 
   // Check comeback condition
@@ -79,14 +69,14 @@ export function updateAchievementStats(statUpdates, existingData = null) {
   }
 
   data.stats = stats;
-  saveAchievements(data);
+  store.save(data);
 
   return { data, newUnlocks };
 }
 
 // ─── Record a move event ───
 export function recordMove(layer, selectionTimeMs) {
-  const data = loadAchievements();
+  const data = store.load();
   const stats = data.stats;
 
   stats.totalMoves += 1;
@@ -109,7 +99,7 @@ export function recordMove(layer, selectionTimeMs) {
 }
 
 export function recordCollapse(turns) {
-  const data = loadAchievements();
+  const data = store.load();
   const stats = data.stats;
 
   stats.totalGames += 1;
@@ -124,7 +114,7 @@ export function recordCollapse(turns) {
 }
 
 export function recordSuccess(turns) {
-  const data = loadAchievements();
+  const data = store.load();
   const stats = data.stats;
 
   stats.totalGames += 1;
@@ -138,16 +128,17 @@ export function recordSuccess(turns) {
 }
 
 export function resetAchievements() {
-  localStorage.removeItem(ACHIEVEMENTS_KEY);
+  store.reset();
 }
 
 /**
  * Сбросить счётчик consecutiveLosses для корректного отслеживания winStreak
  */
 export function resetConsecutiveLosses() {
-  const data = loadAchievements();
-  data.stats.consecutiveLosses = 0;
-  saveAchievements(data);
+  store.update((data) => {
+    data.stats.consecutiveLosses = 0;
+    return data;
+  });
 }
 
 /**
@@ -155,7 +146,7 @@ export function resetConsecutiveLosses() {
  * Не увеличивает totalGames — это делает только recordCollapse при завершении игры.
  */
 export function recordSuccessfulMove(turns) {
-  const data = loadAchievements();
+  const data = store.load();
   const stats = data.stats;
 
   // winStreak = количество успешных ходов подряд без падения

@@ -1,7 +1,8 @@
 // ─── Settings Tracker: localStorage-based persistent settings ───
-// Volume, move timer, difficulty, theme
+// Volume, move timer, difficulty, theme. Storage skeleton lives in
+// `createPersistedStore`.
 
-const SETTINGS_KEY = 'jenga3d_settings';
+import { createPersistedStore } from './storage/createPersistedStore';
 
 const DEFAULT_SETTINGS = {
   volume: 70,            // 0-100
@@ -11,42 +12,29 @@ const DEFAULT_SETTINGS = {
   environment: 'classic', // classic, space, beach, library — scene environment
 };
 
-function loadSettings() {
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return { ...DEFAULT_SETTINGS };
-    const parsed = JSON.parse(raw);
-    return { ...DEFAULT_SETTINGS, ...parsed };
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
-}
-
-function saveSettings(settings) {
-  try {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  } catch { /* quota exceeded — ignore */ }
-}
+const store = createPersistedStore({
+  key: 'jenga3d_settings',
+  version: 1,
+  defaults: () => ({ ...DEFAULT_SETTINGS }),
+});
 
 export function getSettings() {
-  return loadSettings();
+  return store.load();
 }
 
 export function updateSetting(key, value) {
-  const settings = loadSettings();
-  settings[key] = value;
-  saveSettings(settings);
-  return settings;
+  return store.update((settings) => {
+    settings[key] = value;
+    return settings;
+  });
 }
 
 export function updateAllSettings(newSettings) {
-  const settings = { ...loadSettings(), ...newSettings };
-  saveSettings(settings);
-  return settings;
+  return store.update((settings) => ({ ...settings, ...newSettings }));
 }
 
 export function resetSettings() {
-  saveSettings(DEFAULT_SETTINGS);
+  store.save({ ...DEFAULT_SETTINGS });
   return { ...DEFAULT_SETTINGS };
 }
 
@@ -55,7 +43,7 @@ export function resetSettings() {
 // normal: blocks at the same height as removed
 // hard: same height + layer below
 export function getDifficultyDynamicIds(blocks, selectedBlock, removedLayer) {
-  const settings = loadSettings();
+  const settings = store.load();
   const difficulty = settings.difficulty;
   const dynamicIds = new Set();
   
@@ -120,6 +108,6 @@ export const THEME_COLORS = {
 };
 
 export function getThemeColors() {
-  const settings = loadSettings();
+  const settings = store.load();
   return THEME_COLORS[settings.theme] || THEME_COLORS.classic;
 }

@@ -9,10 +9,19 @@
  */
 
 import { isFirebaseEnabled, submitScore, getOnlineLeaderboard, subscribeLeaderboard } from './firebaseService';
-import { TOWER_LAYERS } from './towerConfig';
+import { generateTower } from './domain/tower';
+import { createPersistedStore } from './storage/createPersistedStore';
 
-const DAILY_KEY = 'jenga3d_daily';
-const LEADERBOARD_KEY = 'jenga3d_daily_leaderboard';
+const stateStore = createPersistedStore({
+  key: 'jenga3d_daily',
+  version: 1,
+  defaults: () => ({}),
+});
+const leaderboardStore = createPersistedStore({
+  key: 'jenga3d_daily_leaderboard',
+  version: 1,
+  defaults: () => ({}),
+});
 const USERNAME_KEY = 'jenga3d_username';
 
 export function getPlayerName() {
@@ -79,50 +88,26 @@ export function getDailyChallenge() {
 }
 
 // ─── Generate deterministic tower from seed ───
-// Uses seeded random to vary block colors slightly, creating a unique visual pattern per day
-export function generateDailyTower(getThemeColors, BLOCK_H, LAYER_GAP, BLOCKS_PER_LAYER, STEP) {
+// Uses seeded random to pick a deterministic colour permutation per day from
+// the player's themed palette. The geometry is the same as the regular tower.
+export function generateDailyTower(getThemeColors) {
   const seed = getDailySeed();
   const rng = seededRandom(seed);
-  const colors = getThemeColors();
-  const blocks = [];
-  let id = 0;
-
-  for (let layer = 0; layer < TOWER_LAYERS; layer++) {
-    const y = layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
-    const isOdd = layer % 2 === 1;
-    const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
-    for (let b = 0; b < BLOCKS_PER_LAYER; b++) {
-      const offset = -STEP + b * STEP;
-      // Deterministic color selection using seeded RNG
-      const colorIndex = Math.floor(rng() * colors.length);
-      blocks.push({
-        id,
-        position: [isOdd ? offset : 0, y, isOdd ? 0 : offset],
-        rotation: rot,
-        color: colors[colorIndex],
-        layer,
-      });
-      id++;
-    }
-  }
-  return blocks;
+  const palette = getThemeColors();
+  // Build a deterministic colour stream the same length as the tower.
+  // generateTower takes colors[id % colors.length] — so we just hand it a
+  // pre-shuffled palette generated from the seed.
+  const colors = palette.map(() => palette[Math.floor(rng() * palette.length)]);
+  return generateTower({ colors });
 }
 
 // ─── Daily challenge state ───
 function loadDailyState() {
-  try {
-    const raw = localStorage.getItem(DAILY_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
+  return stateStore.load();
 }
 
 function saveDailyState(state) {
-  try {
-    localStorage.setItem(DAILY_KEY, JSON.stringify(state));
-  } catch { /* quota exceeded */ }
+  stateStore.save(state);
 }
 
 // ─── Check if challenge is completed ───
@@ -176,19 +161,11 @@ export async function recordDailyChallengeAttempt(turns, towerHeight, survived, 
 
 // ─── Leaderboard ───
 function loadLeaderboard() {
-  try {
-    const raw = localStorage.getItem(LEADERBOARD_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
+  return leaderboardStore.load();
 }
 
 function saveLeaderboard(lb) {
-  try {
-    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
-  } catch { /* quota exceeded */ }
+  leaderboardStore.save(lb);
 }
 
 async function addToLeaderboard(turns, towerHeight) {
@@ -240,6 +217,6 @@ export function subscribeOnlineLeaderboardToday(callback) {
 }
 
 export function resetDailyData() {
-  localStorage.removeItem(DAILY_KEY);
-  localStorage.removeItem(LEADERBOARD_KEY);
+  stateStore.reset();
+  leaderboardStore.reset();
 }
