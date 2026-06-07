@@ -1,6 +1,7 @@
 import * as THREE from 'three';
+import { textureCache, themeMapCache } from './blockTextureCache';
 
-const textureCache = new Map();
+export { clearTextureCache } from './blockTextureCache';
 
 function createTexture(canvas, isDataMap = false) {
   const texture = new THREE.CanvasTexture(canvas);
@@ -542,7 +543,6 @@ function generateRoughnessMap(theme, width = 256, height = 64) {
 }
 
 // Separate cache for theme-only maps (normalMap, roughnessMap don't depend on color)
-const themeMapCache = new Map();
 
 function getThemeMaps(theme) {
   if (themeMapCache.has(theme)) {
@@ -642,18 +642,6 @@ export function getBlockMaterialProps(theme, color) {
 
   textureCache.set(cacheKey, props);
   return props;
-}
-
-export function clearTextureCache() {
-  textureCache.forEach((props) => {
-    if (props.map) props.map.dispose();
-  });
-  textureCache.clear();
-  themeMapCache.forEach((maps) => {
-    if (maps.normalMap) maps.normalMap.dispose();
-    if (maps.roughnessMap) maps.roughnessMap.dispose();
-  });
-  themeMapCache.clear();
 }
 
 export const ENVIRONMENT_THEMES = {

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { getSettings, updateAllSettings } from '../settingsTracker';
 import { updateMasterVolume } from '../soundEngine';
-import { clearTextureCache } from '../blockTextures';
+import { clearTextureCache } from '../blockTextureCache';
 import { getAvailableSkins, getAvailableEnvThemes } from '../purchaseService';
 
 export default function SettingsPanel({ onClose, onSettingsChange }) {
