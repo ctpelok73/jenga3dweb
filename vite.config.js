@@ -67,7 +67,7 @@ export default defineConfig({
     }),
   ],
   build: {
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 2500, // increased limit to accommodate large rapier chunk
     minify: 'terser',
     sourcemap: false,
     target: 'es2020',
