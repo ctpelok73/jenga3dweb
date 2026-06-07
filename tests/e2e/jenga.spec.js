@@ -12,6 +12,34 @@ test('desktop can start, pause, and return to menu', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Jenga 3D/ })).toBeVisible();
 });
 
+test('back-to-menu mid-game does not throw uncaught errors', async ({ page }) => {
+  // Pins fix for the App.jsx aiTimersRef ReferenceError that fired on every restart.
+  // If clearRuntimeTimers references an undeclared identifier again, this catches it.
+  const errors = [];
+  page.on('pageerror', (err) => errors.push(err.message));
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(msg.text());
+  });
+
+  await page.addInitScript(() => localStorage.setItem('jenga3d_tutorial_done', '1'));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Начать игру' }).click();
+  await expect(page.getByRole('status', { name: 'Игровая панель' })).toBeVisible({ timeout: 30_000 });
+
+  // Open pause menu, then go back to main menu — this drives resetRoundState +
+  // clearRuntimeTimers, which is where the ReferenceError used to fire.
+  await page.getByRole('button', { name: 'Открыть меню паузы' }).click();
+  await page.getByRole('button', { name: /главное меню/i }).click();
+  await page.getByRole('button', { name: 'Выйти в меню' }).click();
+  await expect(page.getByRole('heading', { name: /Jenga 3D/ })).toBeVisible();
+
+  // Filter out unrelated dev-only noise (favicon, deprecation messages, etc.).
+  const realErrors = errors.filter(
+    (e) => !/favicon|deprecation|deprecated|ResizeObserver loop/i.test(e),
+  );
+  expect(realErrors, `Unexpected errors during restart flow:\n${realErrors.join('\n')}`).toEqual([]);
+});
+
 test('placeholder env does not inject analytics or ads scripts', async ({ page }) => {
   await page.goto('/');
   const scriptSources = await page.locator('script[src]').evaluateAll((scripts) => scripts.map((script) => script.src));
