@@ -20,8 +20,8 @@ export const WOOD_COLORS = [
 
 export const BLOCK_PHYSICS = {
   mass: 1.0,
-  restitution: 0.05,   // less bouncy — wood on wood
-  friction: 0.7,       // wood friction
-  linearDamping: 0.4,
-  angularDamping: 0.6,
+  restitution: 0.01,   // практически нет отскока — дерево на дереве
+  friction: 0.85,      // высокое трение — деревянные блоки не скользят
+  linearDamping: 0.6,  // гасит линейную скорость быстрее
+  angularDamping: 0.8, // гасит вращение быстрее
 };
