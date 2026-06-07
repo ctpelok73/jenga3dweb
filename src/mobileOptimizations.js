@@ -39,37 +39,45 @@ export function isTouchSupported() {
   );
 }
 
-// ─── Определение уровня устройства ───
+// ─── Определение уровня устройства — кэшируется один раз ───
+let _deviceLevelCache = null;
 export function getDeviceLevel() {
-  if (typeof window === 'undefined') return DEVICE_LEVELS.MID;
+  if (_deviceLevelCache) return _deviceLevelCache;
+  if (typeof window === 'undefined') return (_deviceLevelCache = DEVICE_LEVELS.MID);
 
   const { hardwareConcurrency, deviceMemory } = navigator;
   const gpuInfo = getGPUInfo();
 
   // Low-end: <4 cores, <3GB RAM
   if ((hardwareConcurrency || 0) < 4 || (deviceMemory || 0) < 3) {
-    return DEVICE_LEVELS.LOW;
+    return (_deviceLevelCache = DEVICE_LEVELS.LOW);
   }
 
   // High-end: >=8 cores, >=8GB RAM, современный GPU
   if ((hardwareConcurrency || 0) >= 8 && (deviceMemory || 0) >= 8 && gpuInfo.isModern) {
-    return DEVICE_LEVELS.HIGH;
+    return (_deviceLevelCache = DEVICE_LEVELS.HIGH);
   }
 
-  return DEVICE_LEVELS.MID;
+  return (_deviceLevelCache = DEVICE_LEVELS.MID);
 }
 
-// ─── Получение информации о GPU ───
+// ─── Получение информации о GPU — кэшируется один раз ───
+let _gpuInfoCache = null;
 function getGPUInfo() {
+  if (_gpuInfoCache) return _gpuInfoCache;
   if (typeof window === 'undefined' || !window.WebGLRenderingContext) {
-    return { isModern: true, renderer: 'unknown' };
+    return (_gpuInfoCache = { isModern: true, renderer: 'unknown' });
   }
 
+  // Переиспользуем уже существующий WebGL-контекст если он есть,
+  // иначе создаём временный canvas и сразу освобождаем его.
   const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
   if (!gl) {
-    return { isModern: false, renderer: 'no-webgl' };
+    return (_gpuInfoCache = { isModern: false, renderer: 'no-webgl' });
   }
 
   try {
@@ -78,20 +86,23 @@ function getGPUInfo() {
       const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
       const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
 
-      // Определяем "современные" GPU
       const modernGPUKeywords = ['Adreno', 'Mali', 'PowerVR', 'Apple', 'Intel', 'NVIDIA', 'AMD'];
       const lowEndKeywords = ['PowerVR SGX', 'Mali-400', 'Mali-450', 'Adreno 2xx', 'Adreno 3xx'];
 
       const isLowEnd = lowEndKeywords.some(k => renderer.includes(k));
       const isModern = modernGPUKeywords.some(k => renderer.includes(k)) && !isLowEnd;
 
-      return { isModern, renderer, vendor };
+      // Освобождаем контекст временного canvas
+      const ext = gl.getExtension('WEBGL_lose_context');
+      if (ext) ext.loseContext();
+
+      return (_gpuInfoCache = { isModern, renderer, vendor });
     }
   } catch (e) {
-    // Ignore errors
+    // ignore
   }
 
-  return { isModern: true, renderer: 'unknown' };
+  return (_gpuInfoCache = { isModern: true, renderer: 'unknown' });
 }
 
 // ─── Оценка производительности ───
