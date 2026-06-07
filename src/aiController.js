@@ -1,5 +1,6 @@
-import { BLOCKS_PER_LAYER, STEP, BLOCK_H, LAYER_GAP } from './towerConfig';
+import { BLOCKS_PER_LAYER, STEP } from './towerConfig';
 import { getSettings } from './settingsTracker';
+import { pickRandomDropSlot } from './domain/tower';
 
 export const AI_THINK_DELAY = 800;
 export const AI_MOVE_DELAY = 1200;
@@ -73,47 +74,6 @@ export function chooseAIBlock(blocks, topCompleteLayer) {
   return pick.block;
 }
 
-export function computeAIDropSlot(blocks, selectedBlock) {
-  const maxLayer = blocks.reduce((m, b) => Math.max(m, b.layer), 0);
-  const topLayerBlocks = blocks.filter(b => b.layer === maxLayer);
-
-  if (topLayerBlocks.length >= BLOCKS_PER_LAYER) {
-    const newLayer = maxLayer + 1;
-    const y = newLayer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
-    const isOdd = newLayer % 2 === 1;
-    const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
-    const s = Math.floor(Math.random() * BLOCKS_PER_LAYER);
-    const offset = -STEP + s * STEP;
-    return {
-      slotIndex: s,
-      isOdd,
-      position: [isOdd ? offset : 0, y, isOdd ? 0 : offset],
-      rotation: rot,
-      newLayer,
-    };
-  } else {
-    const y = maxLayer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
-    const isOdd = maxLayer % 2 === 1;
-    const rot = isOdd ? [0, Math.PI / 2, 0] : [0, 0, 0];
-    const occupiedSlots = topLayerBlocks.map(b => {
-      const val = isOdd ? b.position[0] : b.position[2];
-      return Math.round((val + STEP) / STEP);
-    });
-    const freeSlots = [];
-    for (let s = 0; s < BLOCKS_PER_LAYER; s++) {
-      if (!occupiedSlots.includes(s)) {
-        freeSlots.push(s);
-      }
-    }
-    if (freeSlots.length === 0) return null;
-    const s = freeSlots[Math.floor(Math.random() * freeSlots.length)];
-    const offset = -STEP + s * STEP;
-    return {
-      slotIndex: s,
-      isOdd,
-      position: [isOdd ? offset : 0, y, isOdd ? 0 : offset],
-      rotation: rot,
-      newLayer: maxLayer,
-    };
-  }
+export function computeAIDropSlot(blocks, _selectedBlock) {
+  return pickRandomDropSlot(blocks);
 }
