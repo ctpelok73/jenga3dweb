@@ -157,9 +157,11 @@ export default function GameScene({ blocks, selectedId, onBlockClick, simulating
     dpr: activeRenderSettings.dpr,
     gl: {
       antialias: activeRenderSettings.antialias,
-      powerPreference: effectiveLowPowerMode ? 'default' : 'high-performance',
+      powerPreference: 'default',
       stencil: false,
       depth: true,
+      // Явно запрашиваем WebGL2 — стабильнее на современных браузерах
+      failIfMajorPerformanceCaveat: false,
     },
     frameloop: 'always',
     performance: {
