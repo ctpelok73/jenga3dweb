@@ -148,7 +148,12 @@ export function ParticleEffect({ position, enabled = true, duration = 0.6 }) {
     const isDust = data.isDust;
 
     const gravity = -9.81;
-    const rotationSpeed = 0.8; // radians per second for subtle orbital rotation
+    const rotationSpeed = 0.8;
+
+    // Предвычисляем damping один раз за кадр (вместо 55 раз в цикле)
+    const dampingFactor = delta * 60;
+    const mainDamping = Math.pow(0.975, dampingFactor);
+    const dustDamping = Math.pow(0.985, dampingFactor);
 
     for (let i = 0; i < TOTAL_PARTICLES; i++) {
       const idx3 = i * 3;
@@ -163,9 +168,8 @@ export function ParticleEffect({ position, enabled = true, duration = 0.6 }) {
       const gFactor = dust ? 0.15 : 1.0;
       velocities[idx3 + 1] += gravity * gFactor * delta;
 
-      // Damping (dust fades slower / less damping)
-      const dampBase = dust ? 0.985 : 0.975;
-      const damping = Math.pow(dampBase, delta * 60);
+      // Damping (dust fades slower / less damping) — используем предвычисленные значения
+      const damping = dust ? dustDamping : mainDamping;
       velocities[idx3]     *= damping;
       velocities[idx3 + 1] *= damping;
       velocities[idx3 + 2] *= damping;
