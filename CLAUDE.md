@@ -37,9 +37,10 @@ Unit tests live in `src/test/` (jsdom env, `src/test/setup.js` clears localStora
 
 1. **UI / state machine** — `src/App.jsx` (top-level component) plus reducer hook `src/hooks/useGameReducer.js`
 2. **3D scene** — `src/GameScene.jsx` is a thin lazy boundary; `src/GameSceneWithPhysics.jsx` is the actual Three.js + Rapier scene
-3. **Game logic** — `src/aiController.js`, `src/aiControllerAdvanced.js`, `src/physicsOptimizer.js`, `src/towerConfig.js`
-4. **Persistence** — `src/{achievements,score,settings,dailyChallenge}Tracker.js` (localStorage)
-5. **Services** — `firebaseService`, `analyticsService`, `adService`, `purchaseService`, `shareService`, `soundEngine`
+3. **Domain (pure)** — `src/domain/tower.js` (geometry, drop slots, tower generation), `src/domain/collapse.js` (Y-threshold collapse check), `src/domain/dynamicBlocks.js` (mobile dynamic-block cap). No React, no app state — these are the single source of truth for tower/physics rules.
+4. **Game logic** — `src/aiController.js`, `src/aiControllerAdvanced.js`, `src/physicsOptimizer.js`, `src/towerConfig.js`
+5. **Persistence** — `src/{achievements,score,settings,dailyChallenge}Tracker.js` all delegate to `src/storage/createPersistedStore.js` — a factory with `{load, save, update, reset}` plus a `version` field and `migrate` hook for future schema changes. `getDifficultyDynamicIds` and `getThemeColors` also live in `settingsTracker.js`.
+6. **Services** — `firebaseService`, `analyticsService`, `adService`, `purchaseService`, `shareService`, `soundEngine`
 
 ### Data flow
 
@@ -76,10 +77,12 @@ Game state and side effects live in hooks consumed by `App.jsx`. When changing t
 
 ### Stability / collapse detection
 
-The collapse check is a **simple Y-coordinate threshold**, not a center-of-mass or tilt calculation. `isCollapsedBlock` (in `src/App.jsx:56`) returns true when:
+The collapse check is a **simple Y-coordinate threshold**, not a center-of-mass or tilt calculation. `isCollapsedBlock` (in `src/domain/collapse.js`) returns true when:
 
 - `block.position[1] < FALLEN_Y` (FALLEN_Y = -0.5), OR
 - For blocks with `layer >= 0`, when `position[1] < expectedY - COLLAPSE_DROP_THRESHOLD`, where `expectedY = layer*(BLOCK_H+LAYER_GAP) + BLOCK_H/2` and `COLLAPSE_DROP_THRESHOLD = (BLOCK_H+LAYER_GAP)*3 ≈ 0.93`
+
+The two consumers are `useGameSimulation` (post-physics check) and the `continueAfterCollapseUpdate` helper used by App.jsx's rewarded-video continue path.
 
 ### Lazy loading & build budget
 

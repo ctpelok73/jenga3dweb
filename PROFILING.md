@@ -112,9 +112,9 @@ system: avg=X.XXms, max=X.XXms, p95=X.XXms (N samples)
 **Symptom:** avg=5ms, max=12ms (physics spikes)
 
 **Fixes to try:**
-1. Lower `RAPIER_SUBSTEPS` in `towerConfig.js`
-2. Increase cascade delay from 150ms → 300ms
-3. Reduce dynamic block limit via `getDynamicBlockLimit()`
+1. Lower `maxDynamicBlocks` for the active device tier in `mobileOptimizations.js` (or rely on `capDynamicIdsForMobile` in `src/domain/dynamicBlocks.js`, already wired through `useGameSimulation`).
+2. Increase the post-move stabilization delay before the next AI tick (see `AI_THINK_DELAY` / `AI_MOVE_DELAY` in `src/aiController.js`).
+3. Tighten the velocity threshold in `physicsOptimizer.VelocityThresholdOptimizer` so simulation finishes earlier.
 
 ### High Memory Usage
 **Symptom:** Chrome shows >200MB for tab
