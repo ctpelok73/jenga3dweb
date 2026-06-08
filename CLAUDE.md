@@ -61,10 +61,12 @@ Turn flow: select block → execute → move block to top → physics runs → s
 
 Game state and side effects live in hooks consumed by `App.jsx`. When changing turn / selection / timer logic, edit these, not App.jsx:
 
-- `useGameReducer.js` — central `useReducer` store. ~25 fields (phase, blocks, selection, simulation, panel toggles, timer values, etc.). Action types include `EXECUTE_MOVE`, `RESET_ROUND`, `INIT_GAME`, `BACK_TO_MENU`, `SET_PHASE`, `SET_AI_THINKING`, `TOGGLE_PANEL`, `INCREMENT_RESTART_KEY`. Action creators (`setPhase`, `setBlocks`, `togglePanel`, …) are exported from the same file — App.jsx imports them as `* as gameActions` and wraps each in a small `useCallback` shim that keeps the legacy `setX(value)` call shape. Tutorial-seen state is read from `localStorage['jenga3d_tutorial_done']` on init.
+- `useGameReducer.js` — central `useReducer` store. ~25 fields (phase, blocks, selection, simulation, panel toggles, timer values, etc.). Action types include `EXECUTE_MOVE`, `RESET_ROUND`, `INIT_GAME`, `BACK_TO_MENU`, `SET_PHASE`, `SET_AI_THINKING`, `TOGGLE_PANEL`, `INCREMENT_RESTART_KEY`. Action creators (`setPhase`, `setBlocks`, `togglePanel`, …) are exported from the same file — App.jsx imports them as `* as gameActions` and wraps each in a small `useCallback` shim that keeps the legacy `setX(value)` call shape. Newer hooks dispatch directly via `gameActions.*` instead of going through shims. Tutorial-seen state is read from `localStorage['jenga3d_tutorial_done']` on init.
 - `useTimers.js` — move-timer countdown + speed-mode total countdown; auto-executes a move on move-timer expiry when a block is selected; calls `onGameOver` on speed-timer expiry. Returns `{moveTimeLeft, speedTimeLeft, startSpeedTimer, clearSpeedTimer}`.
-- `useAIPlayer.js` — runs the AI turn when `playerMode===3 && currentPlayer===1 && phase==='playing' && !simulatingBlockIds && !aiThinking`. Delegates choice to `aiControllerAdvanced.chooseAIBlockAdvanced` (or `minimaxAI` on hard difficulty). Owns its own `aiTimersRef` and cancels timers on dependency change — App.jsx must not reach into it.
+- `useAIPlayer.js` — runs the AI turn when `playerMode===3 && currentPlayer===1 && phase==='playing' && !simulatingBlockIds && !aiThinking`. Delegates choice to `aiControllerAdvanced.chooseAIBlockAdvanced` (or `minimaxAI` on hard difficulty). Owns its own `aiTimersRef` and cancels timers on dependency change — App.jsx must not reach into it. **Known debt:** `aiThinking` is a local `useState` in this hook, but `useGameReducer` also defines `SET_AI_THINKING` and a parallel `aiThinking` field. The reducer field is currently unused; the hook's `useState` is the source of truth. If you reset `aiThinking` from outside the hook (e.g. `resetRoundState`), call the returned `setAiThinking`.
 - `useKeyboardNavigation.js` — wires `keyboardController.js` into App; receives action callbacks (`onBlockClick`, `onMakeMove`, `onRestart`, `onBackToMenu`) and panel state, attaches a single `keydown` listener to `window`.
+- `useAchievementToasts.js` — owns the toast queue: `timersRef` for active `setTimeout` ids, `showAchievementNotification(unlocks)` to enqueue (3500 ms display, 300 ms gap), `clearToasts()` to cancel pending ones on round reset. Dispatches `gameActions.setAchievementToast` directly. The same `timersRef` is also used by `useGameSimulation` to schedule delayed game-over sound and screen shake — both side effects share one cancellation lifecycle, so a restart wipes everything cleanly.
+- `useGameSimulation.js` — owns `handleSimulationComplete`, the largest single side-effect block in the game. Called by `GameSceneWithPhysics` once Rapier reaches a stable state: detects collapse via `isCollapsedBlock`, fires audio / score / achievement / analytics / replay-save / daily-challenge events, swaps players, transitions to `gameOver`. Also exports a pure helper `continueAfterCollapseUpdate(prevBlocks)` used by App.jsx's `handleContinueAfterCollapse` (which stays in App because it needs the function-aware `setBlocks` shim).
 
 ### Tower & physics
 
@@ -130,3 +132,12 @@ Orbit camera at `[7, 4, 7]`, target `[0, 2.7, 0]`, FOV 60°, distance clamped to
 - Block selection is click-or-keyboard then commit; there is no drag-and-drop.
 - The shell on Windows is bash — use `/dev/null` and forward slashes when writing scripts referenced from npm tasks.
 
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

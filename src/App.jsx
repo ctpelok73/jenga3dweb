@@ -11,27 +11,29 @@ import SettingsPanel from './screens/SettingsPanel';
 import AchievementsPanel from './screens/AchievementsPanel';
 import { PLAYER_NAMES } from './styles';
 import { getTopCompleteLayer, getMaxLayer, getDropSlots, generateTower } from './domain/tower';
-import { isCollapsedBlock, FALLEN_Y } from './domain/collapse';
-import { playSelect, playPull, playPlace, playCollapse, playStabilize, playGameOver, playAchievementUnlock, resumeAudio } from './soundEngine';
-import { getBestScore, getTotalGames, getRecentHistory, recordGame } from './scoreTracker';
-import { initializeAnalytics, trackGameStart, trackGameOver, trackRewardedVideoReward } from './analyticsService';
+import { capDynamicIdsForMobile } from './domain/dynamicBlocks';
+import { playSelect, playPull, playGameOver, resumeAudio } from './soundEngine';
+import { recordGame } from './scoreTracker';
+import { initializeAnalytics, trackGameStart, trackRewardedVideoReward } from './analyticsService';
 import { initAdSDK, isAdFree } from './adService';
-import { recordMove, recordCollapse, recordSuccessfulMove } from './achievementsTracker';
+import { recordMove } from './achievementsTracker';
 import { getSettings, getDifficultyDynamicIds, getThemeColors } from './settingsTracker';
 import { cycleBlock, cycleInLayer, getSelectableBlocks, jumpToLayer } from './keyboardController';
 import DailyChallengePanel from './DailyChallengePanel';
-import { generateDailyTower, recordDailyChallengeAttempt } from './dailyChallengeTracker';
+import { generateDailyTower } from './dailyChallengeTracker';
 import PurchasePanel from './PurchasePanel';
 import { isPremiumStoreAvailable, isRemoveAdsPurchased } from './purchaseService';
 import { computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from './aiController';
 import { chooseAIBlockAdvanced, aiPersonality, minimaxAI } from './aiControllerAdvanced';
 import { useTouchGestures } from './touchGestureController';
 import { useMobileOptimizations } from './mobileOptimizations';
-import { saveGameReplay, generateGameId, getChallengeFromUrl } from './shareService';
+import { generateGameId, getChallengeFromUrl } from './shareService';
 import useAIPlayer from './hooks/useAIPlayer';
 import useKeyboardNavigation from './hooks/useKeyboardNavigation';
 import useTimers from './hooks/useTimers';
 import useGameReducer, * as gameActions from './hooks/useGameReducer';
+import useAchievementToasts from './hooks/useAchievementToasts';
+import useGameSimulation, { continueAfterCollapseUpdate } from './hooks/useGameSimulation';
 
 const GameScene = lazy(() => import('./GameScene'));
 
@@ -57,37 +59,6 @@ function SceneLoadingFallback() {
 
 function generateThemedTower() {
   return generateTower({ colors: getThemeColors() });
-}
-
-// ─── Функция ограничения динамических блоков для мобильных устройств ───
-// Использует maxDynamicBlocks из настроек рендеринга
-function capDynamicIdsForMobile(blocks, dynamicIds, moveBlock, removedLayer, maxDynamicBlocks = 7) {
-  if (!dynamicIds || dynamicIds.size <= maxDynamicBlocks) return dynamicIds;
-
-  const extractionX = moveBlock.position[0];
-  const extractionZ = moveBlock.position[2];
-  const candidates = blocks
-    .filter((block) => dynamicIds.has(block.id))
-    .map((block) => {
-      const dx = block.position[0] - extractionX;
-      const dz = block.position[2] - extractionZ;
-      return {
-        id: block.id,
-        selected: block.id === moveBlock.id ? 0 : 1,
-        layerDistance: Math.abs(block.layer - removedLayer),
-        horizontalDistance: Math.sqrt(dx * dx + dz * dz),
-      };
-    })
-    .sort((a, b) => (
-      a.selected - b.selected ||
-      a.layerDistance - b.layerDistance ||
-      a.horizontalDistance - b.horizontalDistance ||
-      a.id - b.id
-    ));
-
-  const capped = new Set(candidates.slice(0, maxDynamicBlocks).map((item) => item.id));
-  capped.add(moveBlock.id);
-  return capped;
 }
 
 function App() {
@@ -154,7 +125,6 @@ function App() {
   }, []);
 
   const selectionTimeRef = useRef(null);
-  const achievementToastTimers = useRef([]);
   const latestTurnCountRef = useRef(0);
   const executeMoveRef = useRef(null);
   const blocksRef = useRef(null);
@@ -165,10 +135,11 @@ function App() {
   const { shouldOptimize, renderSettings, deviceLevel, maxDynamicBlocks } = useMobileOptimizations();
   const [currentSettings, setCurrentSettings] = useState(() => getSettings());
 
-  const clearRuntimeTimers = useCallback(() => {
-    achievementToastTimers.current.forEach(id => clearTimeout(id));
-    achievementToastTimers.current = [];
-  }, []);
+  // Achievement toast queue lives in its own hook. timersRef is also used by
+  // handleSimulationComplete to schedule delayed game-over sound and screen
+  // shake — both share the same cancellation lifecycle.
+  const { showAchievementNotification, clearToasts, timersRef: achievementToastTimers } =
+    useAchievementToasts(dispatch);
 
   const resetRoundState = useCallback(() => {
     setSelectedId(null);
@@ -185,8 +156,8 @@ function App() {
     selectionTimeRef.current = null;
     replayMovesRef.current = [];
     gameIdRef.current = generateGameId();
-    clearRuntimeTimers();
-  }, [clearRuntimeTimers]);
+    clearToasts();
+  }, [clearToasts]);
 
   const towerHeight = useMemo(() => getMaxLayer(blocks) + 1, [blocks]);
 
@@ -220,28 +191,6 @@ function App() {
         setMessage('Вызов от друга принят!');
       }
     } catch (e) { /* ignore */ }
-  }, []);
-
-  const showAchievementNotification = useCallback((newUnlocks) => {
-    if (newUnlocks && newUnlocks.length > 0) {
-      achievementToastTimers.current.forEach(id => clearTimeout(id));
-      achievementToastTimers.current = [];
-      playAchievementUnlock();
-      let idx = 0;
-      const showNext = () => {
-        if (idx < newUnlocks.length) {
-          setAchievementToast(newUnlocks[idx]);
-          idx++;
-          const t1 = setTimeout(() => {
-            setAchievementToast(null);
-            const t2 = setTimeout(showNext, 300);
-            achievementToastTimers.current.push(t2);
-          }, 3500);
-          achievementToastTimers.current.push(t1);
-        }
-      };
-      showNext();
-    }
   }, []);
 
   const handleSpeedTimeout = useCallback(() => {
@@ -512,7 +461,7 @@ function App() {
   });
 
   const handleContinueAfterCollapse = useCallback(() => {
-    setBlocks(prevBlocks => prevBlocks.filter(b => !isCollapsedBlock(b)));
+    setBlocks((prevBlocks) => continueAfterCollapseUpdate(prevBlocks));
     setPhase(PHASE_PLAYING);
     setMessage('🔄 Продолжаем! Башня стабилизирована.');
     setContinuedAfterCollapse(true);
@@ -520,100 +469,18 @@ function App() {
     trackRewardedVideoReward(true);
   }, []);
 
-  const handleSimulationComplete = useCallback(async (updatedBlocks) => {
-    let hasCollapsed = false;
-    for (const b of updatedBlocks) {
-      if (isCollapsedBlock(b)) {
-        hasCollapsed = true;
-        break;
-      }
-    }
-
-    const cleanedBlocks = updatedBlocks.filter(b => b.position[1] >= FALLEN_Y);
-    setBlocks(cleanedBlocks);
-    setSimulatingBlockIds(null);
-
-    const currentTurnCount = latestTurnCountRef.current;
-
-    if (hasCollapsed) {
-      playCollapse();
-      setAiThinking(false);
-      const t1 = setTimeout(() => playGameOver(), 300);
-      achievementToastTimers.current.push(t1);
-      recordGame(currentTurnCount, true);
-      const best = getBestScore();
-      const isNewRecord = currentTurnCount > best;
-      trackGameOver(currentTurnCount, best, isNewRecord);
-
-      const { newUnlocks } = recordCollapse(currentTurnCount);
-      if (newUnlocks && newUnlocks.length > 0) {
-        const t2 = setTimeout(() => showAchievementNotification(newUnlocks), 1500);
-        achievementToastTimers.current.push(t2);
-      }
-
-      if (isDailyChallengeMode) {
-        let maxLayer = 0;
-        for (const b of updatedBlocks) if (b.layer > maxLayer) maxLayer = b.layer;
-        const currentHeight = maxLayer + 1;
-        const challengeResult = await recordDailyChallengeAttempt(currentTurnCount, currentHeight, false);
-        if (challengeResult.completed) {
-          setAnnouncement('Челлендж дня выполнен! 🎉');
-        }
-      }
-
-      // Save replay for this game
-      if (replayMovesRef.current.length > 0) {
-        try {
-          saveGameReplay(gameIdRef.current, replayMovesRef.current, {
-            totalMoves: currentTurnCount,
-            collapsed: true,
-            playerMode,
-            date: Date.now(),
-          });
-        } catch (e) { /* ignore storage errors */ }
-      }
-
-      setScreenShake(true);
-      const shakeTimer = setTimeout(() => setScreenShake(false), 600);
-      achievementToastTimers.current.push(shakeTimer);
-
-      setPhase(PHASE_GAME_OVER);
-    } else {
-      playStabilize();
-      const t3 = setTimeout(() => playPlace(), 150);
-      achievementToastTimers.current.push(t3);
-
-      // Сбрасываем consecutiveLosses и обновляем winStreak при успешной партии
-      const { newUnlocks: successUnlocks } = recordSuccessfulMove(currentTurnCount);
-      if (successUnlocks && successUnlocks.length > 0) {
-        const t4 = setTimeout(() => showAchievementNotification(successUnlocks), 300);
-        achievementToastTimers.current.push(t4);
-      }
-
-      if (isDailyChallengeMode) {
-        let maxLayer = 0;
-        for (const b of cleanedBlocks) if (b.layer > maxLayer) maxLayer = b.layer;
-        const currentHeight = maxLayer + 1;
-        const challengeResult = await recordDailyChallengeAttempt(currentTurnCount, currentHeight, true);
-        if (challengeResult.completed) {
-          setAnnouncement('Челлендж дня выполнен! 🎉');
-        }
-      }
-
-      if (playerMode === 2) {
-        const nextPlayer = currentPlayer === 0 ? 1 : 0;
-        setCurrentPlayer(nextPlayer);
-        setMessage(`Ход: ${PLAYER_NAMES[nextPlayer]}. Выберите блок.`);
-      } else if (playerMode === 3) {
-        setAiThinking(false);
-        const nextPlayer = currentPlayer === 0 ? 1 : 0;
-        setCurrentPlayer(nextPlayer);
-        setMessage(nextPlayer === 1 ? '🤖 ИИ думает...' : `Ход: ${PLAYER_NAMES[0]}. Выберите блок.`);
-      } else {
-        setMessage('Выберите блок.');
-      }
-    }
-  }, [playerMode, currentPlayer, showAchievementNotification, isDailyChallengeMode]);
+  const { handleSimulationComplete } = useGameSimulation({
+    dispatch,
+    playerMode,
+    currentPlayer,
+    isDailyChallengeMode,
+    setAiThinking,
+    showAchievementNotification,
+    timersRef: achievementToastTimers,
+    latestTurnCountRef,
+    replayMovesRef,
+    gameIdRef,
+  });
 
   const handleSettingsChange = useCallback(() => {
     setCurrentSettings(getSettings());
