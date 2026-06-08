@@ -8,3 +8,9 @@ test-results/
 playwright-report/
 .kilo/
 .hermes/
+
+# graphify — machine-local artifacts (the graph itself IS committed, see README "Team setup")
+graphify-out/cost.json
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+graphify-out/2*/
