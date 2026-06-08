@@ -1,15 +1,16 @@
-# Graph Report - .  (2026-06-08)
+# Graph Report - jenga  (2026-06-08)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 82 files · ~41,337 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 628 nodes · 1214 edges · 25 communities (20 shown, 5 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 67 edges (avg confidence: 0.85)
+- 616 nodes · 1192 edges · 33 communities (24 shown, 9 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fbc3fa05`
+- Built from commit: `c27b54e1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -38,71 +39,73 @@
 - [[_COMMUNITY_E2E Spec File|E2E Spec File]]
 - [[_COMMUNITY_App.handleBlockClick (orphan)|App.handleBlockClick (orphan)]]
 - [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 32|Community 32]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `App()` - 51 edges
 2. `MobileOptimizationManager` - 17 edges
 3. `Achievements` - 14 edges
-4. `check-build-budget script` - 13 edges
-5. `trackEvent()` - 11 edges
-6. `getBlockMaterialProps()` - 11 edges
-7. `getSettings()` - 11 edges
-8. `ReplayPlayer` - 11 edges
-9. `Architecture` - 11 edges
-10. `Performance Profiling Guide — Jenga 3D` - 11 edges
+4. `Architecture` - 13 edges
+5. `Performance Profiling Guide — Jenga 3D` - 11 edges
+6. `trackEvent()` - 11 edges
+7. `getBlockMaterialProps()` - 11 edges
+8. `getSettings()` - 11 edges
+9. `ReplayPlayer` - 11 edges
+10. `check-build-budget script` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SettingsPanel()` --semantically_similar_to--> `Achievements`  [INFERRED] [semantically similar]
   src/screens/SettingsPanel.jsx → CLAUDE.md
-- `App.jsx (top-level component)` --implements--> `Turn flow`  [INFERRED]
-  src/App.jsx → CLAUDE.md
-- `GameSceneWithPhysics` --conceptually_related_to--> `Collapse detection (Y-threshold)`  [INFERRED]
-  src/GameSceneWithPhysics.jsx → CLAUDE.md
 - `GitHub Actions CI` --references--> `package.json (Jenga 3D)`  [EXTRACTED]
   .github/workflows/ci.yml → package.json
-- `manualChunks splitter` --implements--> `Lazy loading + build budget invariant`  [INFERRED]
-  vite.config.js → CLAUDE.md
+- `GitHub Actions CI` --calls--> `check-build-budget script`  [EXTRACTED]
+  .github/workflows/ci.yml → scripts/check-build-budget.mjs
+- `getDailyChallenge()` --semantically_similar_to--> `generateTower()`  [INFERRED] [semantically similar]
+  src/dailyChallengeTracker.js → src/domain/tower.js
+- `Vercel Deployment Config` --references--> `package.json (Jenga 3D)`  [EXTRACTED]
+  vercel.json → package.json
 
 ## Import Cycles
 - None detected.
 
-## Communities (25 total, 5 thin omitted)
+## Communities (33 total, 9 thin omitted)
 
 ### Community 0 - "Mobile Optimization & Lazy Boundary"
-Cohesion: 0.07
-Nodes (40): aiController, AI test family, Block stability heuristics (AI scoring), EVEN_ROTATION, generateTower(), getDropSlots(), getFreeSlots(), getLayerRotation() (+32 more)
+Cohesion: 0.09
+Nodes (28): aiController, AI test family, Block stability heuristics (AI scoring), Unit test family (Vitest), chooseAIBlock(), countBlocksInLayer(), isCenterBlock(), isSideBlock() (+20 more)
 
 ### Community 1 - "Audio, Keyboard & Collapse Detection"
-Cohesion: 0.10
-Nodes (33): COLLAPSE_DROP_THRESHOLD, FALLEN_Y, isCollapsedBlock(), capDynamicIdsForMobile(), aiTimersRef ReferenceError regression spec, desktop start/pause/menu spec, continueAfterCollapseUpdate(), useTimers() (+25 more)
-
-### Community 2 - "Settings, Purchases & Persistence Factory"
-Cohesion: 0.06
-Nodes (20): Lazy 3D boundary pattern (heavy chunks excluded from initial bundle), App.executeMove, ErrorBoundary, GameScene(), GameScene.handleCanvasCreated (WebGL context-loss handler), LoadingOverlay(), GameSceneWithPhysics default export, DEVICE_LEVELS (+12 more)
+Cohesion: 0.08
+Nodes (47): App.jsx (top-level component), useGameReducer hook, useGameSimulation hook, useTimers hook, COLLAPSE_DROP_THRESHOLD, FALLEN_Y, isCollapsedBlock(), capDynamicIdsForMobile() (+39 more)
 
 ### Community 3 - "Game State Reducer"
-Cohesion: 0.09
-Nodes (28): Achievements, localStorage tracker pattern, theme_color, SettingsPanel(), UIPanel(), getAchievementById(), getAchievementCategories(), getAchievementProgress() (+20 more)
+Cohesion: 0.06
+Nodes (49): Achievements, localStorage tracker pattern, Persistence test family, theme_color, SettingsPanel(), UIPanel(), getAchievementById(), getAchievementCategories() (+41 more)
 
 ### Community 4 - "AI Controller & Difficulty"
 Cohesion: 0.05
-Nodes (41): check-build-budget script, Heavy chunks: rapier, r3f, three, firebase, Lazy loading + build budget invariant, PWA installable offline app, Vercel security headers (CSP-like), index.html (SPA shell), package.json (Jenga 3D), scripts (+33 more)
+Nodes (40): check-build-budget script, Heavy chunks: rapier, r3f, three, firebase, PWA installable offline app, Vercel security headers (CSP-like), index.html (SPA shell), package.json (Jenga 3D), scripts, build (+32 more)
 
 ### Community 5 - "Block Textures & Physics Hand-off"
-Cohesion: 0.06
-Nodes (25): AI, Architecture, Camera & rendering, Commands, Data flow, graphify, Layers, Notes (+17 more)
+Cohesion: 0.17
+Nodes (14): AI, Architecture, Camera & rendering, Commands, Data flow, graphify, Hooks layer (`src/hooks/`), Layers (+6 more)
 
 ### Community 6 - "Daily Challenge & Firebase Leaderboard"
 Cohesion: 0.06
 Nodes (10): initialState, panelKeyMap, roundResetFields, setShowAchievements(), setShowDailyChallenge(), setShowPauseMenu(), setShowPurchase(), setShowSettings() (+2 more)
 
 ### Community 7 - "Replay, Share & Game Over Screen"
-Cohesion: 0.11
-Nodes (30): SettingsPanel, clearTextureCache(), textureCache, themeMapCache, createTexture(), ENVIRONMENT_THEMES, generateBambooTexture(), generateCandyTexture() (+22 more)
+Cohesion: 0.15
+Nodes (14): getEnvironmentTheme(), Block, DropSlot, _euler, GroundCollider(), GroundSurface(), _q, Scene() (+6 more)
 
 ### Community 8 - "NPM Package Manifest"
-Cohesion: 0.06
-Nodes (32): Before recommending from memory, Bug Fixing Protocol, Communication Style, Core Mission, How to save memories, Implementation Rules, Memory and other forms of persistence, MEMORY.md (+24 more)
+Cohesion: 0.11
+Nodes (18): Before recommending from memory, Bug Fixing Protocol, Communication Style, Core Mission, How to save memories, Implementation Rules, Memory and other forms of persistence, MEMORY.md (+10 more)
 
 ### Community 9 - "Build Config & PWA Shell"
 Cohesion: 0.14
@@ -110,31 +113,27 @@ Nodes (30): addToLeaderboard(), CHALLENGE_TYPES, dateToSeed(), generateDailyTowe
 
 ### Community 10 - "Achievements System & UI"
 Cohesion: 0.15
-Nodes (23): env-gated optional service pattern, placeholder env analytics/ads gating spec, AdBanner(), hideBannerAd(), initAdSDK(), isAdFree(), isBannerAdConfigured(), isRewardedAdConfigured() (+15 more)
-
-### Community 11 - "Analytics & Ads Services"
-Cohesion: 0.10
-Nodes (12): Persistence test family, Unit test family (Vitest), mobile gesture smoke spec, normalizeEventName(), useTouchGestures(), test/achievements.test.js, test/collapse.test.js, test/keyboardController.test.js (+4 more)
+Nodes (21): env-gated optional service pattern, placeholder env analytics/ads gating spec, AdBanner(), hideBannerAd(), initAdSDK(), isAdFree(), isBannerAdConfigured(), isRewardedAdConfigured() (+13 more)
 
 ### Community 12 - "Touch Gestures & Test Setup"
 Cohesion: 0.07
 Nodes (27): author, dependencies, firebase, react, react-dom, @react-three/drei, @react-three/fiber, @react-three/rapier (+19 more)
 
 ### Community 13 - "Physics Cascade Simulation Loop"
-Cohesion: 0.12
-Nodes (10): decodeTowerConfig(), encodeTowerConfig(), generateChallengeLink(), generateGameId(), generateShareLink(), getChallengeFromUrl(), listGameReplays(), _pruneReplays() (+2 more)
+Cohesion: 0.13
+Nodes (8): decodeTowerConfig(), encodeTowerConfig(), generateChallengeLink(), generateShareLink(), getChallengeFromUrl(), listGameReplays(), _pruneReplays(), ReplayPlayer
 
 ### Community 14 - "Project Documentation & Agent Config"
-Cohesion: 0.16
-Nodes (20): getAvailableEnvThemes(), getAvailableSkins(), getItemStatus(), getPremiumItems(), getPurchaseStatus(), isEnvThemesPurchased(), isPremiumStoreAvailable(), isPurchased() (+12 more)
+Cohesion: 0.27
+Nodes (16): SettingsPanel, clearTextureCache(), textureCache, themeMapCache, createTexture(), ENVIRONMENT_THEMES, generateBambooTexture(), generateCandyTexture() (+8 more)
 
 ### Community 15 - "Tower Geometry Domain"
 Cohesion: 0.13
 Nodes (12): Cascade collapse simulation flow, setSimulation(), App.handleSimulationComplete, Scene.findNextUnsupportedLayer (cascade detector), Scene useFrame settling loop, main.jsx root render, profiler (singleton), AdaptiveFrameRateController (+4 more)
 
 ### Community 16 - "Performance Profiler"
-Cohesion: 0.10
-Nodes (19): 1. **Physics Extraction (Worst Case)**, 2. **Rendering (Baseline)**, 3. **AI Decision-Making**, 4. **Mobile Performance**, AI Too Slow, Architecture, Available Metrics, Common Issues & Fixes (+11 more)
+Cohesion: 0.06
+Nodes (22): main.jsx entry point, 1. **Physics Extraction (Worst Case)**, 2. **Rendering (Baseline)**, 3. **AI Decision-Making**, 4. **Mobile Performance**, AI Too Slow, Architecture, Available Metrics (+14 more)
 
 ### Community 17 - "Vercel Deploy Config"
 Cohesion: 0.29
@@ -144,25 +143,41 @@ Nodes (6): buildCommand, framework, headers, installCommand, outputDirectory, re
 Cohesion: 1.00
 Nodes (3): Jenga 3D logo concept (stacked wooden block tower on blue rounded square with JENGA wordmark), icon-192.svg (Jenga tower icon, 192x192), icon-512.svg (Jenga tower icon, 512x512)
 
+### Community 25 - "Community 25"
+Cohesion: 0.24
+Nodes (15): EVEN_ROTATION, generateTower(), getDropSlots(), getFreeSlots(), getLayerRotation(), getLayerY(), getOccupiedSlots(), getSlotIndexFromPosition() (+7 more)
+
+### Community 26 - "Community 26"
+Cohesion: 0.26
+Nodes (10): GameScene (lazy boundary), GameSceneWithPhysics, getDeviceLevel(), getDynamicBlockLimit(), getGPUInfo(), getPerformanceScore(), getPhysicsSettingsForMobile(), isMobileDevice() (+2 more)
+
+### Community 27 - "Community 27"
+Cohesion: 0.17
+Nodes (6): ErrorBoundary, LoadingOverlay(), DEVICE_LEVELS, RENDER_QUALITY, WasmLoader class, wasmLoader (singleton)
+
+### Community 29 - "Community 29"
+Cohesion: 0.40
+Nodes (5): Lazy 3D boundary pattern (heavy chunks excluded from initial bundle), App.executeMove, GameScene(), GameScene.handleCanvasCreated (WebGL context-loss handler), GameSceneWithPhysics default export
+
 ## Knowledge Gaps
-- **150 isolated node(s):** `PreToolUse`, `allow`, `name`, `version`, `private` (+145 more)
+- **146 isolated node(s):** `Layers`, `Data flow`, `Hooks layer (`src/hooks/`)`, `Tower & physics`, `Stability / collapse detection` (+141 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Architecture` connect `Block Textures & Physics Hand-off` to `NPM Package Manifest`, `Game State Reducer`?**
-  _High betweenness centrality (0.247) - this node is a cross-community bridge._
-- **Why does `Achievements` connect `Game State Reducer` to `Audio, Keyboard & Collapse Detection`, `Block Textures & Physics Hand-off`?**
-  _High betweenness centrality (0.200) - this node is a cross-community bridge._
-- **Why does `Lazy loading & build budget` connect `Block Textures & Physics Hand-off` to `AI Controller & Difficulty`?**
-  _High betweenness centrality (0.157) - this node is a cross-community bridge._
+- **Why does `theme_color` connect `Game State Reducer` to `AI Controller & Difficulty`?**
+  _High betweenness centrality (0.195) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `App()` (e.g. with `Lazy 3D boundary pattern (heavy chunks excluded from initial bundle)` and `App.handleSimulationComplete`) actually correct?**
   _`App()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `Achievements` (e.g. with `AriaAnnouncer.jsx` and `SettingsPanel()`) actually correct?**
   _`Achievements` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `PreToolUse`, `allow`, `name` to the rest of the system?**
-  _155 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Layers`, `Data flow`, `Hooks layer (`src/hooks/`)` to the rest of the system?**
+  _149 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Mobile Optimization & Lazy Boundary` be split into smaller, more focused modules?**
-  _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08748615725359911 - nodes in this community are weakly interconnected._
+- **Should `Audio, Keyboard & Collapse Detection` be split into smaller, more focused modules?**
+  _Cohesion score 0.07832167832167833 - nodes in this community are weakly interconnected._
+- **Should `Game State Reducer` be split into smaller, more focused modules?**
+  _Cohesion score 0.06252587991718427 - nodes in this community are weakly interconnected._

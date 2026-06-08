@@ -4,12 +4,462 @@
   "graph": {},
   "nodes": [
     {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "claude",
+      "community": 5,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "claude_claude_md",
+      "community": 5,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "Commands",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "claude_commands",
+      "community": 5,
+      "norm_label": "commands"
+    },
+    {
+      "label": "Architecture",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "claude_architecture",
+      "community": 5,
+      "norm_label": "architecture"
+    },
+    {
+      "label": "Layers",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "claude_layers",
+      "community": 5,
+      "norm_label": "layers"
+    },
+    {
+      "label": "Data flow",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "claude_data_flow",
+      "community": 5,
+      "norm_label": "data flow"
+    },
+    {
+      "label": "Hooks layer (`src/hooks/`)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L61",
+      "_origin": "ast",
+      "id": "claude_hooks_layer_src_hooks",
+      "community": 5,
+      "norm_label": "hooks layer (`src/hooks/`)"
+    },
+    {
+      "label": "Tower & physics",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "claude_tower_physics",
+      "community": 5,
+      "norm_label": "tower & physics"
+    },
+    {
+      "label": "Stability / collapse detection",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L78",
+      "_origin": "ast",
+      "id": "claude_stability_collapse_detection",
+      "community": 5,
+      "norm_label": "stability / collapse detection"
+    },
+    {
+      "label": "Lazy loading & build budget",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L87",
+      "_origin": "ast",
+      "id": "claude_lazy_loading_build_budget",
+      "community": 5,
+      "norm_label": "lazy loading & build budget"
+    },
+    {
+      "label": "Performance profiler",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L99",
+      "_origin": "ast",
+      "id": "claude_performance_profiler",
+      "community": 5,
+      "norm_label": "performance profiler"
+    },
+    {
+      "label": "AI",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L113",
+      "_origin": "ast",
+      "id": "claude_ai",
+      "community": 5,
+      "norm_label": "ai"
+    },
+    {
+      "label": "Achievements",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L117",
+      "_origin": "ast",
+      "id": "claude_achievements",
+      "community": 3,
+      "norm_label": "achievements"
+    },
+    {
+      "label": "Camera & rendering",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L121",
+      "_origin": "ast",
+      "id": "claude_camera_rendering",
+      "community": 5,
+      "norm_label": "camera & rendering"
+    },
+    {
+      "label": "Performance targets",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L125",
+      "_origin": "ast",
+      "id": "claude_performance_targets",
+      "community": 5,
+      "norm_label": "performance targets"
+    },
+    {
+      "label": "Notes",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L131",
+      "_origin": "ast",
+      "id": "claude_notes",
+      "community": 5,
+      "norm_label": "notes"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L138",
+      "_origin": "ast",
+      "id": "claude_graphify",
+      "community": 5,
+      "norm_label": "graphify"
+    },
+    {
+      "label": "PROFILING.md",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "profiling",
+      "community": 16,
+      "norm_label": "profiling.md"
+    },
+    {
+      "label": "Performance Profiling Guide \u2014 Jenga 3D",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "profiling_performance_profiling_guide_jenga_3d",
+      "community": 16,
+      "norm_label": "performance profiling guide \u2014 jenga 3d"
+    },
+    {
+      "label": "Architecture",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "profiling_architecture",
+      "community": 16,
+      "norm_label": "architecture"
+    },
+    {
+      "label": "Quick Start (Browser DevTools)",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "profiling_quick_start_browser_devtools",
+      "community": 16,
+      "norm_label": "quick start (browser devtools)"
+    },
+    {
+      "label": "Expected Performance Budget (60 FPS = 16.67ms/frame)",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "profiling_expected_performance_budget_60_fps_16_67ms_frame",
+      "community": 16,
+      "norm_label": "expected performance budget (60 fps = 16.67ms/frame)"
+    },
+    {
+      "label": "What to Profile",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "profiling_what_to_profile",
+      "community": 16,
+      "norm_label": "what to profile"
+    },
+    {
+      "label": "1. **Physics Extraction (Worst Case)**",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "profiling_1_physics_extraction_worst_case",
+      "community": 16,
+      "norm_label": "1. **physics extraction (worst case)**"
+    },
+    {
+      "label": "2. **Rendering (Baseline)**",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "profiling_2_rendering_baseline",
+      "community": 16,
+      "norm_label": "2. **rendering (baseline)**"
+    },
+    {
+      "label": "3. **AI Decision-Making**",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "profiling_3_ai_decision_making",
+      "community": 16,
+      "norm_label": "3. **ai decision-making**"
+    },
+    {
+      "label": "4. **Mobile Performance**",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L80",
+      "_origin": "ast",
+      "id": "profiling_4_mobile_performance",
+      "community": 16,
+      "norm_label": "4. **mobile performance**"
+    },
+    {
+      "label": "Available Metrics",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L87",
+      "_origin": "ast",
+      "id": "profiling_available_metrics",
+      "community": 16,
+      "norm_label": "available metrics"
+    },
+    {
+      "label": "Common Issues & Fixes",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L109",
+      "_origin": "ast",
+      "id": "profiling_common_issues_fixes",
+      "community": 16,
+      "norm_label": "common issues & fixes"
+    },
+    {
+      "label": "Frame Rate Drops During Cascade",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L111",
+      "_origin": "ast",
+      "id": "profiling_frame_rate_drops_during_cascade",
+      "community": 16,
+      "norm_label": "frame rate drops during cascade"
+    },
+    {
+      "label": "High Memory Usage",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L119",
+      "_origin": "ast",
+      "id": "profiling_high_memory_usage",
+      "community": 16,
+      "norm_label": "high memory usage"
+    },
+    {
+      "label": "Consistent Jank (steady 8-10ms)",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L127",
+      "_origin": "ast",
+      "id": "profiling_consistent_jank_steady_8_10ms",
+      "community": 16,
+      "norm_label": "consistent jank (steady 8-10ms)"
+    },
+    {
+      "label": "AI Too Slow",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L135",
+      "_origin": "ast",
+      "id": "profiling_ai_too_slow",
+      "community": 16,
+      "norm_label": "ai too slow"
+    },
+    {
+      "label": "Profiler API",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L145",
+      "_origin": "ast",
+      "id": "profiling_profiler_api",
+      "community": 16,
+      "norm_label": "profiler api"
+    },
+    {
+      "label": "Profiling with Chrome DevTools (Alternative)",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L165",
+      "_origin": "ast",
+      "id": "profiling_profiling_with_chrome_devtools_alternative",
+      "community": 16,
+      "norm_label": "profiling with chrome devtools (alternative)"
+    },
+    {
+      "label": "GPU Profiling (Advanced)",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L183",
+      "_origin": "ast",
+      "id": "profiling_gpu_profiling_advanced",
+      "community": 16,
+      "norm_label": "gpu profiling (advanced)"
+    },
+    {
+      "label": "Next Steps After Profiling",
+      "file_type": "document",
+      "source_file": "PROFILING.md",
+      "source_location": "L195",
+      "_origin": "ast",
+      "id": "profiling_next_steps_after_profiling",
+      "community": 16,
+      "norm_label": "next steps after profiling"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme",
+      "community": 4,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Jenga 3D",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme_jenga_3d",
+      "community": 4,
+      "norm_label": "jenga 3d"
+    },
+    {
+      "label": "\u0412\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "readme_\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438",
+      "community": 4,
+      "norm_label": "\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438"
+    },
+    {
+      "label": "\u0417\u0430\u043f\u0443\u0441\u043a",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "readme_\u0437\u0430\u043f\u0443\u0441\u043a",
+      "community": 4,
+      "norm_label": "\u0437\u0430\u043f\u0443\u0441\u043a"
+    },
+    {
+      "label": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0438",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "readme_\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438",
+      "community": 4,
+      "norm_label": "\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438"
+    },
+    {
+      "label": "\u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "readme_\u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f",
+      "community": 4,
+      "norm_label": "\u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f"
+    },
+    {
+      "label": "\u0421\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "readme_\u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430",
+      "community": 4,
+      "norm_label": "\u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430"
+    },
+    {
+      "label": "\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L92",
+      "_origin": "ast",
+      "id": "readme_\u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f",
+      "community": 4,
+      "norm_label": "\u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f"
+    },
+    {
       "label": "settings.json",
       "file_type": "code",
       "source_file": ".claude/settings.json",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 8,
+      "community": 30,
       "norm_label": "settings.json",
       "id": "claude_settings"
     },
@@ -19,7 +469,7 @@
       "source_file": ".claude/settings.json",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 8,
+      "community": 30,
       "norm_label": "hooks",
       "id": "claude_settings_hooks"
     },
@@ -29,7 +479,7 @@
       "source_file": ".claude/settings.json",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 8,
+      "community": 30,
       "norm_label": "pretooluse",
       "id": "claude_settings_hooks_pretooluse"
     },
@@ -529,7 +979,7 @@
       "source_file": "scripts/benchmark.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 8,
+      "community": 31,
       "norm_label": "benchmark.mjs",
       "id": "scripts_benchmark"
     },
@@ -669,7 +1119,7 @@
       "source_file": "src/App.jsx",
       "source_location": "L60",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "generatethemedtower()",
       "id": "src_app_generatethemedtower"
     },
@@ -709,7 +1159,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": "gamescene.jsx",
       "id": "src_gamescene"
     },
@@ -719,7 +1169,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": "loadingoverlay()",
       "id": "src_gamescene_loadingoverlay"
     },
@@ -729,7 +1179,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": "errorboundary",
       "id": "src_gamescene_errorboundary"
     },
@@ -739,7 +1189,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L42",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": ".constructor()",
       "id": "src_gamescene_errorboundary_constructor"
     },
@@ -749,7 +1199,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": ".getderivedstatefromerror()",
       "id": "src_gamescene_errorboundary_getderivedstatefromerror"
     },
@@ -759,7 +1209,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": ".componentdidcatch()",
       "id": "src_gamescene_errorboundary_componentdidcatch"
     },
@@ -769,7 +1219,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L55",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": ".render()",
       "id": "src_gamescene_errorboundary_render"
     },
@@ -779,7 +1229,7 @@
       "source_file": "src/GameScene.jsx",
       "source_location": "L79",
       "_origin": "ast",
-      "community": 2,
+      "community": 29,
       "norm_label": "gamescene()",
       "id": "src_gamescene_gamescene"
     },
@@ -989,7 +1439,7 @@
       "source_file": "src/PurchasePanel.jsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "purchasepanel.jsx",
       "id": "src_purchasepanel"
     },
@@ -1159,7 +1609,7 @@
       "source_file": "src/achievementsTracker.js",
       "source_location": "L116",
       "_origin": "ast",
-      "community": 1,
+      "community": 3,
       "norm_label": "recordsuccess()",
       "id": "src_achievementstracker_recordsuccess"
     },
@@ -1549,7 +1999,7 @@
       "source_file": "src/analyticsService.js",
       "source_location": "L69",
       "_origin": "ast",
-      "community": 10,
+      "community": 1,
       "norm_label": "trackgameover()",
       "id": "src_analyticsservice_trackgameover"
     },
@@ -1599,7 +2049,7 @@
       "source_file": "src/analyticsService.js",
       "source_location": "L126",
       "_origin": "ast",
-      "community": 10,
+      "community": 1,
       "norm_label": "trackrewardedvideoerror()",
       "id": "src_analyticsservice_trackrewardedvideoerror"
     },
@@ -1629,7 +2079,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "blocktexturecache.js",
       "id": "src_blocktexturecache"
     },
@@ -1639,7 +2089,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "texturecache",
       "id": "src_blocktexturecache_texturecache"
     },
@@ -1649,7 +2099,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "thememapcache",
       "id": "src_blocktexturecache_thememapcache"
     },
@@ -1659,7 +2109,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "cleartexturecache()",
       "id": "src_blocktexturecache_cleartexturecache"
     },
@@ -1669,7 +2119,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "blocktextures.js",
       "id": "src_blocktextures"
     },
@@ -1679,7 +2129,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "createtexture()",
       "id": "src_blocktextures_createtexture"
     },
@@ -1689,7 +2139,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generatewoodtexture()",
       "id": "src_blocktextures_generatewoodtexture"
     },
@@ -1699,7 +2149,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L64",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generateneontexture()",
       "id": "src_blocktextures_generateneontexture"
     },
@@ -1709,7 +2159,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L111",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generateicetexture()",
       "id": "src_blocktextures_generateicetexture"
     },
@@ -1719,7 +2169,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L155",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generatebambootexture()",
       "id": "src_blocktextures_generatebambootexture"
     },
@@ -1729,7 +2179,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L198",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generatecandytexture()",
       "id": "src_blocktextures_generatecandytexture"
     },
@@ -1739,7 +2189,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L239",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generatemarbletexture()",
       "id": "src_blocktextures_generatemarbletexture"
     },
@@ -1749,7 +2199,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L288",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generatenormalmap()",
       "id": "src_blocktextures_generatenormalmap"
     },
@@ -1759,7 +2209,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L431",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "generateroughnessmap()",
       "id": "src_blocktextures_generateroughnessmap"
     },
@@ -1769,7 +2219,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L547",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "getthememaps()",
       "id": "src_blocktextures_getthememaps"
     },
@@ -1779,7 +2229,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L559",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "getblockmaterialprops()",
       "id": "src_blocktextures_getblockmaterialprops"
     },
@@ -1789,7 +2239,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L647",
       "_origin": "ast",
-      "community": 7,
+      "community": 14,
       "norm_label": "environment_themes",
       "id": "src_blocktextures_environment_themes"
     },
@@ -1819,7 +2269,7 @@
       "source_file": "src/components/LoadingProgressBar.jsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": "loadingprogressbar.jsx",
       "id": "components_loadingprogressbar"
     },
@@ -2099,7 +2549,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "tower.js",
       "id": "domain_tower"
     },
@@ -2109,7 +2559,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "odd_rotation",
       "id": "domain_tower_odd_rotation"
     },
@@ -2119,7 +2569,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "even_rotation",
       "id": "domain_tower_even_rotation"
     },
@@ -2129,7 +2579,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "getlayery()",
       "id": "domain_tower_getlayery"
     },
@@ -2139,7 +2589,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "isoddlayer()",
       "id": "domain_tower_isoddlayer"
     },
@@ -2149,7 +2599,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "getlayerrotation()",
       "id": "domain_tower_getlayerrotation"
     },
@@ -2159,7 +2609,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "getslotposition()",
       "id": "domain_tower_getslotposition"
     },
@@ -2169,7 +2619,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L42",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "getslotindexfromposition()",
       "id": "domain_tower_getslotindexfromposition"
     },
@@ -2179,7 +2629,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 0,
+      "community": 1,
       "norm_label": "getmaxlayer()",
       "id": "domain_tower_getmaxlayer"
     },
@@ -2189,7 +2639,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 0,
+      "community": 1,
       "norm_label": "gettopcompletelayer()",
       "id": "domain_tower_gettopcompletelayer"
     },
@@ -2199,7 +2649,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L57",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "getoccupiedslots()",
       "id": "domain_tower_getoccupiedslots"
     },
@@ -2209,7 +2659,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L63",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "getfreeslots()",
       "id": "domain_tower_getfreeslots"
     },
@@ -2219,7 +2669,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L78",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "getdropslots()",
       "id": "domain_tower_getdropslots"
     },
@@ -2229,7 +2679,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L115",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "pickrandomdropslot()",
       "id": "domain_tower_pickrandomdropslot"
     },
@@ -2239,7 +2689,7 @@
       "source_file": "src/domain/tower.js",
       "source_location": "L126",
       "_origin": "ast",
-      "community": 0,
+      "community": 25,
       "norm_label": "generatetower()",
       "id": "domain_tower_generatetower"
     },
@@ -2899,7 +3349,7 @@
       "source_file": "src/main.jsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": "main.jsx",
       "id": "src_main"
     },
@@ -2909,7 +3359,7 @@
       "source_file": "src/main.jsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": "_warn",
       "id": "src_main_warn"
     },
@@ -2919,7 +3369,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "mobileoptimizations.js",
       "id": "src_mobileoptimizations"
     },
@@ -2929,7 +3379,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": "device_levels",
       "id": "src_mobileoptimizations_device_levels"
     },
@@ -2939,7 +3389,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 2,
+      "community": 27,
       "norm_label": "render_quality",
       "id": "src_mobileoptimizations_render_quality"
     },
@@ -2949,7 +3399,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "ismobiledevice()",
       "id": "src_mobileoptimizations_ismobiledevice"
     },
@@ -2959,7 +3409,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "istouchsupported()",
       "id": "src_mobileoptimizations_istouchsupported"
     },
@@ -2969,7 +3419,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "getdevicelevel()",
       "id": "src_mobileoptimizations_getdevicelevel"
     },
@@ -2979,7 +3429,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L66",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "getgpuinfo()",
       "id": "src_mobileoptimizations_getgpuinfo"
     },
@@ -2989,7 +3439,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L109",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "getperformancescore()",
       "id": "src_mobileoptimizations_getperformancescore"
     },
@@ -3009,7 +3459,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L134",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": ".constructor()",
       "id": "src_mobileoptimizations_mobileoptimizationmanager_constructor"
     },
@@ -3019,7 +3469,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L143",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": ".getdeviceinfo()",
       "id": "src_mobileoptimizations_mobileoptimizationmanager_getdeviceinfo"
     },
@@ -3159,7 +3609,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L319",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "getphysicssettingsformobile()",
       "id": "src_mobileoptimizations_getphysicssettingsformobile"
     },
@@ -3169,7 +3619,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L349",
       "_origin": "ast",
-      "community": 5,
+      "community": 26,
       "norm_label": "getdynamicblocklimit()",
       "id": "src_mobileoptimizations_getdynamicblocklimit"
     },
@@ -3179,7 +3629,7 @@
       "source_file": "src/mobileOptimizations.js",
       "source_location": "L364",
       "_origin": "ast",
-      "community": 2,
+      "community": 26,
       "norm_label": "shoulduselowpowermode()",
       "id": "src_mobileoptimizations_shoulduselowpowermode"
     },
@@ -3189,7 +3639,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": "performanceprofiler.js",
       "id": "src_performanceprofiler"
     },
@@ -3199,7 +3649,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".constructor()",
       "id": "src_performanceprofiler_performanceprofiler_constructor"
     },
@@ -3209,7 +3659,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".enable()",
       "id": "src_performanceprofiler_performanceprofiler_enable"
     },
@@ -3219,7 +3669,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".disable()",
       "id": "src_performanceprofiler_performanceprofiler_disable"
     },
@@ -3229,7 +3679,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".mark()",
       "id": "src_performanceprofiler_performanceprofiler_mark"
     },
@@ -3239,7 +3689,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".measure()",
       "id": "src_performanceprofiler_performanceprofiler_measure"
     },
@@ -3249,7 +3699,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L52",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".getstats()",
       "id": "src_performanceprofiler_performanceprofiler_getstats"
     },
@@ -3259,7 +3709,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L64",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".report()",
       "id": "src_performanceprofiler_performanceprofiler_report"
     },
@@ -3269,7 +3719,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L85",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": ".reset()",
       "id": "src_performanceprofiler_performanceprofiler_reset"
     },
@@ -3279,7 +3729,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L93",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": "profiler",
       "id": "src_performanceprofiler_profiler"
     },
@@ -3289,7 +3739,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L96",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": "setupgpuprofiler()",
       "id": "src_performanceprofiler_setupgpuprofiler"
     },
@@ -3299,7 +3749,7 @@
       "source_file": "src/performanceProfiler.js",
       "source_location": "L108",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": "useframeprofiler()",
       "id": "src_performanceprofiler_useframeprofiler"
     },
@@ -3419,7 +3869,7 @@
       "source_file": "src/profilerConsole.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 16,
       "norm_label": "profilerconsole.js",
       "id": "src_profilerconsole"
     },
@@ -3429,7 +3879,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "purchaseservice.js",
       "id": "src_purchaseservice"
     },
@@ -3439,7 +3889,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "premium_items",
       "id": "src_purchaseservice_premium_items"
     },
@@ -3449,7 +3899,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "valid_codes",
       "id": "src_purchaseservice_valid_codes"
     },
@@ -3459,7 +3909,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "purchase_status",
       "id": "src_purchaseservice_purchase_status"
     },
@@ -3469,7 +3919,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "loadpurchases()",
       "id": "src_purchaseservice_loadpurchases"
     },
@@ -3479,7 +3929,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L53",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "savepurchases()",
       "id": "src_purchaseservice_savepurchases"
     },
@@ -3489,7 +3939,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L59",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "loadusedcodes()",
       "id": "src_purchaseservice_loadusedcodes"
     },
@@ -3499,7 +3949,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L69",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "saveusedcodes()",
       "id": "src_purchaseservice_saveusedcodes"
     },
@@ -3509,7 +3959,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L75",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getpremiumitems()",
       "id": "src_purchaseservice_getpremiumitems"
     },
@@ -3519,7 +3969,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L82",
       "_origin": "ast",
-      "community": 14,
+      "community": 1,
       "norm_label": "ispremiumstoreavailable()",
       "id": "src_purchaseservice_ispremiumstoreavailable"
     },
@@ -3529,7 +3979,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L86",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getitemstatus()",
       "id": "src_purchaseservice_getitemstatus"
     },
@@ -3539,7 +3989,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L98",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "ispurchased()",
       "id": "src_purchaseservice_ispurchased"
     },
@@ -3549,7 +3999,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L103",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "isskinpackpurchased()",
       "id": "src_purchaseservice_isskinpackpurchased"
     },
@@ -3559,7 +4009,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L107",
       "_origin": "ast",
-      "community": 14,
+      "community": 1,
       "norm_label": "isremoveadspurchased()",
       "id": "src_purchaseservice_isremoveadspurchased"
     },
@@ -3569,7 +4019,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L118",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "isenvthemespurchased()",
       "id": "src_purchaseservice_isenvthemespurchased"
     },
@@ -3579,7 +4029,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L122",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getavailableskins()",
       "id": "src_purchaseservice_getavailableskins"
     },
@@ -3589,7 +4039,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L130",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getavailableenvthemes()",
       "id": "src_purchaseservice_getavailableenvthemes"
     },
@@ -3599,7 +4049,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L138",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "purchaseitem()",
       "id": "src_purchaseservice_purchaseitem"
     },
@@ -3609,7 +4059,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L157",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "redeemcode()",
       "id": "src_purchaseservice_redeemcode"
     },
@@ -3619,7 +4069,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L181",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getpurchasestatus()",
       "id": "src_purchaseservice_getpurchasestatus"
     },
@@ -3629,7 +4079,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L191",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "resetpurchases()",
       "id": "src_purchaseservice_resetpurchases"
     },
@@ -3679,7 +4129,7 @@
       "source_file": "src/scoreTracker.js",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "getrecenthistory()",
       "id": "src_scoretracker_getrecenthistory"
     },
@@ -3689,7 +4139,7 @@
       "source_file": "src/scoreTracker.js",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "recordgame()",
       "id": "src_scoretracker_recordgame"
     },
@@ -3839,7 +4289,7 @@
       "source_file": "src/settingsTracker.js",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "getdifficultydynamicids()",
       "id": "src_settingstracker_getdifficultydynamicids"
     },
@@ -3919,7 +4369,7 @@
       "source_file": "src/shareService.js",
       "source_location": "L85",
       "_origin": "ast",
-      "community": 13,
+      "community": 1,
       "norm_label": "savegamereplay()",
       "id": "src_shareservice_savegamereplay"
     },
@@ -3969,7 +4419,7 @@
       "source_file": "src/shareService.js",
       "source_location": "L194",
       "_origin": "ast",
-      "community": 13,
+      "community": 1,
       "norm_label": "generategameid()",
       "id": "src_shareservice_generategameid"
     },
@@ -4339,7 +4789,7 @@
       "source_file": "src/test/setup.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 0,
       "norm_label": "setup.js",
       "id": "test_setup"
     },
@@ -4529,7 +4979,7 @@
       "source_file": "src/touchGestureController.js",
       "source_location": "L244",
       "_origin": "ast",
-      "community": 11,
+      "community": 1,
       "norm_label": "usetouchgestures()",
       "id": "src_touchgesturecontroller_usetouchgestures"
     },
@@ -4569,7 +5019,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": "wasmloader.js",
       "id": "src_wasmloader"
     },
@@ -4579,7 +5029,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".constructor()",
       "id": "src_wasmloader_wasmloader_constructor"
     },
@@ -4589,7 +5039,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".load()",
       "id": "src_wasmloader_wasmloader_load"
     },
@@ -4599,7 +5049,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L80",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".attemptload()",
       "id": "src_wasmloader_wasmloader_attemptload"
     },
@@ -4609,7 +5059,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L115",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".notifyprogress()",
       "id": "src_wasmloader_wasmloader_notifyprogress"
     },
@@ -4619,7 +5069,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L122",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".notifycallbacks()",
       "id": "src_wasmloader_wasmloader_notifycallbacks"
     },
@@ -4629,7 +5079,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L130",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".getprogress()",
       "id": "src_wasmloader_wasmloader_getprogress"
     },
@@ -4639,7 +5089,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L137",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".iswasmloaded()",
       "id": "src_wasmloader_wasmloader_iswasmloaded"
     },
@@ -4649,7 +5099,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L144",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".iswasmloading()",
       "id": "src_wasmloader_wasmloader_iswasmloading"
     },
@@ -4659,7 +5109,7 @@
       "source_file": "src/wasmLoader.js",
       "source_location": "L151",
       "_origin": "ast",
-      "community": 2,
+      "community": 28,
       "norm_label": ".reset()",
       "id": "src_wasmloader_wasmloader_reset"
     },
@@ -4994,416 +5444,6 @@
       "id": "agents_feature_planner_executor_memory_md"
     },
     {
-      "label": "CLAUDE.md",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "claude.md",
-      "id": "claude"
-    },
-    {
-      "label": "Commands",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L5",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "commands",
-      "id": "claude_commands"
-    },
-    {
-      "label": "Architecture",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L34",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "architecture",
-      "id": "claude_architecture"
-    },
-    {
-      "label": "Layers",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L36",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "layers",
-      "id": "claude_layers"
-    },
-    {
-      "label": "Data flow",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L44",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "data flow",
-      "id": "claude_data_flow"
-    },
-    {
-      "label": "Tower & physics",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L71",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "tower & physics",
-      "id": "claude_tower_physics"
-    },
-    {
-      "label": "Stability / collapse detection",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L77",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "stability / collapse detection",
-      "id": "claude_stability_collapse_detection"
-    },
-    {
-      "label": "AI",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L110",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "ai",
-      "id": "claude_ai"
-    },
-    {
-      "label": "Achievements",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L114",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "achievements",
-      "id": "claude_achievements"
-    },
-    {
-      "label": "Camera & rendering",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L118",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "camera & rendering",
-      "id": "claude_camera_rendering"
-    },
-    {
-      "label": "Performance targets",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L122",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "performance targets",
-      "id": "claude_performance_targets"
-    },
-    {
-      "label": "Notes",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L128",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "notes",
-      "id": "claude_notes"
-    },
-    {
-      "label": "graphify",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L135",
-      "_origin": "ast",
-      "community": 5,
-      "norm_label": "graphify",
-      "id": "claude_graphify"
-    },
-    {
-      "label": "PROFILING.md",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "profiling.md",
-      "id": "profiling"
-    },
-    {
-      "label": "Performance Profiling Guide \u2014 Jenga 3D",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "performance profiling guide \u2014 jenga 3d",
-      "id": "profiling_performance_profiling_guide_jenga_3d"
-    },
-    {
-      "label": "Architecture",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L3",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "architecture",
-      "id": "profiling_architecture"
-    },
-    {
-      "label": "Quick Start (Browser DevTools)",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L17",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "quick start (browser devtools)",
-      "id": "profiling_quick_start_browser_devtools"
-    },
-    {
-      "label": "Expected Performance Budget (60 FPS = 16.67ms/frame)",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L51",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "expected performance budget (60 fps = 16.67ms/frame)",
-      "id": "profiling_expected_performance_budget_60_fps_16_67ms_frame"
-    },
-    {
-      "label": "What to Profile",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L63",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "what to profile",
-      "id": "profiling_what_to_profile"
-    },
-    {
-      "label": "1. **Physics Extraction (Worst Case)**",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L65",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "1. **physics extraction (worst case)**",
-      "id": "profiling_1_physics_extraction_worst_case"
-    },
-    {
-      "label": "2. **Rendering (Baseline)**",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L70",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "2. **rendering (baseline)**",
-      "id": "profiling_2_rendering_baseline"
-    },
-    {
-      "label": "3. **AI Decision-Making**",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L75",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "3. **ai decision-making**",
-      "id": "profiling_3_ai_decision_making"
-    },
-    {
-      "label": "4. **Mobile Performance**",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L80",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "4. **mobile performance**",
-      "id": "profiling_4_mobile_performance"
-    },
-    {
-      "label": "Available Metrics",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L87",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "available metrics",
-      "id": "profiling_available_metrics"
-    },
-    {
-      "label": "Common Issues & Fixes",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L109",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "common issues & fixes",
-      "id": "profiling_common_issues_fixes"
-    },
-    {
-      "label": "Frame Rate Drops During Cascade",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L111",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "frame rate drops during cascade",
-      "id": "profiling_frame_rate_drops_during_cascade"
-    },
-    {
-      "label": "High Memory Usage",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L119",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "high memory usage",
-      "id": "profiling_high_memory_usage"
-    },
-    {
-      "label": "Consistent Jank (steady 8-10ms)",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L127",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "consistent jank (steady 8-10ms)",
-      "id": "profiling_consistent_jank_steady_8_10ms"
-    },
-    {
-      "label": "AI Too Slow",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L135",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "ai too slow",
-      "id": "profiling_ai_too_slow"
-    },
-    {
-      "label": "Profiler API",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L145",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "profiler api",
-      "id": "profiling_profiler_api"
-    },
-    {
-      "label": "Profiling with Chrome DevTools (Alternative)",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L165",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "profiling with chrome devtools (alternative)",
-      "id": "profiling_profiling_with_chrome_devtools_alternative"
-    },
-    {
-      "label": "GPU Profiling (Advanced)",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L183",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "gpu profiling (advanced)",
-      "id": "profiling_gpu_profiling_advanced"
-    },
-    {
-      "label": "Next Steps After Profiling",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": "L195",
-      "_origin": "ast",
-      "community": 16,
-      "norm_label": "next steps after profiling",
-      "id": "profiling_next_steps_after_profiling"
-    },
-    {
-      "label": "README.md",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "readme.md",
-      "id": "readme"
-    },
-    {
-      "label": "Jenga 3D",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "jenga 3d",
-      "id": "readme_jenga_3d"
-    },
-    {
-      "label": "\u0412\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L5",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438",
-      "id": "readme_\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438"
-    },
-    {
-      "label": "\u0417\u0430\u043f\u0443\u0441\u043a",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L16",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "\u0437\u0430\u043f\u0443\u0441\u043a",
-      "id": "readme_\u0437\u0430\u043f\u0443\u0441\u043a"
-    },
-    {
-      "label": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0438",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L25",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438",
-      "id": "readme_\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438"
-    },
-    {
-      "label": "\u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L42",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "\u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f",
-      "id": "readme_\u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f"
-    },
-    {
-      "label": "\u0421\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L53",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "\u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430",
-      "id": "readme_\u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430"
-    },
-    {
-      "label": "Roadmap",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L70",
-      "_origin": "ast",
-      "community": 4,
-      "norm_label": "roadmap",
-      "id": "readme_roadmap"
-    },
-    {
       "label": "ACHIEVEMENTS",
       "file_type": "code",
       "source_file": "src/achievementsTracker.js",
@@ -5492,32 +5532,6 @@
       "id": "index_html_root"
     },
     {
-      "label": "Project CLAUDE.md",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "project claude.md",
-      "id": "claude_md_root"
-    },
-    {
-      "label": "PROFILING.md guide",
-      "file_type": "document",
-      "source_file": "PROFILING.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "profiling.md guide",
-      "id": "profiling_md"
-    },
-    {
       "label": "GitHub Actions CI",
       "file_type": "code",
       "source_file": ".github/workflows/ci.yml",
@@ -5539,22 +5553,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 8,
+      "community": 32,
       "norm_label": "test_ai.js standalone smoke test",
       "id": "test_ai_smoketest"
-    },
-    {
-      "label": "Lazy loading + build budget invariant",
-      "file_type": "rationale",
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:82-92",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 4,
-      "norm_label": "lazy loading + build budget invariant",
-      "id": "concept_lazy_loading_budget"
     },
     {
       "label": "Heavy chunks: rapier, r3f, three, firebase",
@@ -5568,123 +5569,6 @@
       "community": 4,
       "norm_label": "heavy chunks: rapier, r3f, three, firebase",
       "id": "concept_heavy_chunks"
-    },
-    {
-      "label": "60 FPS performance budget",
-      "file_type": "rationale",
-      "source_file": "PROFILING.md",
-      "source_location": "PROFILING.md:51-59",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "60 fps performance budget",
-      "id": "concept_perf_budget"
-    },
-    {
-      "label": "window.profile API",
-      "file_type": "concept",
-      "source_file": "PROFILING.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "window.profile api",
-      "id": "concept_profiler_api"
-    },
-    {
-      "label": "Y-threshold collapse detection",
-      "file_type": "rationale",
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:75-80",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "y-threshold collapse detection",
-      "id": "concept_collapse_detection"
-    },
-    {
-      "label": "Wood-on-wood BLOCK_PHYSICS tuning",
-      "file_type": "rationale",
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:71",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "wood-on-wood block_physics tuning",
-      "id": "concept_block_physics_params"
-    },
-    {
-      "label": "Turn flow (select \u2192 execute \u2192 physics \u2192 check)",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:58",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "turn flow (select \u2192 execute \u2192 physics \u2192 check)",
-      "id": "concept_turn_flow"
-    },
-    {
-      "label": "Hooks layer (src/hooks/)",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "hooks layer (src/hooks/)",
-      "id": "concept_hooks_layer"
-    },
-    {
-      "label": "localStorage persistence layer",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "localstorage persistence layer",
-      "id": "concept_persistence_localstorage"
-    },
-    {
-      "label": "AI personality & difficulty adaptation",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:108-110",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "ai personality & difficulty adaptation",
-      "id": "concept_ai_personality_difficulty"
-    },
-    {
-      "label": "graphify-out knowledge graph workflow",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:133-141",
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 8,
-      "norm_label": "graphify-out knowledge graph workflow",
-      "id": "concept_graphify_workflow"
     },
     {
       "label": "PWA installable offline app",
@@ -5721,7 +5605,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 29,
       "norm_label": "app.executemove",
       "id": "src_app_executemove"
     },
@@ -5747,7 +5631,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 25,
       "norm_label": "app.initgame",
       "id": "src_app_initgame"
     },
@@ -5773,7 +5657,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 25,
       "norm_label": "app.resetroundstate",
       "id": "src_app_resetroundstate"
     },
@@ -5799,7 +5683,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 29,
       "norm_label": "gamescene.handlecanvascreated (webgl context-loss handler)",
       "id": "src_gamescene_handlecanvascreated"
     },
@@ -5838,7 +5722,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 29,
       "norm_label": "gamescenewithphysics default export",
       "id": "src_gamescenewithphysics_default"
     },
@@ -5890,7 +5774,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 27,
       "norm_label": "wasmloader class",
       "id": "src_wasmloader_class"
     },
@@ -5903,7 +5787,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 27,
       "norm_label": "wasmloader (singleton)",
       "id": "src_wasmloader_singleton"
     },
@@ -5929,7 +5813,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 29,
       "norm_label": "lazy 3d boundary pattern (heavy chunks excluded from initial bundle)",
       "id": "concept_lazy_3d_boundary"
     },
@@ -6098,7 +5982,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 3,
       "norm_label": "test/achievements.test.js",
       "id": "test_achievements"
     },
@@ -6111,7 +5995,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 0,
       "norm_label": "test/collapse.test.js",
       "id": "test_collapse"
     },
@@ -6124,7 +6008,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 0,
       "norm_label": "test/keyboardcontroller.test.js",
       "id": "test_keyboardcontroller"
     },
@@ -6137,7 +6021,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 0,
       "norm_label": "test/mobileoptimizations.test.js",
       "id": "test_mobileoptimizations"
     },
@@ -6150,7 +6034,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 3,
       "norm_label": "test/storageservices.test.js",
       "id": "test_storageservices"
     },
@@ -6163,7 +6047,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 0,
       "norm_label": "test/touchgesturecontroller.test.js",
       "id": "test_touchgesturecontroller"
     },
@@ -6176,7 +6060,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 0,
       "norm_label": "test/uismoke.test.jsx",
       "id": "test_uismoke"
     },
@@ -6254,7 +6138,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 0,
       "norm_label": "unit test family (vitest)",
       "id": "concept_unit_test_suite"
     },
@@ -6293,7 +6177,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 11,
+      "community": 3,
       "norm_label": "persistence test family",
       "id": "concept_persistence_test_family"
     },
@@ -6337,19 +6221,6 @@
       "id": "concept_jenga_logo"
     },
     {
-      "label": "CLAUDE.md Project Guide",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 5,
-      "norm_label": "claude.md project guide",
-      "id": "claudemd_project_guide"
-    },
-    {
       "label": "App.jsx (top-level component)",
       "file_type": "code",
       "source_file": "src/App.jsx",
@@ -6358,7 +6229,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 1,
       "norm_label": "app.jsx (top-level component)",
       "id": "claudemd_app"
     },
@@ -6371,7 +6242,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 1,
       "norm_label": "usegamereducer hook",
       "id": "claudemd_usegamereducer"
     },
@@ -6384,7 +6255,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 26,
       "norm_label": "gamescene (lazy boundary)",
       "id": "claudemd_gamescene"
     },
@@ -6397,7 +6268,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 26,
       "norm_label": "gamescenewithphysics",
       "id": "claudemd_gamescenewithphysics"
     },
@@ -6423,7 +6294,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 1,
       "norm_label": "usetimers hook",
       "id": "claudemd_usetimers"
     },
@@ -6436,7 +6307,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 1,
       "norm_label": "usegamesimulation hook",
       "id": "claudemd_usegamesimulation"
     },
@@ -6449,7 +6320,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 16,
       "norm_label": "main.jsx entry point",
       "id": "claudemd_main"
     },
@@ -6501,51 +6372,653 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 14,
       "norm_label": "settingspanel",
       "id": "claudemd_settingspanel"
-    },
-    {
-      "label": "Collapse detection (Y-threshold)",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 5,
-      "norm_label": "collapse detection (y-threshold)",
-      "id": "claudemd_collapse_detection"
-    },
-    {
-      "label": "Lazy loading & build budget",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 5,
-      "norm_label": "lazy loading & build budget",
-      "id": "claudemd_build_budget_concept"
-    },
-    {
-      "label": "Turn flow",
-      "file_type": "concept",
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "community": 5,
-      "norm_label": "turn flow",
-      "id": "claudemd_turn_flow"
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L34",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude",
+      "target": "claude_architecture"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "claude",
+      "target": "claude_claude_md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude",
+      "target": "claude_commands"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L135",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude",
+      "target": "claude_graphify"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L128",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude",
+      "target": "claude_notes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L122",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude",
+      "target": "claude_performance_targets"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_architecture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_commands",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L138",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_notes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_performance_targets",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L114",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_achievements"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L110",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_ai"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L118",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_camera_rendering"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L44",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_data_flow"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_hooks_layer_src_hooks",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_layers"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L87",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_lazy_loading_build_budget",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_performance_profiler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L77",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_stability_collapse_detection"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L71",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_tower_physics"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L96",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_architecture",
+      "target": "src_performanceprofiler"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/achievements.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementsextended"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/achievements.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementsextended_getachievementbyid"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/achievements.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementsextended_getachievementcategories"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/achievements.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementsextended_getachievementprogress"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/achievements.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementsextended_getachievementsbycategory"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/AchievementsPanel.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementstracker"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/AchievementsPanel.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementstracker_achievements"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/screens/AchievementsPanel.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import",
+      "source": "claude_achievements",
+      "target": "src_achievementstracker_getachievementdata"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/screens/AchievementsPanel.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "claude_achievements",
+      "target": "src_achievementstracker_getlockedachievements"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "src/components/AchievementToast.jsx",
+      "source_location": null,
+      "weight": 0.65,
+      "source": "claude_achievements",
+      "target": "src_ariaannouncer"
+    },
+    {
+      "relation": "contains",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/AchievementProgressBar.jsx",
+      "source_location": "L48",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_achievementprogressbar",
+      "target": "claude_achievements"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/screens/SettingsPanel.jsx",
+      "source_location": null,
+      "weight": 0.85,
+      "source": "screens_settingspanel_settingspanel",
+      "target": "claude_achievements"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "claude_achievements"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling",
+      "target": "profiling_performance_profiling_guide_jenga_3d"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "profiling",
+      "target": "src_performanceprofiler"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_architecture"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L87",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_available_metrics"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L109",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_common_issues_fixes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_expected_performance_budget_60_fps_16_67ms_frame"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L183",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_gpu_profiling_advanced"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L195",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_next_steps_after_profiling"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L145",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_profiler_api"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L165",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_profiling_with_chrome_devtools_alternative"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_quick_start_browser_devtools"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L63",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_performance_profiling_guide_jenga_3d",
+      "target": "profiling_what_to_profile"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_what_to_profile",
+      "target": "profiling_1_physics_extraction_worst_case"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L70",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_what_to_profile",
+      "target": "profiling_2_rendering_baseline"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_what_to_profile",
+      "target": "profiling_3_ai_decision_making"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L80",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_what_to_profile",
+      "target": "profiling_4_mobile_performance"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L135",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_common_issues_fixes",
+      "target": "profiling_ai_too_slow"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L127",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_common_issues_fixes",
+      "target": "profiling_consistent_jank_steady_8_10ms"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L111",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_common_issues_fixes",
+      "target": "profiling_frame_rate_drops_during_cascade"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "PROFILING.md",
+      "source_location": "L119",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "profiling_common_issues_fixes",
+      "target": "profiling_high_memory_usage"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "README.md:17-40",
+      "weight": 1.0,
+      "source": "readme",
+      "target": "package_main"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme",
+      "target": "readme_jenga_3d"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_jenga_3d",
+      "target": "readme_\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "readme_jenga_3d",
+      "target": "readme_\u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_jenga_3d",
+      "target": "readme_\u0437\u0430\u043f\u0443\u0441\u043a"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_jenga_3d",
+      "target": "readme_\u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L25",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_jenga_3d",
+      "target": "readme_\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_jenga_3d",
+      "target": "readme_\u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430"
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -6555,16 +7028,6 @@
       "confidence_score": 1.0,
       "source": "claude_settings",
       "target": "claude_settings_hooks"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": ".claude/settings.json",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "claude_settings",
-      "target": "concept_graphify_workflow"
     },
     {
       "relation": "contains",
@@ -7087,36 +7550,6 @@
       "target": "public_manifest_theme_color"
     },
     {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "scripts/benchmark.mjs",
-      "source_location": "scripts/benchmark.mjs:71-74",
-      "weight": 1.0,
-      "source": "scripts_benchmark",
-      "target": "concept_perf_budget"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "scripts/benchmark.mjs",
-      "source_location": "scripts/benchmark.mjs:29-49",
-      "weight": 1.0,
-      "source": "scripts_benchmark",
-      "target": "concept_profiler_api"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "scripts/benchmark.mjs",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "scripts_benchmark",
-      "target": "profiling_md"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/check-build-budget.mjs",
@@ -7301,17 +7734,6 @@
       "weight": 1.0,
       "source": "e2e_jenga_desktopstartpause",
       "target": "src_app"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L11",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "claude_achievements"
     },
     {
       "relation": "imports_from",
@@ -8876,16 +9298,6 @@
       "target": "src_app_app"
     },
     {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.65,
-      "source_file": "src/components/AchievementToast.jsx",
-      "source_location": null,
-      "weight": 0.65,
-      "source": "claude_achievements",
-      "target": "src_ariaannouncer"
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -9796,17 +10208,6 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "src/test/achievements.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementsextended"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
       "source_file": "src/components/AchievementProgressBar.jsx",
       "source_location": "L2",
       "weight": 1.0,
@@ -9909,39 +10310,6 @@
     },
     {
       "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/achievements.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementsextended_getachievementbyid"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/achievements.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementsextended_getachievementsbycategory"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/achievements.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementsextended_getachievementprogress"
-    },
-    {
-      "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/AchievementProgressBar.jsx",
@@ -9973,17 +10341,6 @@
       "target": "src_achievementsextended_getachievementprogress"
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/achievements.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementsextended_getachievementcategories"
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -9993,17 +10350,6 @@
       "confidence_score": 1.0,
       "source": "src_achievementstracker_getachievementdata",
       "target": "src_achievementsextended_getachievementcategories"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/AchievementsPanel.jsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementstracker"
     },
     {
       "relation": "calls",
@@ -10201,17 +10547,6 @@
     },
     {
       "relation": "imports",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/screens/AchievementsPanel.jsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "context": "import",
-      "source": "claude_achievements",
-      "target": "src_achievementstracker_getachievementdata"
-    },
-    {
-      "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/AchievementProgressBar.jsx",
@@ -10241,17 +10576,6 @@
       "weight": 1.0,
       "source": "screens_uipanel_uipanel",
       "target": "src_achievementstracker_getachievementdata"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/screens/AchievementsPanel.jsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementstracker_getlockedachievements"
     },
     {
       "relation": "imports",
@@ -12107,17 +12431,6 @@
       "confidence_score": 1.0,
       "source": "src_blocktextures_getblockmaterialprops",
       "target": "src_blocktextures_getthememaps"
-    },
-    {
-      "relation": "contains",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/AchievementProgressBar.jsx",
-      "source_location": "L48",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_achievementprogressbar",
-      "target": "claude_achievements"
     },
     {
       "relation": "imports_from",
@@ -14968,16 +15281,6 @@
       "target": "src_mobileoptimizations_getdynamicblocklimit"
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L96",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "src_performanceprofiler"
-    },
-    {
       "relation": "calls",
       "confidence": "EXTRACTED",
       "confidence_score": 0.9,
@@ -14995,16 +15298,6 @@
       "source_location": null,
       "weight": 1.0,
       "source": "claudemd_main",
-      "target": "src_performanceprofiler"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "profiling",
       "target": "src_performanceprofiler"
     },
     {
@@ -16187,16 +16480,6 @@
       "confidence_score": 1.0,
       "source": "test_uismoke_test",
       "target": "screens_settingspanel"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "src/screens/SettingsPanel.jsx",
-      "source_location": null,
-      "weight": 0.85,
-      "source": "screens_settingspanel_settingspanel",
-      "target": "claude_achievements"
     },
     {
       "relation": "calls",
@@ -17911,16 +18194,6 @@
       "target": "vite_config"
     },
     {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "vite_config",
-      "target": "claudemd_build_budget_concept"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "vite.config.js",
@@ -18041,16 +18314,6 @@
       "target": "agents_feature_planner_executor_quality_gates"
     },
     {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": ".claude/agents/feature-planner-executor.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "agents_feature_planner_executor",
-      "target": "claude_md_root"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".claude/agents/feature-planner-executor.md",
@@ -18151,437 +18414,6 @@
       "target": "agents_feature_planner_executor_when_to_access_memories"
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L34",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude",
-      "target": "claude_architecture"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude",
-      "target": "claude_commands"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L135",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude",
-      "target": "claude_graphify"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L128",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude",
-      "target": "claude_notes"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L122",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude",
-      "target": "claude_performance_targets"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L114",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claude_achievements"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L110",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claude_ai"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L118",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claude_camera_rendering"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L44",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claude_data_flow"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L36",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claude_layers"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L77",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claude_stability_collapse_detection"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L71",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claude_tower_physics"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L84",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "claudemd_build_budget_concept"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CLAUDE.md",
-      "source_location": "L60",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_architecture",
-      "target": "concept_hooks_layer"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/AchievementsPanel.jsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_achievements",
-      "target": "src_achievementstracker_achievements"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling",
-      "target": "profiling_performance_profiling_guide_jenga_3d"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_architecture"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L87",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_available_metrics"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L109",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_common_issues_fixes"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L51",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_expected_performance_budget_60_fps_16_67ms_frame"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L183",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_gpu_profiling_advanced"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L195",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_next_steps_after_profiling"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L145",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_profiler_api"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L165",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_profiling_with_chrome_devtools_alternative"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L17",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_quick_start_browser_devtools"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L63",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_performance_profiling_guide_jenga_3d",
-      "target": "profiling_what_to_profile"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L65",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_what_to_profile",
-      "target": "profiling_1_physics_extraction_worst_case"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L70",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_what_to_profile",
-      "target": "profiling_2_rendering_baseline"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L75",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_what_to_profile",
-      "target": "profiling_3_ai_decision_making"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L80",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_what_to_profile",
-      "target": "profiling_4_mobile_performance"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L135",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_common_issues_fixes",
-      "target": "profiling_ai_too_slow"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L127",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_common_issues_fixes",
-      "target": "profiling_consistent_jank_steady_8_10ms"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L111",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_common_issues_fixes",
-      "target": "profiling_frame_rate_drops_during_cascade"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "PROFILING.md",
-      "source_location": "L119",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "profiling_common_issues_fixes",
-      "target": "profiling_high_memory_usage"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "README.md:33-34",
-      "weight": 1.0,
-      "source": "readme",
-      "target": "concept_lazy_loading_budget"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "README.md:17-40",
-      "weight": 1.0,
-      "source": "readme",
-      "target": "package_main"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "readme",
-      "target": "readme_jenga_3d"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L70",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "readme_jenga_3d",
-      "target": "readme_roadmap"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "readme_jenga_3d",
-      "target": "readme_\u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L16",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "readme_jenga_3d",
-      "target": "readme_\u0437\u0430\u043f\u0443\u0441\u043a"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L42",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "readme_jenga_3d",
-      "target": "readme_\u043a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L25",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "readme_jenga_3d",
-      "target": "readme_\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "README.md",
-      "source_location": "L53",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "readme_jenga_3d",
-      "target": "readme_\u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0430"
-    },
-    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -18622,16 +18454,6 @@
       "target": "concept_heavy_chunks"
     },
     {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.95,
-      "source_file": "vite.config.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "vite_manualchunks",
-      "target": "concept_lazy_loading_budget"
-    },
-    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -18640,16 +18462,6 @@
       "weight": 1.0,
       "source": "vite_pwa_workbox",
       "target": "concept_heavy_chunks"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.95,
-      "source_file": "vite.config.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "vite_pwa_workbox",
-      "target": "concept_lazy_loading_budget"
     },
     {
       "relation": "implements",
@@ -18692,116 +18504,6 @@
       "target": "concept_security_headers"
     },
     {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:108-110",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_ai_personality_difficulty"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:71",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_block_physics_params"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:75-80",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_collapse_detection"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:133-141",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_graphify_workflow"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:60-67",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_hooks_layer"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:82-92",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_lazy_loading_budget"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:120-124",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_perf_budget"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:41",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_persistence_localstorage"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "CLAUDE.md:58",
-      "weight": 1.0,
-      "source": "claude_md_root",
-      "target": "concept_turn_flow"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "PROFILING.md",
-      "source_location": "PROFILING.md:51-59",
-      "weight": 1.0,
-      "source": "profiling_md",
-      "target": "concept_perf_budget"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "PROFILING.md",
-      "source_location": "PROFILING.md:147-161",
-      "weight": 1.0,
-      "source": "profiling_md",
-      "target": "concept_profiler_api"
-    },
-    {
       "relation": "calls",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -18810,26 +18512,6 @@
       "weight": 1.0,
       "source": "workflows_ci",
       "target": "claudemd_checkbuildbudget"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "test_ai.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "test_ai_smoketest",
-      "target": "concept_turn_flow"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "scripts/check-build-budget.mjs",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "claudemd_checkbuildbudget",
-      "target": "concept_lazy_loading_budget"
     },
     {
       "relation": "references",
@@ -19118,58 +18800,8 @@
       "source_file": "CLAUDE.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "claudemd_project_guide",
-      "target": "claudemd_app"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "claudemd_project_guide",
-      "target": "claudemd_build_budget_concept"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "claudemd_project_guide",
-      "target": "claudemd_gamescenewithphysics"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "claudemd_app",
-      "target": "claudemd_collapse_detection"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 1.0,
       "source": "claudemd_app",
       "target": "claudemd_gamescene"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 0.8,
-      "source": "claudemd_app",
-      "target": "claudemd_turn_flow"
     },
     {
       "relation": "calls",
@@ -19210,28 +18842,8 @@
       "weight": 1.0,
       "source": "claudemd_gamescene",
       "target": "claudemd_gamescenewithphysics"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 0.8,
-      "source": "claudemd_gamescenewithphysics",
-      "target": "claudemd_collapse_detection"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "claudemd_checkbuildbudget",
-      "target": "claudemd_build_budget_concept"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "fbc3fa0523c210e78b8ee32d01ca326b60f54b83"
+  "built_at_commit": "c27b54e15a4f7c6b365226435b1b26b72b017e67"
 }
