@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useModalA11y } from '../hooks/useModalA11y';
 import { getSettings, updateAllSettings } from '../settingsTracker';
 import { updateMasterVolume } from '../soundEngine';
 import { clearTextureCache } from '../blockTextureCache';
@@ -8,6 +9,7 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
   const [settings, setSettings] = useState(() => getSettings());
   const availableSkins = useMemo(() => getAvailableSkins(), []);
   const availableEnvThemes = useMemo(() => getAvailableEnvThemes(), []);
+  const modalRef = useModalA11y({ onEscape: onClose });
 
   const handleChange = (key, value) => {
     const updated = { ...settings, [key]: value };
@@ -55,7 +57,7 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
   ];
 
   return (
-    <div className="j-overlay" role="dialog" aria-label="Настройки">
+    <div className="j-overlay" role="dialog" aria-label="Настройки" ref={modalRef}>
       <div className="j-card j-card--wide j-card--left">
         <div className="j-header">
           <h2 className="j-heading j-heading--sm">⚙️ Настройки</h2>

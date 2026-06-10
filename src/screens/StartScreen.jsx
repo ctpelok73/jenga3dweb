@@ -1,4 +1,5 @@
 import React from 'react';
+import { useModalA11y } from '../hooks/useModalA11y';
 import { getBestScore, getTotalGames } from '../scoreTracker';
 import { getUnlockedAchievements, ACHIEVEMENTS } from '../achievementsTracker';
 import { isDailyChallengeCompleted } from '../dailyChallengeTracker';
@@ -8,8 +9,9 @@ export default function StartScreen({ onStart, playerMode, setPlayerMode, gameMo
   const total = getTotalGames();
   const unlockedCount = getUnlockedAchievements().length;
   const dailyDone = isDailyChallengeCompleted();
+  const modalRef = useModalA11y();
   return (
-    <div className="j-overlay j-overlay--start" role="dialog" aria-label="Стартовый экран">
+    <div className="j-overlay j-overlay--start" role="dialog" aria-label="Стартовый экран" ref={modalRef}>
       <div className="j-card">
         <h1 className="j-heading j-heading--gradient">🧱 Jenga 3D</h1>
         <p className="j-subtext">
