@@ -102,7 +102,8 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
                 <button key={opt.value}
                   className={`j-opt-btn${settings.theme === opt.value ? ' is-active' : ''}${locked ? ' j-opt-btn--locked' : ''}`}
                   onClick={() => { if (!locked) { handleChange('theme', opt.value); clearTextureCache(); } }}
-                  disabled={locked}
+                  aria-disabled={locked}
+                  aria-label={locked ? `${opt.label} — премиум, доступно после покупки` : undefined}
                   title={locked ? 'Премиум — доступно после покупки' : ''}
                 >{opt.label}</button>
               );
@@ -119,7 +120,8 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
                 <button key={opt.value}
                   className={`j-opt-btn${settings.environment === opt.value ? ' is-active' : ''}${locked ? ' j-opt-btn--locked' : ''}`}
                   onClick={() => { if (!locked) handleChange('environment', opt.value); }}
-                  disabled={locked}
+                  aria-disabled={locked}
+                  aria-label={locked ? `${opt.label} — премиум, доступно после покупки` : undefined}
                   title={locked ? 'Премиум — доступно после покупки' : ''}
                 >{opt.label}</button>
               );

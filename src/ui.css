@@ -1118,12 +1118,19 @@
   justify-content: center;
 }
 .j-tutorial-dot {
+  position: relative;
   width: 8px; height: 8px;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
   padding: 0;
+}
+/* Expand the tap target to 24px (WCAG 2.5.8) without enlarging the visible dot. */
+.j-tutorial-dot::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 .j-tutorial-dot--active {
   background: var(--j-blue);
@@ -1694,6 +1701,14 @@
   .j-hud__menu-btn { min-height: 44px; min-width: 44px; font-size: 20px; }
   .j-close-btn { min-height: 44px; min-width: 44px; }
   .j-btn--primary { min-height: 48px; }
+  /* Ensure all remaining interactive controls meet the 44px tap-target min. */
+  .j-btn, .j-action-btn, .j-mode-btn, .j-opt-btn, .j-lb-tab, .j-share-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .j-toast__close { min-height: 44px; min-width: 44px; }
 }
 
 @media (max-width: 360px) {
