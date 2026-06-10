@@ -21,7 +21,7 @@
   --j-card-border: rgba(100, 160, 255, 0.12);
   --j-card-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 60px rgba(42, 110, 255, 0.06), inset 0 1px 0 rgba(255,255,255,0.06);
   --j-text: #fff;
-  --j-text-dim: rgba(255,255,255,0.4);
+  --j-text-dim: rgba(255,255,255,0.55);
   --j-text-muted: rgba(255,255,255,0.6);
   --j-divider: rgba(255,255,255,0.06);
 }
@@ -1102,7 +1102,7 @@
 }
 .j-tutorial-hint {
   font-size: 11px;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.4);
   margin-bottom: 16px;
   font-style: italic;
 }
@@ -2235,5 +2235,31 @@
   .j-hud__info { font-size: 12px; margin-bottom: 6px; }
   .j-hud-btn { padding: 6px 12px; font-size: 13px; }
   .j-toast { top: 8px; right: 8px; max-width: 250px; padding: 10px 14px; }
+}
+
+/* ─── Reduced motion (vestibular safety) ───
+   Kills the high-impact / infinite / large-displacement animations.
+   Entrance fades are kept but made near-instant so layout still settles. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Screen shake on collapse — disable the transform entirely */
+  .j-shake { animation: none !important; }
+  /* Rotating conic background on the start screen */
+  .j-overlay--start::before { animation: none !important; }
+  /* Infinite pulses (player tag, timers, record badge, spotlight) */
+  .j-hud__player-tag,
+  .j-hud__timer--warning,
+  .j-hud__speed-timer--critical,
+  .j-gameover-record,
+  .pm-player-tag,
+  .j-spotlight__glow { animation: none !important; }
+  /* Loading spinners/indeterminate bars: stop spin but keep them visible */
+  .j-spinner-ring,
+  .j-loading-overlay__progress { animation: none !important; }
 }
 
