@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useModalA11y } from '../hooks/useModalA11y';
-import { getSettings, updateAllSettings } from '../settingsTracker';
+import { getSettings, updateAllSettings, resetSettings } from '../settingsTracker';
 import { updateMasterVolume } from '../soundEngine';
 import { clearTextureCache } from '../blockTextureCache';
 import { getAvailableSkins, getAvailableEnvThemes } from '../purchaseService';
@@ -20,9 +20,8 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
   };
 
   const handleReset = () => {
-    const defaults = { volume: 70, moveTimer: 0, difficulty: 'normal', theme: 'classic', environment: 'classic' };
+    const defaults = resetSettings();
     setSettings(defaults);
-    updateAllSettings(defaults);
     updateMasterVolume();
     if (onSettingsChange) onSettingsChange(defaults);
   };
