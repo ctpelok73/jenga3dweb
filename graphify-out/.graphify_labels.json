@@ -1,7 +1,6 @@
 {
   "0": "Mobile Optimization & Lazy Boundary",
   "1": "Audio, Keyboard & Collapse Detection",
-  "2": "Settings, Purchases & Persistence Factory",
   "3": "Game State Reducer",
   "4": "AI Controller & Difficulty",
   "5": "Block Textures & Physics Hand-off",
@@ -26,8 +25,6 @@
   "24": "Community 24",
   "25": "Community 25",
   "26": "Community 26",
-  "27": "Community 27",
-  "28": "Community 28",
   "29": "Community 29",
   "30": "Community 30",
   "31": "Community 31",

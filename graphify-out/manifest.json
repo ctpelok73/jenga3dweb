@@ -5,8 +5,8 @@
     "semantic_hash": "af5683cedca023035194f9ad92eb0eef"
   },
   ".claude/settings.local.json": {
-    "mtime": 1781100014.879788,
-    "ast_hash": "2ec05c2565001b13f79d400873bba3b2",
+    "mtime": 1781154136.9911504,
+    "ast_hash": "d55963cd49ec9d624b199aebfab284b7",
     "semantic_hash": ""
   },
   "package.json": {
@@ -60,9 +60,9 @@
     "semantic_hash": "695c49c547117998d9ab111e2af15f03"
   },
   "src/GameSceneWithPhysics.jsx": {
-    "mtime": 1780593247.7468238,
-    "ast_hash": "b7fa7747ced3273b49468fbbfa0f57c7",
-    "semantic_hash": "b7fa7747ced3273b49468fbbfa0f57c7"
+    "mtime": 1781202363.8366077,
+    "ast_hash": "d8caf874f8c607fd843ae68c09b9f490",
+    "semantic_hash": ""
   },
   "src/InteractiveTutorialOverlay.jsx": {
     "mtime": 1781141649.5611212,
@@ -220,9 +220,9 @@
     "semantic_hash": "2b17b8dc5397b70b52a69227fa709d74"
   },
   "src/physicsOptimizer.js": {
-    "mtime": 1780811285.8798912,
-    "ast_hash": "2d3031afa7eb45b6ec727895a3e0a399",
-    "semantic_hash": "2d3031afa7eb45b6ec727895a3e0a399"
+    "mtime": 1781200013.400742,
+    "ast_hash": "2a2adc22956667697cddf99155a82488",
+    "semantic_hash": ""
   },
   "src/profilerConsole.js": {
     "mtime": 1780553757.0964596,
@@ -265,9 +265,9 @@
     "semantic_hash": ""
   },
   "src/settingsTracker.js": {
-    "mtime": 1780811983.3037233,
-    "ast_hash": "4f838201b46be2704942ca75c2963da4",
-    "semantic_hash": "4f838201b46be2704942ca75c2963da4"
+    "mtime": 1781202275.2667599,
+    "ast_hash": "1e4293d870c3246a5affe02b311df3dd",
+    "semantic_hash": ""
   },
   "src/shareService.js": {
     "mtime": 1780258155.9581616,
@@ -425,9 +425,9 @@
     "semantic_hash": "51610c0096fbcd6fb838ae6dc5d2b003"
   },
   "src/hooks/useGameSimulation.js": {
-    "mtime": 1780896986.964344,
-    "ast_hash": "7c07e6b0cf89d06b3073f59c0a54afb8",
-    "semantic_hash": "7c07e6b0cf89d06b3073f59c0a54afb8"
+    "mtime": 1781203049.4770424,
+    "ast_hash": "6955aebe421f0b72b8834d2582475059",
+    "semantic_hash": ""
   },
   "scripts/ui-audit.mjs": {
     "mtime": 1781043734.8880758,
@@ -455,13 +455,13 @@
     "semantic_hash": ""
   },
   "src/hooks/useModalA11y.js": {
-    "mtime": 1781074665.0954843,
-    "ast_hash": "4bafc3ac0b845b432419ef9f45decdd4",
+    "mtime": 1781141649.562131,
+    "ast_hash": "be092b5bce5d990737620e68211ae38e",
     "semantic_hash": ""
   },
   "src/test/useModalA11y.test.jsx": {
-    "mtime": 1781074684.0313778,
-    "ast_hash": "33952f022100fed33d398fa6b1745d78",
+    "mtime": 1781141649.566559,
+    "ast_hash": "7111581f5a84e796668019a91601142d",
     "semantic_hash": ""
   }
 }

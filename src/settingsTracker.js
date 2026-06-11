@@ -30,18 +30,20 @@ export function getSettings() {
 }
 
 export function updateSetting(key, value) {
-  cacheInvalidate();
-
-  return store.update((settings) => {
+  const result = store.update((settings) => {
     settings[key] = value;
     return settings;
   });
+
+  cachedSettings = result;
+  return result;
 }
 
 export function updateAllSettings(newSettings) {
-  cacheInvalidate();
+  const result = store.update((settings) => ({ ...settings, ...newSettings }));
 
-  return store.update((settings) => ({ ...settings, ...newSettings }));
+  cachedSettings = result;
+  return result;
 }
 
 export function resetSettings() {
@@ -58,7 +60,7 @@ function cacheInvalidate() {
 }
 
 export function getDifficultyDynamicIds(blocks, selectedBlock, removedLayer) {
-  const settings = store.load();
+  const settings = getSettings();
   const difficulty = settings.difficulty;
   const dynamicIds = new Set();
 
@@ -123,6 +125,6 @@ export const THEME_COLORS = {
 };
 
 export function getThemeColors() {
-  const settings = store.load();
+  const settings = getSettings();
   return THEME_COLORS[settings.theme] || THEME_COLORS.classic;
 }
