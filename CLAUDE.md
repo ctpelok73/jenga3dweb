@@ -135,6 +135,48 @@ Orbit camera at `[7, 4, 7]`, target `[0, 2.7, 0]`, FOV 60°, distance clamped to
 - Block selection is click-or-keyboard then commit; there is no drag-and-drop.
 - The shell on Windows is bash — use `/dev/null` and forward slashes when writing scripts referenced from npm tasks.
 
+## Mandatory skill & tool usage
+
+These rules are NON-NEGOTIABLE. If a trigger condition matches, the skill/tool MUST be used BEFORE writing code or responding.
+
+### Codegraph (MCP)
+- **Trigger:** ANY question about codebase structure, "how does X work", "where is X", symbol lookup, call chains, impact analysis.
+- **Action:** Call `codegraph_explore` FIRST. Use `codegraph_callers`/`codegraph_callees`/`codegraph_impact` for dependency questions. Do NOT grep/read manually when codegraph can answer.
+- **After edits:** If `.codegraph/` exists and files were changed, the watcher auto-updates — no manual action needed.
+
+### Graphify
+- **Trigger:** Architecture questions, cross-file relationships, "explain concept X", broad codebase navigation.
+- **Action:** Run `graphify query "<question>"` or `graphify path/explain` BEFORE grepping or reading files. Use graphify-out/wiki/index.md for navigation.
+- **After edits:** Run `graphify update .` to keep the graph current.
+
+### frontend-design (skill)
+- **Trigger:** ANY UI/frontend/CSS/component work — new screens, restyling, layout changes, design system.
+- **Action:** Invoke `/frontend-design` skill BEFORE writing any UI code.
+
+### feature-dev (skill)
+- **Trigger:** Adding new features, architectural decisions, multi-file changes that alter behavior.
+- **Action:** Invoke `/feature-dev` skill to get architecture guidance BEFORE implementation.
+
+### superpowers:writing-plans
+- **Trigger:** Any task requiring 5+ file changes, or where the approach is non-obvious.
+- **Action:** Invoke the `writing-plans` skill and produce a plan for user approval BEFORE coding.
+
+### superpowers:verification-before-completion
+- **Trigger:** Before reporting ANY task as "done" or "complete".
+- **Action:** Invoke the `verification-before-completion` skill. Run tests, build, and verify in browser where applicable.
+
+### verify / run (skills)
+- **Trigger:** After UI changes, after bug fixes, after any user-facing behavior change.
+- **Action:** Invoke `/verify` or `/run` to confirm the change works in the actual app, not just in tests.
+
+### code-review (skill)
+- **Trigger:** Before creating a PR, or when user asks for review.
+- **Action:** Invoke `/code-review` on the diff.
+
+### superpowers:brainstorming
+- **Trigger:** Before entering plan mode, or when approaching an ambiguous/open-ended task.
+- **Action:** Invoke the `brainstorming` skill to explore options before committing to an approach.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

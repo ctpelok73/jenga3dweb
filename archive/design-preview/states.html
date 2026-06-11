@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jenga 3D — STATE MATRIX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6efe2;--paper-2:#ece3d1;--paper-3:#ddd2b9;
+  --ink:#131110;--ink-2:#3b3530;--ink-3:#7a6f63;
+  --accent:#ff5b1f;--warn:#c43a17;--ok:#1f8a5a;
+  --p1:#1f6feb;--p2:#c92763;--ai:#7a3ad6;
+  --br:2px;--br-strong:3px;
+  --shadow-hard:6px 6px 0 var(--ink);
+  --shadow-hard-sm:3px 3px 0 var(--ink);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif}
+body{background-image:repeating-linear-gradient(0deg, transparent 0 23px, rgba(19,17,16,.04) 23px 24px),repeating-linear-gradient(90deg, transparent 0 23px, rgba(19,17,16,.04) 23px 24px)}
+.wrap{max-width:1340px;margin:0 auto;padding:36px 24px 80px}
+
+/* Header */
+.head{display:flex;justify-content:space-between;align-items:flex-end;padding:16px 0 28px;border-bottom:var(--br-strong) solid var(--ink);margin-bottom:36px;gap:24px}
+.head h1{font-family:'Archivo Black',sans-serif;font-size:40px;letter-spacing:-1px;margin:0;line-height:.95}
+.head h1 span{color:var(--accent)}
+.head .meta{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-2);text-align:right;line-height:1.55}
+.head .meta b{color:var(--ink)}
+.head .meta a{color:var(--accent);text-decoration:none}
+.head .meta a:hover{text-decoration:underline}
+
+/* Section */
+.section{margin-bottom:54px}
+.section-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:14px;margin:0 0 16px}
+.section-title::before{content:"";flex:0 0 24px;height:3px;background:var(--ink)}
+.section-title b{color:var(--ink);font-weight:700;font-size:14px;letter-spacing:1.5px}
+
+/* Card grid */
+.grid{display:grid;gap:0;border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard);background:var(--paper)}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:1fr 1fr 1fr}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-5{grid-template-columns:repeat(5,1fr)}
+@media (max-width:1100px){.grid-3,.grid-4,.grid-5{grid-template-columns:1fr 1fr}}
+
+.cell{
+  padding:18px 18px 16px;border-right:var(--br) solid var(--ink);border-bottom:var(--br) solid var(--ink);
+  display:flex;flex-direction:column;gap:10px;min-height:200px;
+}
+.cell:last-child{border-right:none}
+.grid-2 .cell:nth-child(2n){border-right:none}
+.grid-3 .cell:nth-child(3n){border-right:none}
+.grid-4 .cell:nth-child(4n){border-right:none}
+.grid-5 .cell:nth-child(5n){border-right:none}
+.grid > .cell:nth-last-child(-n+2){border-bottom:none}
+.grid-3 > .cell:nth-last-child(-n+3){border-bottom:none}
+.grid-4 > .cell:nth-last-child(-n+4){border-bottom:none}
+.grid-5 > .cell:nth-last-child(-n+5){border-bottom:none}
+
+.cell .badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--paper);background:var(--ink);padding:3px 6px;align-self:flex-start;font-weight:700}
+.cell .badge.ok{background:var(--ok)}
+.cell .badge.warn{background:var(--accent);color:var(--ink)}
+.cell .badge.crit{background:var(--warn);color:var(--paper)}
+.cell .name{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:-.5px;line-height:.95;margin:0}
+.cell .desc{font-family:'Inter Tight';font-size:12.5px;line-height:1.45;color:var(--ink-2);margin:0}
+.cell .props{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);line-height:1.6;margin-top:auto;border-top:1px solid var(--paper-3);padding-top:8px}
+.cell .props b{color:var(--ink);font-weight:700}
+.cell .props span.prop{display:block;margin-bottom:2px}
+
+/* Tree (for state machines) */
+.tree{
+  border:var(--br) solid var(--ink);background:var(--paper);padding:18px 20px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.85;color:var(--ink);white-space:pre;overflow-x:auto;
+}
+.tree em{font-style:normal;color:var(--accent);font-weight:700}
+.tree b{color:var(--ink);font-weight:700}
+.tree i{font-style:normal;color:var(--ink-3);font-size:11px;letter-spacing:1px}
+
+/* Two-column layout */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media (max-width:1100px){.cols{grid-template-columns:1fr}}
+
+/* Transition diagram (simple) */
+.flow{
+  border:var(--br) solid var(--ink);background:var(--paper);padding:14px 16px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;
+}
+.flow .node{padding:6px 10px;border:var(--br) solid var(--ink);background:var(--paper-2);font-weight:700;color:var(--ink)}
+.flow .node.start{background:var(--accent);color:var(--ink)}
+.flow .node.end{background:var(--warn);color:var(--paper);border-color:var(--warn)}
+.flow .arr{color:var(--ink-3);font-weight:700}
+.flow .label{color:var(--ink-3);font-size:10px;padding:0 4px}
+
+/* Type spec block */
+.spec-code{
+  border:var(--br) solid var(--ink);background:var(--ink);color:var(--paper);
+  padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;white-space:pre;overflow-x:auto;
+}
+.spec-code em{font-style:normal;color:var(--accent)}
+.spec-code i{font-style:normal;color:#7a6f63}
+.spec-code b{color:#fff;font-weight:700}
+
+/* Note */
+.note{
+  margin-top:14px;padding:14px 16px;border:var(--br) solid var(--ink);background:var(--paper);
+  font-size:13px;line-height:1.55;
+}
+.note h3{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;color:var(--ink-3)}
+.note ul{margin:0;padding-left:18px}
+.note li{margin-bottom:4px}
+.note strong{background:var(--accent);padding:0 4px}
+.note code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--paper-2);padding:1px 4px}
+
+.foot{margin-top:36px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="head">
+    <h1>STATE MATRIX <span>// before react</span></h1>
+    <div class="meta">
+      reference for state types &amp; routing<br>
+      companion to <a href="index.html">design-preview/index.html</a> · v0.3
+    </div>
+  </header>
+
+  <!-- ─── 01. APP / GAME PHASE ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>01 / app phase</b> top-level state machine — already in code as PHASE_*</h2>
+
+    <div class="cols">
+      <div class="tree">
+<b>App</b>
+ ├─ <em>start</em>           <i>// landing screen, mode select</i>
+ │   ├─ tutorial             <i>// first-run overlay (one-shot)</i>
+ │   └─ default
+ ├─ <em>playing</em>         <i>// active game session</i>
+ │   ├─ idle                 <i>// no block selected</i>
+ │   ├─ blockSelected        <i>// hi block + ghost slot visible</i>
+ │   ├─ executing            <i>// move animation in flight</i>
+ │   ├─ stabilizing          <i>// physics settling, no input</i>
+ │   ├─ aiThinking           <i>// AI computing move (mode 3 only)</i>
+ │   └─ paused               <i>// modal pause overlay open</i>
+ └─ <em>gameOver</em>        <i>// collapse or speed-timer expired</i>
+     ├─ default
+     ├─ continued            <i>// after revive (continuedAfterCollapse=true)</i>
+     └─ replaying            <i>// replay player open</i>
+      </div>
+
+      <div class="flow">
+        <span class="node start">start</span>
+        <span class="arr">→</span>
+        <span class="label">handleStart</span>
+        <span class="node">playing</span>
+        <span class="arr">→</span>
+        <span class="label">collapse / time-up</span>
+        <span class="node end">gameOver</span>
+        <span class="arr">→</span>
+        <span class="label">restart</span>
+        <span class="node">playing</span>
+        <span class="arr">↻</span>
+        <span class="label">backToMenu</span>
+        <span class="node start">start</span>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>maps to react</h3>
+      <ul>
+        <li>Top-level phase already reduces to <code>'start' | 'playing' | 'gameOver'</code> in <code>useGameReducer</code>. <strong>Substates of <code>playing</code></strong> (<code>idle / blockSelected / executing / stabilizing / aiThinking / paused</code>) are currently <em>derived</em> from independent flags (selectedId, simulatingBlockIds, aiThinking, showPauseMenu). Worth a discriminated union later, not now — derivation works.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─── 02. PLAYER MODE × GAME MODE ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>02 / player × game mode</b> orthogonal axes — picked once on Start</h2>
+
+    <div class="grid grid-3">
+      <div class="cell">
+        <span class="badge">player · 1P</span>
+        <h3 class="name">Solo</h3>
+        <p class="desc">Single player, one timer per move, no opponent UI.</p>
+        <div class="props"><span class="prop"><b>HUD player card:</b> hidden / muted</span><span class="prop"><b>Turn arrow:</b> none</span><span class="prop"><b>Glyph color:</b> P1</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">player · 2P</span>
+        <h3 class="name">Local PvP</h3>
+        <p class="desc">Hot-seat; player tag swaps each turn.</p>
+        <div class="props"><span class="prop"><b>HUD player card:</b> shown</span><span class="prop"><b>Glyph:</b> P1 / P2 alternating</span><span class="prop"><b>Color:</b> blue / magenta</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">player · vs AI</span>
+        <h3 class="name">vs AI</h3>
+        <p class="desc">User is P1; AI is P2 with thinking state and personality.</p>
+        <div class="props"><span class="prop"><b>HUD player card:</b> shown</span><span class="prop"><b>Glyph:</b> P1 / AI</span><span class="prop"><b>Substate:</b> aiThinking on AI turn</span></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:14px">
+      <div class="cell">
+        <span class="badge">mode · classic</span>
+        <h3 class="name">Classic</h3>
+        <p class="desc">No global timer. Per-move timer optional (Settings).</p>
+        <div class="props"><span class="prop"><b>HUD timer:</b> only if moveTimer ≠ off</span><span class="prop"><b>Speed countdown:</b> hidden</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">mode · speed</span>
+        <h3 class="name">Speed Run</h3>
+        <p class="desc">Global countdown 60 / 120 / 180s. Game ends on 0 even if tower stable.</p>
+        <div class="props"><span class="prop"><b>HUD speed timer:</b> always shown, top-left</span><span class="prop"><b>Game-over reason:</b> &quot;Время вышло!&quot; vs &quot;Башня рухнула!&quot;</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 03. TIMER ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>03 / timer states</b> visual state by remaining seconds</h2>
+
+    <div class="grid grid-3">
+      <div class="cell">
+        <span class="badge ok">&gt; 10s</span>
+        <h3 class="name">OK</h3>
+        <p class="desc">Default. Paper bg, ink border, ink text. No animation.</p>
+        <div class="props"><span class="prop"><b>border:</b> ink 2px</span><span class="prop"><b>shadow:</b> ink offset</span><span class="prop"><b>animation:</b> none</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge warn">5–10s</span>
+        <h3 class="name">Warning</h3>
+        <p class="desc">Orange border + matching offset shadow. Text stays ink. Pre-emptive nudge.</p>
+        <div class="props"><span class="prop"><b>border:</b> accent 2px</span><span class="prop"><b>shadow:</b> accent offset</span><span class="prop"><b>animation:</b> none</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge crit">≤ 5s</span>
+        <h3 class="name">Critical</h3>
+        <p class="desc">Full orange fill. Subtle 0.6s pulse. Demands immediate attention.</p>
+        <div class="props"><span class="prop"><b>fill:</b> accent</span><span class="prop"><b>animation:</b> pulse 0.6s alt</span><span class="prop"><b>used by:</b> moveTimer + speedTimer</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 04. ACHIEVEMENT ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>04 / achievement card</b> three discrete states</h2>
+
+    <div class="grid grid-3">
+      <div class="cell">
+        <span class="badge">locked</span>
+        <h3 class="name">Locked</h3>
+        <p class="desc">No progress shown (or 0%). Greyscale icon, opacity 0.65.</p>
+        <div class="props"><span class="prop"><b>icon bg:</b> paper-2</span><span class="prop"><b>icon filter:</b> grayscale</span><span class="prop"><b>meter:</b> hidden</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge warn">progress</span>
+        <h3 class="name">In progress</h3>
+        <p class="desc">Some non-zero progress measured by getAchievementProgress. Meter visible, percentage shown.</p>
+        <div class="props"><span class="prop"><b>icon bg:</b> paper-2</span><span class="prop"><b>meter:</b> accent fill</span><span class="prop"><b>pct:</b> &quot;14 / 16 · 64%&quot;</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge ok">unlocked</span>
+        <h3 class="name">Unlocked</h3>
+        <p class="desc">Achievement is in <code>data.unlocked</code>. Icon background fills accent. Meter hidden, date shown.</p>
+        <div class="props"><span class="prop"><b>icon bg:</b> accent</span><span class="prop"><b>icon color:</b> ink</span><span class="prop"><b>caption:</b> &quot;unlocked · 2026-05-12&quot;</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>HUD chip variants</h3>
+      <ul>
+        <li><strong>side</strong> (desktop) — vertical card on the right edge of the play field, ≥ 200px width.</li>
+        <li><strong>inline</strong> (mobile, narrow) — horizontal chip docked above the action sheet.</li>
+        <li>Both forms share the same content model: <code>{ icon, name, current, target, percentage }</code>. Component takes <code>variant</code> prop.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─── 05. DIALOG / MODAL ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>05 / dialog</b> two severity levels</h2>
+
+    <div class="grid grid-2">
+      <div class="cell">
+        <span class="badge">soft</span>
+        <h3 class="name">Soft confirm</h3>
+        <p class="desc">Action loses progress but is expected (Back to menu, Discard replay). Ink ring around icon, red primary stays for the destructive outcome.</p>
+        <div class="props"><span class="prop"><b>icon ring:</b> ink 3px</span><span class="prop"><b>cancel key:</b> ESC</span><span class="prop"><b>confirm key:</b> Enter</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge crit">destructive</span>
+        <h3 class="name">Destructive confirm</h3>
+        <p class="desc">Irreversible-ish (Restart, Activate code that overwrites state). Warn ring around icon, alert glyph.</p>
+        <div class="props"><span class="prop"><b>icon ring:</b> warn 3px</span><span class="prop"><b>icon:</b> alert</span><span class="prop"><b>primary:</b> warn fill</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>existing destructive triggers</h3>
+      <ul>
+        <li><strong>Restart in-game</strong> (PauseMenu / HUD) — destructive variant.</li>
+        <li><strong>Back to main menu</strong> (PauseMenu / NavBar Menu tab while playing) — soft variant.</li>
+        <li><strong>Reset settings</strong> (SettingsPanel footer) — soft variant.</li>
+        <li><strong>Discard replay</strong> (future) — soft variant.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─── 06. NAV / OVERLAY ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>06 / overlay surface</b> what gets the NavBar, what doesn't</h2>
+
+    <div class="grid grid-4">
+      <div class="cell">
+        <span class="badge">surface</span>
+        <h3 class="name">StartScreen</h3>
+        <p class="desc">Has NavBar. Menu tab is current. Tutorial overlay can layer on top.</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · tab Menu</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">surface</span>
+        <h3 class="name">In-game HUD</h3>
+        <p class="desc">Has NavBar (no tab is current — game is the surface, panels are siblings).</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · no current</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">overlay</span>
+        <h3 class="name">PauseMenu</h3>
+        <p class="desc">Has NavBar. Menu tab current means &quot;you came from in-game&quot;.</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · tab Menu</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">overlay</span>
+        <h3 class="name">GameOver</h3>
+        <p class="desc">Has NavBar. Trophy tab current if achievement unlocked this round.</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · tab varies</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">panel</span>
+        <h3 class="name">SettingsPanel</h3>
+        <p class="desc">Settings tab current. ESC returns to caller (Start or Pause).</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · Settings</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">panel</span>
+        <h3 class="name">AchievementsPanel</h3>
+        <p class="desc">Achv tab current. ESC returns to caller.</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · Achv</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">panel</span>
+        <h3 class="name">DailyChallenge</h3>
+        <p class="desc">Menu tab current; opened from Pause or Start (no top-level tab).</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · Menu</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">panel</span>
+        <h3 class="name">PurchasePanel</h3>
+        <p class="desc">Menu tab current; opened from Pause or Start.</p>
+        <div class="props"><span class="prop"><b>nav:</b> visible · Menu</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge crit">modal</span>
+        <h3 class="name">ConfirmDialog</h3>
+        <p class="desc">No NavBar. Centered card on hatched backdrop. Captures ESC + Enter only.</p>
+        <div class="props"><span class="prop"><b>nav:</b> hidden</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge crit">overlay</span>
+        <h3 class="name">Tutorial</h3>
+        <p class="desc">No NavBar. Coachmarks on real UI. Single Skip control.</p>
+        <div class="props"><span class="prop"><b>nav:</b> hidden</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>back-stack rule</h3>
+      <ul>
+        <li>NavBar tab clicks <em>navigate</em>; they don't <em>stack</em>. Going Settings → Achievements doesn't push, it replaces. The only stack is: <strong>caller → ConfirmDialog</strong>, which is one deep max.</li>
+        <li>ESC on a panel returns to caller (Start or Pause). ESC on Pause returns to game. ESC on game opens Pause. ESC on ConfirmDialog cancels.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─── 07. INPUT ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>07 / input</b> who can act, when</h2>
+
+    <div class="grid grid-3">
+      <div class="cell">
+        <span class="badge ok">enabled</span>
+        <h3 class="name">canMove</h3>
+        <p class="desc">Pre-condition for the bottom Action button + drop-slot click.</p>
+        <div class="props"><span class="prop">selectedBlock !== null</span><span class="prop">phase === 'playing'</span><span class="prop">simulatingBlockIds === null</span><span class="prop">selectedBlock.layer &lt; topCompleteLayer</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge">disabled</span>
+        <h3 class="name">disabled</h3>
+        <p class="desc">Action button greyed; drop-slot non-interactive; HUD cards still update.</p>
+        <div class="props"><span class="prop">no selection</span><span class="prop">stabilizing</span><span class="prop">top layer rule violated</span></div>
+      </div>
+      <div class="cell">
+        <span class="badge crit">locked</span>
+        <h3 class="name">aiThinking</h3>
+        <p class="desc">All player input ignored. AI delay constants control duration. HUD shows AI badge.</p>
+        <div class="props"><span class="prop">playerMode === 3</span><span class="prop">currentPlayer === 1</span><span class="prop">duration: AI_THINK + AI_MOVE</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 08. TYPE SHAPE — what React will see ─── -->
+  <section class="section">
+    <h2 class="section-title"><b>08 / suggested type shape</b> what the reducer should look like</h2>
+
+    <div class="spec-code"><i>// src/state/types.ts (or .js with JSDoc)</i>
+
+<em>type</em> <b>Phase</b> = 'start' | 'playing' | 'gameOver';
+<em>type</em> <b>PlayerMode</b> = 1 | 2 | 3;        <i>// solo | local-pvp | vs-ai</i>
+<em>type</em> <b>GameMode</b> = 'classic' | 'speed';
+<em>type</em> <b>Difficulty</b> = 'easy' | 'normal' | 'hard';
+
+<em>type</em> <b>TimerState</b> = 'ok' | 'warn' | 'crit';   <i>// derived from seconds</i>
+
+<em>type</em> <b>AchievementCardState</b> =
+  | { kind: 'locked' }
+  | { kind: 'progress', current: number, target: number, percentage: number }
+  | { kind: 'unlocked', unlockedAt: number };
+
+<em>type</em> <b>Overlay</b> =
+  | null
+  | { kind: 'pause' }
+  | { kind: 'settings' }
+  | { kind: 'achievements' }
+  | { kind: 'daily' }
+  | { kind: 'purchase' }
+  | { kind: 'confirm', variant: 'soft' | 'destructive', action: ConfirmAction }
+  | { kind: 'tutorial' };
+
+<em>type</em> <b>NavTab</b> = 'menu' | 'settings' | 'achievements';
+<em>type</em> <b>NavCurrent</b> = NavTab | null;          <i>// null on in-game HUD</i>
+    </div>
+
+    <div class="note">
+      <h3>refactor cost</h3>
+      <ul>
+        <li>Phase already exists. <code>Overlay</code> as a discriminated union <strong>replaces 5 boolean flags</strong> (showPauseMenu / showSettings / showAchievements / showDailyChallenge / showPurchase) with one field. Cuts off the bug class &quot;two overlays open at once&quot;.</li>
+        <li>Not doing this in step 1. First port screens to primitives, then collapse the booleans in a follow-up refactor — touching App.jsx and useGameReducer.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span>state matrix v1 · 8 sections · companion to design-preview/index.html</span>
+    <span>next: tokens.css + tokens.js</span>
+  </div>
+
+</div>
+</body>
+</html>

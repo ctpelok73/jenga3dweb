@@ -1,0 +1,1362 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jenga 3D — design preview v0.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>:root{
+  --paper:#f6efe2;
+  --paper-2:#ece3d1;
+  --paper-3:#ddd2b9;
+  --ink:#131110;
+  --ink-2:#3b3530;
+  --ink-3:#7a6f63;
+  --accent:#ff5b1f;
+  --accent-2:#e0481a;
+  --p1:#1f6feb;
+  --p2:#c92763;
+  --ai:#7a3ad6;
+  --warn:#c43a17;
+  --warn-soft:#f0a087;
+  --ok:#1f8a5a;
+  --gold:#d4a017;
+  --br:2px;
+  --br-strong:3px;
+  --shadow-hard:6px 6px 0 var(--ink);
+  --shadow-hard-sm:3px 3px 0 var(--ink);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif}
+body{
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(19,17,16,.04) 23px 24px),
+    repeating-linear-gradient(90deg, transparent 0 23px, rgba(19,17,16,.04) 23px 24px);
+  min-height:100vh;
+}
+.preview-wrap{max-width:1340px;margin:0 auto;padding:36px 24px 80px}
+.preview-head{display:flex;justify-content:space-between;align-items:flex-end;padding:16px 0 28px;border-bottom:var(--br-strong) solid var(--ink);margin-bottom:36px;gap:24px}
+.preview-head h1{font-family:'Archivo Black',sans-serif;font-size:40px;letter-spacing:-1px;margin:0;line-height:.95}
+.preview-head h1 span{color:var(--accent)}
+.preview-head .meta{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-2);text-align:right;line-height:1.55}
+.preview-head .meta b{color:var(--ink);font-weight:700}
+
+/* ─── SVG ICON SYSTEM ─── */
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic--lg{width:1.4em;height:1.4em;stroke-width:1.5}
+.ic--xl{width:32px;height:32px;stroke-width:1.6}
+
+/* ─── Layout ─── */
+.screen-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.screen-grid--3{grid-template-columns:1fr 1fr 1fr;gap:36px}
+.screen-grid--4{grid-template-columns:repeat(4,1fr);gap:24px}
+@media (max-width:1180px){.screen-grid,.screen-grid--3,.screen-grid--4{grid-template-columns:1fr}}
+.screen-row{margin-bottom:60px}
+.row-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:14px;margin:0 0 18px}
+.row-title::before{content:"";flex:0 0 24px;height:3px;background:var(--ink)}
+.row-title b{color:var(--ink);font-weight:700}
+
+/* ─── Frame ─── */
+.frame{background:var(--paper);border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard);position:relative;overflow:hidden}
+.frame-label{position:absolute;top:0;left:0;background:var(--ink);color:var(--paper);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;padding:6px 10px 5px;text-transform:uppercase;font-weight:700;z-index:5}
+.frame-body{min-height:760px;display:flex;flex-direction:column;position:relative}
+.frame-body--hud{min-height:700px}
+.frame-body--pause{min-height:700px}
+.frame-body--narrow{min-height:760px}
+.frame-mobile{max-width:380px;margin:0 auto}
+.frame-mobile .frame-body{min-height:720px}
+
+/* ─── Tower BG ─── */
+.tower{position:absolute;inset:0;overflow:hidden;background:radial-gradient(140% 80% at 50% 110%, rgba(19,17,16,.16), transparent 55%),linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 70%, var(--paper-3) 100%)}
+.tower-stack{position:absolute;left:50%;bottom:7%;transform:translateX(-50%) perspective(1100px) rotateX(6deg);width:280px;height:540px;display:flex;flex-direction:column-reverse;gap:3px;filter:drop-shadow(8px 12px 0 rgba(19,17,16,.18))}
+.tower-row{display:flex;gap:3px;height:30px}
+.tower-blk{flex:1;background:linear-gradient(180deg,#cdb88f 0%,#b89c6e 60%,#a08756 100%);border:1.5px solid var(--ink);position:relative}
+.tower-blk::before{content:"";position:absolute;inset:2px 4px 60% 4px;background:repeating-linear-gradient(0deg, transparent 0 2px, rgba(19,17,16,.06) 2px 3px)}
+.tower-row--rot{flex-direction:column-reverse}
+.tower-row--rot .tower-blk{height:30px}
+.tower-row--rot .tower-blk::before{inset:4px 60% 2px 4px;background:repeating-linear-gradient(90deg, transparent 0 2px, rgba(19,17,16,.06) 2px 3px)}
+.tower-shadow{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:340px;height:18px;border-radius:50%;background:rgba(19,17,16,.22);filter:blur(6px)}
+.tower--fallen .tower-stack{transform:translateX(-50%) perspective(1100px) rotateX(6deg) rotate(-3deg)}
+.tower--fallen .tower-stack > div:nth-child(n+8){opacity:.35;transform:translate(20px, 6px) rotate(8deg)}
+.tower--dim{opacity:.45}
+
+/* ─── Top bar ─── */
+.bar{position:relative;z-index:3;display:flex;align-items:stretch;background:var(--ink);color:var(--paper)}
+.bar-brand{padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2.5px;font-weight:700;display:flex;align-items:center;gap:8px;border-right:1px solid rgba(246,239,226,.15)}
+.bar-brand .dot{width:8px;height:8px;background:var(--accent)}
+.bar-tabs{display:flex;flex:1}
+.bar-tab{flex:1;padding:12px 6px 11px;text-align:center;cursor:pointer;background:transparent;border:none;color:var(--paper);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-right:1px solid rgba(246,239,226,.15);display:flex;align-items:center;justify-content:center;gap:6px;transition:background .12s;user-select:none}
+.bar-tab:hover{background:#231f1c}
+.bar-tab[aria-current="page"]{background:var(--accent);color:var(--ink)}
+.bar-tab .b{font-size:9px;background:var(--paper);color:var(--ink);padding:1px 4px;font-weight:700;letter-spacing:1px}
+.bar-tab[aria-current="page"] .b{background:var(--ink);color:var(--accent)}
+.bar-mute{width:42px;background:transparent;border:none;color:var(--paper);font-size:14px;cursor:pointer;border-left:1px solid rgba(246,239,226,.15)}
+.bar-mute:hover{background:#231f1c}
+
+/* mobile bar variant: icons only */
+.bar--m .bar-tab{padding:14px 4px;font-size:14px}
+.bar--m .bar-tab .nm{display:none}
+
+/* ─── Screen content ─── */
+.screen{position:relative;z-index:2;flex:1;padding:40px 32px 32px;display:flex;flex-direction:column}
+.screen--tight{padding:30px 26px 28px}
+.screen--m{padding:24px 18px 18px}
+
+/* ─── Brand block ─── */
+.brand{display:flex;align-items:flex-start;gap:18px;margin-bottom:20px}
+.brand h2{font-family:'Archivo Black',sans-serif;font-size:84px;line-height:.82;letter-spacing:-3px;margin:0}
+.brand h2 em{font-style:normal;color:var(--accent)}
+.brand .ver{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-2);letter-spacing:2px;writing-mode:vertical-rl;transform:rotate(180deg);padding-top:6px}
+.tag{font-size:14px;line-height:1.5;color:var(--ink-2);max-width:340px;margin:0 0 32px;border-left:2px solid var(--accent);padding-left:12px}
+
+/* ─── Spec / metric ─── */
+.spec{display:grid;grid-template-columns:1fr 1fr;gap:0;border:var(--br) solid var(--ink);background:var(--paper);margin-bottom:28px}
+.spec > div{padding:22px 22px 20px;border-right:var(--br) solid var(--ink)}
+.spec > div:last-child{border-right:none}
+.spec-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.spec-val{font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.95;letter-spacing:-1.5px}
+.spec-unit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:1.2px;margin-top:6px;display:block}
+
+/* ─── Section title ─── */
+.section-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+.section-title::before{content:"";flex:0 0 14px;height:2px;background:var(--ink)}
+.section-title b{color:var(--ink);font-weight:700}
+
+/* ─── Mode/Player buttons ─── */
+.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:14px;border:var(--br) solid var(--ink)}
+.mode-btn{background:var(--paper);border:none;border-right:var(--br) solid var(--ink);padding:14px 14px;text-align:left;cursor:pointer;font-family:'Inter Tight',sans-serif;font-weight:700;font-size:15px;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background .12s, transform .08s}
+.mode-btn:last-child{border-right:none}
+.mode-btn:hover{background:var(--paper-2)}
+.mode-btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.mode-btn[aria-pressed="true"] .mode-meta{color:rgba(246,239,226,.65)}
+.mode-meta{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3)}
+.player-row{display:grid;grid-template-columns:1fr 1fr 1fr;border:var(--br) solid var(--ink);margin-bottom:28px}
+.player-row .mode-btn{padding:18px 14px;flex-direction:column;align-items:flex-start;gap:6px}
+.player-row .mode-btn .big{font-family:'Archivo Black',sans-serif;font-size:22px;line-height:1}
+
+/* ─── CTA ─── */
+.cta{display:flex;gap:0;border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard-sm);margin-top:auto}
+.cta-main{flex:1;background:var(--accent);color:var(--ink);border:none;padding:22px 22px;font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:-.5px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:transform .08s, background .12s}
+.cta-main:hover{background:var(--accent-2);transform:translate(-2px,-2px)}
+.cta-main .arrow{font-family:'JetBrains Mono',monospace;font-size:22px}
+.cta-side{background:var(--ink);color:var(--paper);border:none;padding:0 22px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer}
+.cta-side:hover{background:#231f1c}
+
+/* ─── Notes ─── */
+.notes{margin-top:14px;padding:14px 16px;border:var(--br) solid var(--ink);background:var(--paper);font-size:13px;line-height:1.55}
+.notes h3{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;color:var(--ink-3)}
+.notes ul{margin:0;padding-left:18px}
+.notes li{margin-bottom:4px}
+.notes strong{background:var(--accent);padding:0 4px;font-weight:700}
+.notes code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--paper-2);padding:1px 4px}
+
+/* ═════════ GAME OVER ═════════ */
+.go-stamp{position:absolute;top:78px;right:24px;z-index:4;font-family:'Archivo Black',sans-serif;font-size:13px;color:var(--warn);border:var(--br) solid var(--warn);padding:6px 10px 5px;letter-spacing:2px;transform:rotate(6deg);background:var(--paper)}
+.go-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
+.go-hero h2{font-family:'Archivo Black',sans-serif;font-size:60px;line-height:.85;letter-spacing:-2px;margin:0}
+.go-hero h2 em{font-style:normal;color:var(--warn)}
+.go-hero .who{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);text-align:right}
+.go-hero .who b{display:block;color:var(--ink);font-family:'Inter Tight';font-size:18px;letter-spacing:0;text-transform:none;margin-top:4px;font-weight:700}
+.metric-row{display:grid;grid-template-columns:2fr 1fr 1fr;border:var(--br) solid var(--ink);margin-bottom:22px;background:var(--paper)}
+.metric-row > div{padding:22px 18px;border-right:var(--br) solid var(--ink)}
+.metric-row > div:last-child{border-right:none}
+.metric-row .big{font-family:'Archivo Black',sans-serif;font-size:84px;line-height:.85;letter-spacing:-3px;color:var(--accent)}
+.metric-row .mid{font-family:'Archivo Black',sans-serif;font-size:42px;line-height:.85;letter-spacing:-1.5px;color:var(--ink)}
+.metric-row .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);margin-top:10px}
+.record-banner{background:var(--accent);color:var(--ink);border:var(--br) solid var(--ink);padding:10px 14px;font-family:'Archivo Black',sans-serif;font-size:13px;letter-spacing:2px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center}
+.record-banner span{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;font-weight:700}
+.go-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto}
+.go-btn{background:var(--paper);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:14px 14px;text-align:left;cursor:pointer;font-family:'Inter Tight';font-weight:700;font-size:14px;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:6px;transition:transform .08s}
+.go-btn:hover{transform:translate(-2px,-2px)}
+.go-btn.primary{background:var(--ink);color:var(--paper)}
+.go-btn.primary .k{color:var(--accent)}
+.go-btn .k{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);letter-spacing:1.5px}
+.share-line{margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);border-top:var(--br) solid var(--ink);padding-top:12px}
+.share-line .icons{display:flex;gap:6px}
+.share-line .icons button{background:var(--paper);border:1.5px solid var(--ink);width:30px;height:30px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ink)}
+.share-line .icons button:hover{background:var(--accent)}
+
+/* ═════════ HUD ═════════ */
+.hud-stack{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%) perspective(1100px) rotateX(8deg);width:300px;height:520px;display:flex;flex-direction:column-reverse;gap:3px;filter:drop-shadow(8px 12px 0 rgba(19,17,16,.18))}
+.hud-stack .tower-row{height:32px}
+.hud-stack .tower-blk.hi{background:linear-gradient(180deg,#ff8a5b 0%,#ff5b1f 60%,#d63d10 100%);border-color:var(--ink);box-shadow:inset 0 0 0 2px rgba(19,17,16,.4)}
+.hud-stack .tower-blk.hi::before{background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(19,17,16,.18) 2px 3px)}
+
+/* HUD top strip */
+.hud-top{position:absolute;top:46px;left:0;right:0;z-index:4;display:flex;align-items:stretch;padding:14px;gap:10px;pointer-events:none}
+.hud-top > *{pointer-events:auto}
+
+/* Player card — now strong */
+.hud-player{background:var(--paper);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);display:flex;align-items:stretch;min-width:160px;font-family:'JetBrains Mono',monospace}
+.hud-player .glyph{width:54px;display:flex;align-items:center;justify-content:center;font-family:'Archivo Black',sans-serif;font-size:24px;letter-spacing:-1px;color:var(--paper);background:var(--p1)}
+.hud-player.is-p2 .glyph{background:var(--p2)}
+.hud-player.is-ai .glyph{background:var(--ai)}
+.hud-player .meta{padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.hud-player .meta .l{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3)}
+.hud-player .meta .nm{font-family:'Inter Tight';font-weight:700;font-size:14px;color:var(--ink);letter-spacing:0;text-transform:none;line-height:1}
+
+.hud-card{background:var(--paper);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);display:flex;flex-direction:column;gap:2px;min-width:74px}
+.hud-card .v{font-family:'Archivo Black',sans-serif;font-size:22px;color:var(--ink);letter-spacing:-1px;line-height:1}
+.hud-spacer{flex:1}
+
+/* Timer states */
+.hud-timer{background:var(--paper);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);display:flex;flex-direction:column;gap:2px;min-width:84px}
+.hud-timer .v{font-family:'Archivo Black',sans-serif;font-size:22px;color:var(--ink);letter-spacing:-1px;line-height:1}
+.hud-timer.warn{border-color:var(--accent);box-shadow:3px 3px 0 var(--accent)}
+.hud-timer.crit{background:var(--accent);color:var(--ink);border-color:var(--ink);animation:hud-pulse 0.6s ease-in-out infinite alternate}
+.hud-timer.crit .v{color:var(--ink)}
+@keyframes hud-pulse{from{transform:translate(0,0)}to{transform:translate(-1px,-1px)}}
+
+/* Achievement progress (desktop: side card) */
+.hud-ach-side{position:absolute;top:140px;right:14px;z-index:4;background:var(--paper);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:10px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);width:200px;transition:transform .08s}
+.hud-ach-side:hover{transform:translate(-2px,-2px)}
+.hud-ach-side .row{display:flex;align-items:center;gap:8px}
+.hud-ach-side .nm{color:var(--ink);font-weight:700;font-family:'Inter Tight';text-transform:none;letter-spacing:0;font-size:12px;line-height:1.1;flex:1}
+.hud-ach-side .meter{height:6px;background:var(--paper-3);border:1px solid var(--ink);position:relative}
+.hud-ach-side .meter > i{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.hud-ach-side .pct{font-weight:700;color:var(--ink-3)}
+
+/* Bottom action sheet */
+.hud-bottom{position:absolute;bottom:0;left:0;right:0;z-index:4;background:var(--paper);border-top:var(--br-strong) solid var(--ink);padding:14px 14px 16px;display:flex;align-items:stretch;gap:10px}
+.hud-status{flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.hud-status .msg{font-family:'Inter Tight';font-weight:700;font-size:15px;color:var(--ink);line-height:1.2}
+.hud-status .hint{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.kbd{display:inline-block;border:1.5px solid var(--ink);padding:1px 5px;font-weight:700;color:var(--ink);background:var(--paper-2);font-family:'JetBrains Mono',monospace;font-size:10px}
+.hud-action{background:var(--accent);color:var(--ink);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:14px 22px;font-family:'Archivo Black',sans-serif;font-size:18px;letter-spacing:-.5px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:2px;transition:transform .08s, background .12s}
+.hud-action:hover{transform:translate(-2px,-2px);background:var(--accent-2)}
+.hud-action .arr{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--ink)}
+.hud-restart{background:var(--paper);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);width:54px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:18px}
+.hud-restart:hover{background:var(--accent)}
+
+/* HUD mobile achievement chip lives inside bottom strip */
+.hud-bottom--m{flex-direction:column;gap:8px}
+.hud-ach-mobile{background:var(--paper-2);border:var(--br) solid var(--ink);padding:8px 10px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3);cursor:pointer}
+.hud-ach-mobile .nm{color:var(--ink);font-weight:700;font-family:'Inter Tight';text-transform:none;letter-spacing:0;font-size:11px;flex:1}
+.hud-ach-mobile .meter{flex:0 0 80px;height:6px;background:var(--paper);border:1px solid var(--ink);position:relative}
+.hud-ach-mobile .meter > i{position:absolute;inset:0 36% 0 0;background:var(--accent)}
+
+/* ═════════ PAUSE ═════════ */
+.pause-screen{padding:36px 32px 28px}
+.pause-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;gap:18px}
+.pause-head h2{font-family:'Archivo Black',sans-serif;font-size:54px;line-height:.85;letter-spacing:-2px;margin:0;display:flex;align-items:center;gap:14px}
+.pause-head h2 em{font-style:normal;color:var(--accent)}
+.pause-head .pause-glyph{width:42px;height:42px;border:var(--br-strong) solid var(--ink);display:inline-flex;align-items:center;justify-content:center;background:var(--paper)}
+.pause-head .pause-glyph .b{width:8px;height:24px;background:var(--ink);margin:0 2px}
+.pause-head .who{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);text-align:right}
+.pause-head .who b{display:block;font-family:'Inter Tight';font-size:18px;font-weight:700;color:var(--ink);text-transform:none;letter-spacing:0;margin-top:4px}
+.pause-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border:var(--br) solid var(--ink);margin-bottom:24px}
+.pause-stats > div{padding:20px 18px;border-right:var(--br) solid var(--ink)}
+.pause-stats > div:last-child{border-right:none}
+.pause-stats .v{font-family:'Archivo Black',sans-serif;font-size:42px;line-height:.9;letter-spacing:-1.5px}
+.pause-stats .l{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+.pause-cta{background:var(--accent);color:var(--ink);border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:22px;font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:-.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:14px;transition:transform .08s, background .12s}
+.pause-cta:hover{background:var(--accent-2);transform:translate(-2px,-2px)}
+.pause-cta .k{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);letter-spacing:1.5px;background:var(--paper);padding:3px 6px;font-weight:700}
+.pause-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pause-btn{background:var(--paper);border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:14px 14px;text-align:left;cursor:pointer;font-family:'Inter Tight';font-weight:700;font-size:14px;color:var(--ink);display:flex;justify-content:space-between;align-items:center;transition:transform .08s;gap:8px}
+.pause-btn:hover{transform:translate(-2px,-2px)}
+.pause-btn .lbl{display:flex;align-items:center;gap:8px}
+.pause-btn .k{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);letter-spacing:1.5px}
+.pause-divider{height:var(--br);background:var(--ink);margin:8px 0 12px}
+.pause-row{display:flex;gap:10px;margin-top:auto}
+.pause-row .pause-btn{flex:1}
+.pause-btn.danger{border-color:var(--warn);color:var(--warn)}
+.pause-btn.danger:hover{background:var(--warn);color:var(--paper)}
+.pause-btn.danger .k{color:var(--warn)}
+.pause-btn.danger:hover .k{color:var(--paper)}
+
+/* ═════════ ACHIEVEMENTS ═════════ */
+.ach-screen{padding:30px 28px 28px}
+.ach-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px}
+.ach-head h2{font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.85;letter-spacing:-1.5px;margin:0}
+.ach-head .progress{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);text-align:right}
+.ach-head .progress b{font-family:'Archivo Black',sans-serif;font-size:32px;color:var(--ink);letter-spacing:-1px;display:block}
+.ach-summary{display:grid;grid-template-columns:repeat(4,1fr);border:var(--br) solid var(--ink);margin-bottom:18px}
+.ach-summary > div{padding:14px 12px;border-right:var(--br) solid var(--ink)}
+.ach-summary > div:last-child{border-right:none}
+.ach-summary .v{font-family:'Archivo Black',sans-serif;font-size:24px;letter-spacing:-1px;line-height:1}
+.ach-summary .l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+.ach-summary .v.done{color:var(--ok)}
+.ach-summary .v.next{color:var(--accent)}
+.ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ach-card{border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);background:var(--paper);padding:14px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:flex-start}
+.ach-card .ico{width:46px;height:46px;border:var(--br) solid var(--ink);display:flex;align-items:center;justify-content:center;background:var(--paper-2);color:var(--ink-2)}
+.ach-card.unlocked .ico{background:var(--accent);color:var(--ink)}
+.ach-card.locked{opacity:.65}
+.ach-card.locked .ico{filter:grayscale(1)}
+.ach-card .nm{font-family:'Inter Tight';font-weight:700;font-size:14px;color:var(--ink);line-height:1.15}
+.ach-card .ds{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin-top:4px;line-height:1.4}
+.ach-card .meter{margin-top:8px;height:6px;background:var(--paper-3);border:1px solid var(--ink);position:relative}
+.ach-card .meter > i{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.ach-card .pct{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--ink-3);margin-top:4px}
+.ach-card.unlocked .pct{color:var(--ok)}
+
+/* ═════════ SETTINGS ═════════ */
+.set-screen{padding:30px 28px 28px}
+.set-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px}
+.set-head h2{font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.85;letter-spacing:-1.5px;margin:0}
+.set-row{margin-bottom:18px}
+.set-row .l{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;margin-bottom:8px}
+.set-row .l b{color:var(--ink)}
+.set-slider{width:100%;height:18px;border:var(--br) solid var(--ink);background:var(--paper);position:relative;cursor:pointer}
+.set-slider .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.set-slider .knob{position:absolute;top:50%;width:14px;height:30px;background:var(--ink);transform:translate(-50%,-50%)}
+.set-opt{display:flex;border:var(--br) solid var(--ink);overflow:hidden}
+.set-opt button{flex:1;padding:11px 8px;background:var(--paper);border:none;border-right:var(--br) solid var(--ink);font-family:'Inter Tight';font-weight:700;font-size:13px;color:var(--ink);cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:6px}
+.set-opt button:last-child{border-right:none}
+.set-opt button:hover{background:var(--paper-2)}
+.set-opt button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.set-swatch-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.set-swatch{border:var(--br) solid var(--ink);padding:10px;background:var(--paper);cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:transform .08s, box-shadow .08s}
+.set-swatch:hover{transform:translate(-2px,-2px);box-shadow:var(--shadow-hard-sm)}
+.set-swatch[aria-pressed="true"]{outline:var(--br) solid var(--accent);outline-offset:-4px}
+.set-swatch .chip{height:28px;border:1.5px solid var(--ink);background:linear-gradient(135deg,#cdb88f,#a08756)}
+.set-swatch .nm{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.set-swatch .nm .lock{color:var(--ink-3)}
+.set-swatch.locked{opacity:.55}
+.set-swatch.skin-neon .chip{background:linear-gradient(135deg,#bb66ff,#5a1aa0)}
+.set-swatch.skin-marble .chip{background:linear-gradient(135deg,#fff,#cfcfd0)}
+.set-swatch.skin-ice .chip{background:linear-gradient(135deg,#a8e2f0,#3a8db0)}
+.set-swatch.skin-bamboo .chip{background:linear-gradient(135deg,#cae29a,#7aa84a)}
+.set-swatch.skin-candy .chip{background:linear-gradient(135deg,#ffaad0,#d63a7a)}
+.set-foot{margin-top:auto;display:flex;justify-content:space-between;gap:10px;padding-top:18px;border-top:var(--br) solid var(--ink)}
+.set-foot button{padding:14px 18px;border:var(--br) solid var(--ink);font-family:'Inter Tight';font-weight:700;cursor:pointer;font-size:14px;color:var(--ink);background:var(--paper);box-shadow:var(--shadow-hard-sm)}
+.set-foot .reset:hover{background:var(--warn);color:var(--paper);border-color:var(--warn)}
+.set-foot .ok{background:var(--accent);font-family:'Archivo Black',sans-serif;letter-spacing:-.5px}
+.set-foot .ok:hover{background:var(--accent-2)}
+
+/* ═════════ DAILY ═════════ */
+.daily-screen{padding:30px 28px 28px}
+.daily-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px}
+.daily-head h2{font-family:'Archivo Black',sans-serif;font-size:42px;line-height:.85;letter-spacing:-1.5px;margin:0}
+.daily-head .date{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);text-align:right}
+.daily-head .date b{color:var(--ink);font-family:'Archivo Black',sans-serif;font-size:18px;letter-spacing:-.5px;display:block;margin-top:2px}
+.daily-task{border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:18px 18px;background:var(--paper);margin-bottom:18px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:flex-start}
+.daily-task .badge{width:54px;height:54px;background:var(--accent);border:var(--br) solid var(--ink);display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.daily-task .nm{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:-.5px;line-height:1;margin-bottom:6px}
+.daily-task .ds{font-family:'Inter Tight';font-size:13px;color:var(--ink-2);line-height:1.45}
+.daily-task .stamp{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;background:var(--ok);color:var(--paper);display:inline-block;padding:3px 6px;font-weight:700;margin-top:8px}
+.daily-section{margin-bottom:14px}
+.lb-tabs{display:flex;border:var(--br) solid var(--ink);margin-bottom:10px}
+.lb-tabs button{flex:1;background:var(--paper);border:none;border-right:var(--br) solid var(--ink);padding:10px 8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);cursor:pointer;font-weight:700}
+.lb-tabs button:last-child{border-right:none}
+.lb-tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.lb-list{border:var(--br) solid var(--ink);background:var(--paper)}
+.lb-row{display:grid;grid-template-columns:32px 1fr auto auto;gap:10px;padding:10px 12px;border-bottom:1px solid var(--ink-3);align-items:center;font-family:'Inter Tight';font-size:13px}
+.lb-row:last-child{border-bottom:none}
+.lb-row.you{background:var(--accent);color:var(--ink)}
+.lb-row .rk{font-family:'Archivo Black',sans-serif;font-size:18px;letter-spacing:-.5px}
+.lb-row .nm{font-weight:700;color:var(--ink)}
+.lb-row .sc{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.lb-row .ly{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px}
+.daily-cta{margin-top:auto;background:var(--accent);color:var(--ink);border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:18px 22px;font-family:'Archivo Black',sans-serif;font-size:18px;letter-spacing:-.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:auto}
+.daily-cta:hover{background:var(--accent-2)}
+
+/* ═════════ PREMIUM ═════════ */
+.prem-screen{padding:30px 28px 28px}
+.prem-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px}
+.prem-head h2{font-family:'Archivo Black',sans-serif;font-size:42px;line-height:.85;letter-spacing:-1.5px;margin:0}
+.prem-head .pill{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:6px 10px;font-weight:700}
+.prem-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.prem-card{border:var(--br) solid var(--ink);box-shadow:var(--shadow-hard-sm);padding:14px 14px;background:var(--paper);display:flex;flex-direction:column;gap:8px}
+.prem-card .nm{font-family:'Archivo Black',sans-serif;font-size:20px;letter-spacing:-.5px;line-height:1}
+.prem-card .ds{font-family:'Inter Tight';font-size:12px;color:var(--ink-2);line-height:1.45;flex:1}
+.prem-card .row{display:flex;justify-content:space-between;align-items:center;border-top:var(--br) solid var(--ink);padding-top:10px;margin-top:8px}
+.prem-card .price{font-family:'Archivo Black',sans-serif;font-size:18px;color:var(--accent);letter-spacing:-.5px}
+.prem-card .buy{background:var(--ink);color:var(--paper);border:none;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:700}
+.prem-card .buy:hover{background:var(--accent);color:var(--ink)}
+.prem-card.purchased{background:var(--paper-2)}
+.prem-card.purchased .price{color:var(--ok)}
+.prem-code{border:var(--br-strong) solid var(--ink);padding:14px;display:flex;gap:10px;align-items:stretch}
+.prem-code input{flex:1;border:var(--br) solid var(--ink);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;background:var(--paper);color:var(--ink)}
+.prem-code button{background:var(--accent);border:var(--br) solid var(--ink);padding:0 18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:700;color:var(--ink)}
+.prem-code button:hover{background:var(--accent-2)}
+.prem-code .lbl{display:flex;flex-direction:column;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3)}
+.prem-code .lbl b{color:var(--ink);font-size:13px;letter-spacing:0;font-family:'Inter Tight';text-transform:none;font-weight:700}
+
+/* ═════════ CONFIRM DIALOG ═════════ */
+.cfm-frame{display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(45deg,rgba(19,17,16,.04) 0 8px,transparent 8px 16px),var(--paper)}
+.cfm-card{max-width:340px;width:100%;background:var(--paper);border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard);padding:26px 22px 22px;text-align:left;margin:0 24px}
+.cfm-card .ico-wrap{width:54px;height:54px;border:var(--br-strong) solid var(--warn);display:flex;align-items:center;justify-content:center;color:var(--warn);margin-bottom:16px}
+.cfm-card.cancel-only .ico-wrap{border-color:var(--ink);color:var(--ink)}
+.cfm-card h3{font-family:'Archivo Black',sans-serif;font-size:24px;letter-spacing:-.5px;line-height:1;margin:0 0 8px}
+.cfm-card p{font-family:'Inter Tight';font-size:13px;color:var(--ink-2);line-height:1.5;margin:0 0 18px}
+.cfm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cfm-btn{padding:14px 12px;border:var(--br) solid var(--ink);font-family:'Inter Tight';font-weight:700;font-size:13px;cursor:pointer;background:var(--paper);color:var(--ink);box-shadow:var(--shadow-hard-sm);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cfm-btn .k{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-3);letter-spacing:1.5px}
+.cfm-btn:hover{transform:translate(-2px,-2px)}
+.cfm-btn.danger{background:var(--warn);color:var(--paper);border-color:var(--warn)}
+.cfm-btn.danger .k{color:var(--paper);opacity:.8}
+.cfm-btn.danger:hover{background:var(--ink);border-color:var(--ink)}
+.cfm-frame .frame-body{justify-content:center;align-items:center;display:flex}
+
+/* ═════════ TOKENS strip ═════════ */
+.palette{margin-top:48px;display:grid;grid-template-columns:repeat(6,1fr);border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard)}
+.palette > div{padding:18px 14px;border-right:var(--br) solid var(--ink);min-height:140px;display:flex;flex-direction:column;justify-content:space-between}
+.palette > div:last-child{border-right:none}
+.palette .name{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+.palette .hex{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;margin-top:auto}
+.sw-paper{background:var(--paper)}
+.sw-paper2{background:var(--paper-2)}
+.sw-ink{background:var(--ink);color:var(--paper)}
+.sw-accent{background:var(--accent)}
+.sw-warn{background:var(--warn);color:var(--paper)}
+.sw-ok{background:var(--ok);color:var(--paper)}
+.typo{margin-top:24px;display:grid;grid-template-columns:1fr 1fr 1fr;border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard)}
+.typo > div{padding:22px 18px;border-right:var(--br) solid var(--ink)}
+.typo > div:last-child{border-right:none}
+.typo .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.typo .sample-display{font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;letter-spacing:-1.5px}
+.typo .sample-body{font-family:'Inter Tight';font-size:18px;font-weight:600;line-height:1.3}
+.typo .sample-mono{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700}
+
+/* Icon library showcase */
+.icon-grid{margin-top:24px;display:grid;grid-template-columns:repeat(8,1fr);border:var(--br-strong) solid var(--ink);box-shadow:var(--shadow-hard);background:var(--paper)}
+.icon-grid > div{padding:18px 12px 14px;border-right:var(--br) solid var(--ink);text-align:center;color:var(--ink)}
+.icon-grid > div:last-child{border-right:none}
+.icon-grid .ic{width:32px;height:32px;stroke-width:1.6}
+.icon-grid .nm{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+
+.foot{margin-top:36px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Nav -->
+    <symbol id="i-menu" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/><line x1="3" y1="9" x2="21" y2="9"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 4h12v4a6 6 0 0 1-12 0z"/><path d="M6 6H3a3 3 0 0 0 3 6"/><path d="M18 6h3a3 3 0 0 1-3 6"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="8" y1="20" x2="16" y2="20"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></symbol>
+    <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M9 3l3 6 3-6"/><path d="M9 9l3 12 3-12"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M5 9h3l5-4v14l-5-4H5z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M5 9h3l5-4v14l-5-4H5z"/><line x1="17" y1="9" x2="22" y2="14"/><line x1="22" y1="9" x2="17" y2="14"/></symbol>
+    <!-- HUD -->
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 4 21 10 15 10"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></symbol>
+    <!-- Game actions -->
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="7.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="16.6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></symbol>
+    <symbol id="i-ad" viewBox="0 0 24 24"><polygon points="5 4 19 12 5 20 5 4"/><line x1="22" y1="6" x2="22" y2="18"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></symbol>
+    <!-- Achievements (replace emoji 🎯 🔥 👑 🤖 🧱 ⏱) -->
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0 6 6 0 0 1 3-5"/><path d="M12 21a3 3 0 0 0 3-3c0-2-1.5-3-3-5-1.5 2-3 3-3 5a3 3 0 0 0 3 3z"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 18l2-11 5 5 2-7 2 7 5-5 2 11z"/><line x1="3" y1="21" x2="21" y2="21"/></symbol>
+    <symbol id="i-robot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="1"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><line x1="12" y1="3" x2="12" y2="8"/><circle cx="12" cy="3" r="1"/></symbol>
+    <symbol id="i-brick" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="6"/><rect x="3" y="13" width="9" height="6"/><rect x="12" y="13" width="9" height="6"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 15"/><line x1="9" y1="2" x2="15" y2="2"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><polygon points="13 2 4 14 11 14 9 22 20 10 13 10 13 2"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></symbol>
+    <!-- UI helpers -->
+    <symbol id="i-close" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 21h20z"/><line x1="12" y1="10" x2="12" y2="15"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></symbol>
+    <symbol id="i-tg" viewBox="0 0 24 24"><path d="M3 11l18-7-3 17-5-4-3 4v-5z"/></symbol>
+    <symbol id="i-vk" viewBox="0 0 24 24"><path d="M3 7c1 5 4 9 9 10v-4c2 0 3 2 4 4h4c-1-3-3-5-5-6 2-1 4-3 5-6h-4c-1 2-2 4-4 4V7z"/></symbol>
+    <!-- Tutorial / 1P 2P AI inline -->
+  </defs>
+</svg>
+<div class="preview-wrap">
+
+  <header class="preview-head">
+    <h1>JENGA 3D <span>// UI v0.3</span></h1>
+    <div class="meta">
+      direction: <b>architectural brutalism × warmth</b><br>
+      v0.3: stronger Player card · 3-state timer · clickable achievement bar (desktop side / mobile inline) · SVG icons replace emoji · Settings · Daily · Premium · Confirm · Mobile column
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ ROW 1: START + GAME OVER ═══════════════════════ -->
+  <h2 class="row-title"><b>01</b> entry & exit</h2>
+  <section class="screen-row">
+    <div class="screen-grid">
+
+      <!-- ─── START ─── -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">screen · start</div>
+          <div class="frame-body">
+            <div class="tower">
+              <div class="tower-shadow"></div>
+              <div class="tower-stack">
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+              </div>
+            </div>
+
+            <div class="bar">
+              <div class="bar-brand"><span class="dot"></span>JENGA · 3D</div>
+              <div class="bar-tabs">
+                <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">7/24</span></button>
+              </div>
+              <button class="bar-mute" title="Звук"><svg class="ic"><use href="#i-volume"/></svg></button>
+            </div>
+
+            <div class="screen">
+              <div class="brand">
+                <h2>JENGA<br><em>3D</em></h2>
+                <div class="ver">75×25×15 mm · 18 layers</div>
+              </div>
+              <p class="tag">Вытаскивай блок. Ставь наверх. Не урони башню.</p>
+
+              <div class="spec">
+                <div>
+                  <div class="spec-label">Best</div>
+                  <div class="spec-val">37</div>
+                  <span class="spec-unit">turns · personal record</span>
+                </div>
+                <div>
+                  <div class="spec-label">Games</div>
+                  <div class="spec-val">142</div>
+                  <span class="spec-unit">total played</span>
+                </div>
+              </div>
+
+              <div class="section-title"><b>01 / mode</b></div>
+              <div class="mode-row">
+                <button class="mode-btn" aria-pressed="true">Классика <span class="mode-meta">∞ time</span></button>
+                <button class="mode-btn" aria-pressed="false">Speed Run <span class="mode-meta">60·120·180s</span></button>
+              </div>
+
+              <div class="section-title"><b>02 / players</b></div>
+              <div class="player-row">
+                <button class="mode-btn" aria-pressed="true"><span class="big">1P</span>Соло</button>
+                <button class="mode-btn" aria-pressed="false"><span class="big">2P</span>Локально</button>
+                <button class="mode-btn" aria-pressed="false"><span class="big">AI</span>vs ИИ</button>
+              </div>
+
+              <div class="cta">
+                <button class="cta-main">Начать игру <span class="arrow"><svg class="ic ic--lg"><use href="#i-arrow-right"/></svg></span></button>
+                <button class="cta-side">Туториал</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── GAME OVER ─── -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">screen · game over</div>
+          <div class="frame-body">
+            <div class="tower tower--fallen">
+              <div class="tower-shadow"></div>
+              <div class="tower-stack">
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+              </div>
+            </div>
+
+            <div class="go-stamp">КОЛЛАПС</div>
+
+            <div class="bar">
+              <div class="bar-brand"><span class="dot"></span>JENGA · 3D</div>
+              <div class="bar-tabs">
+                <button class="bar-tab"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+                <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">+2</span></button>
+              </div>
+              <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+            </div>
+
+            <div class="screen">
+              <div class="go-hero">
+                <h2>БАШНЯ<br><em>РУХНУЛА</em></h2>
+                <div class="who">player<br><b>Игрок 1</b></div>
+              </div>
+
+              <div class="record-banner"><span><svg class="ic"><use href="#i-star"/></svg> NEW RECORD</span> <span>+5 turns vs prev best</span></div>
+
+              <div class="metric-row">
+                <div><div class="big">42</div><div class="lbl">turns made</div></div>
+                <div><div class="mid">37</div><div class="lbl">prev best</div></div>
+                <div><div class="mid">14</div><div class="lbl">layers up</div></div>
+              </div>
+
+              <div class="section-title"><b>continue?</b></div>
+              <div class="go-actions">
+                <button class="go-btn primary"><span><svg class="ic"><use href="#i-restart"/></svg> Играть снова</span> <span class="k">↵ enter</span></button>
+                <button class="go-btn"><span><svg class="ic"><use href="#i-home"/></svg> В меню</span> <span class="k">esc</span></button>
+                <button class="go-btn"><span><svg class="ic"><use href="#i-ad"/></svg> Revive (ad)</span> <span class="k">free</span></button>
+                <button class="go-btn"><span><svg class="ic"><use href="#i-replay"/></svg> Повтор</span> <span class="k">replay</span></button>
+              </div>
+
+              <div class="share-line">
+                <span>Поделиться</span>
+                <div class="icons">
+                  <button title="copy"><svg class="ic"><use href="#i-copy"/></svg></button>
+                  <button title="qr"><svg class="ic"><use href="#i-qr"/></svg></button>
+                  <button title="x"><svg class="ic"><use href="#i-x"/></svg></button>
+                  <button title="tg"><svg class="ic"><use href="#i-tg"/></svg></button>
+                  <button title="vk"><svg class="ic"><use href="#i-vk"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ROW 2: HUD desktop (full width) ═══════════════════════ -->
+  <h2 class="row-title"><b>02</b> in-game HUD · stronger player card · 3-state timer · clickable achievement</h2>
+  <section class="screen-row">
+    <div class="frame">
+      <div class="frame-label">screen · HUD (desktop) — 95% времени игрока</div>
+      <div class="frame-body frame-body--hud">
+        <div class="tower">
+          <div class="tower-shadow"></div>
+          <div class="hud-stack">
+            <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk hi"></div><div class="tower-blk"></div></div>
+            <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+            <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+          </div>
+        </div>
+
+        <div class="bar">
+          <div class="bar-brand"><span class="dot"></span>JENGA · 3D</div>
+          <div class="bar-tabs">
+            <button class="bar-tab"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+            <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+            <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">7/24</span></button>
+          </div>
+          <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+        </div>
+
+        <!-- HUD live cards -->
+        <div class="hud-top">
+          <div class="hud-player">
+            <span class="glyph">P1</span>
+            <div class="meta">
+              <span class="l">player · turn</span>
+              <span class="nm">Игрок 1</span>
+            </div>
+          </div>
+          <div class="hud-card">
+            <span>turns</span>
+            <span class="v">28</span>
+          </div>
+          <div class="hud-card">
+            <span>layer</span>
+            <span class="v">14</span>
+          </div>
+          <div class="hud-spacer"></div>
+          <!-- Three timer states shown stacked (only one shows at runtime) -->
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+            <div class="hud-timer"><span>timer · ok</span><span class="v">12s</span></div>
+            <div class="hud-timer warn"><span>timer · warn</span><span class="v">08s</span></div>
+            <div class="hud-timer crit"><span>timer · crit</span><span class="v">04s</span></div>
+          </div>
+        </div>
+
+        <!-- Achievement progress (desktop position — side) -->
+        <button class="hud-ach-side">
+          <div class="row"><svg class="ic" style="font-size:14px;color:var(--accent)"><use href="#i-target"/></svg><span class="nm">Высотный риск</span></div>
+          <div class="meter"><i style="width:64%"></i></div>
+          <div class="row"><span>14 / 16 layers</span><span class="pct">64%</span></div>
+        </button>
+
+        <!-- Bottom action sheet -->
+        <div class="hud-bottom">
+          <div class="hud-status">
+            <div class="msg">Слой 14 · блок выбран</div>
+            <div class="hint">
+              <span class="kbd">SPACE</span>
+              <span>сделать ход — или жми на оранжевый слот сверху</span>
+            </div>
+          </div>
+          <button class="hud-restart" title="Заново"><svg class="ic ic--lg"><use href="#i-restart"/></svg></button>
+          <button class="hud-action">
+            Сделать ход
+            <span class="arr">SPACE →</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h3>HUD · что закрыто из v0.2 фидбека</h3>
+      <ul>
+        <li><strong>Player card усилена</strong>: цветной плинтус слева заменён на полноценный <code>54px</code> glyph-блок (<code>P1</code> / <code>P2</code> / <code>AI</code>) — тяжёлым шрифтом, на цвете игрока. Имя ушло во вторичный текст. Теперь карточка визуально доминирует над Turns / Layer.</li>
+        <li><strong>Три состояния таймера</strong> показаны стопкой справа (в реальной игре виден один): <code>&gt;10s</code> обычный, <code>5–10s</code> тонкая оранжевая рамка + тень того же цвета, <code>≤5s</code> полная заливка + лёгкая пульсация (анимация <code>hud-pulse</code>). Предупреждение начинается на 5 секунд раньше.</li>
+        <li><strong>Достижение справа на десктопе</strong> — кликабельная карточка с прогресс-баром и %. На мобильном этот блок переезжает вниз (см. mobile-колонку в строке 04) — компоновка решена заранее, чтобы не ломать адаптив в React.</li>
+        <li>Все эмодзи в HUD заменены на штриховые SVG из общей библиотеки (<code>restart</code>, <code>target</code>, <code>volume</code>).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ROW 3: PAUSE + ACHIEVEMENTS ═══════════════════════ -->
+  <h2 class="row-title"><b>03</b> pause & achievements</h2>
+  <section class="screen-row">
+    <div class="screen-grid">
+
+      <!-- ─── PAUSE ─── -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">screen · pause</div>
+          <div class="frame-body frame-body--pause">
+            <div class="tower tower--dim">
+              <div class="tower-shadow"></div>
+              <div class="tower-stack">
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+              </div>
+            </div>
+
+            <div class="bar">
+              <div class="bar-brand"><span class="dot"></span>JENGA · PAUSE</div>
+              <div class="bar-tabs">
+                <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">7/24</span></button>
+              </div>
+              <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+            </div>
+
+            <div class="screen pause-screen">
+              <div class="pause-head">
+                <h2><span class="pause-glyph"><span class="b"></span><span class="b"></span></span><em>PAUSE</em></h2>
+                <div class="who">player · turn<br><b>Игрок 1</b></div>
+              </div>
+
+              <div class="pause-stats">
+                <div><div class="v">28</div><div class="l">turns</div></div>
+                <div><div class="v">14</div><div class="l">layers</div></div>
+                <div><div class="v">4:12</div><div class="l">elapsed</div></div>
+              </div>
+
+              <button class="pause-cta">Продолжить <span class="k">ESC</span></button>
+
+              <div class="pause-grid">
+                <button class="pause-btn"><span class="lbl"><svg class="ic"><use href="#i-calendar"/></svg> Челлендж дня</span> <span class="k">D</span></button>
+                <button class="pause-btn"><span class="lbl"><svg class="ic"><use href="#i-diamond"/></svg> Premium</span> <span class="k">P</span></button>
+              </div>
+
+              <div class="pause-divider"></div>
+
+              <div class="pause-row">
+                <button class="pause-btn danger"><span class="lbl"><svg class="ic"><use href="#i-restart"/></svg> Начать заново</span> <span class="k">R</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notes">
+          <h3>pause · что закрыто из v0.2 фидбека</h3>
+          <ul>
+            <li><strong>Дубль убран</strong>: кнопка «В главное меню» удалена со внутреннего поля — её роль теперь играет таб <code>Menu</code> в шапке (он подсвечен оранжевым на этом скрине). На паузе осталось только то, что относится к <em>текущей игре</em>: продолжить, прыгнуть в челлендж/премиум, начать заново. Это убирает один уровень дублирования.</li>
+            <li>Settings и Achievements тоже доступны из шапки (две оставшиеся вкладки), поэтому из тела убраны — в теле остались только <em>игровые</em> переходы (Daily / Premium) и опасный Restart.</li>
+            <li>«Начать заново» оставлен как единственное опасное действие — обведено красным, ведёт в Confirm-диалог (см. строку 06).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── ACHIEVEMENTS ─── -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">screen · achievements</div>
+          <div class="frame-body frame-body--pause" style="background:var(--paper)">
+            <div class="bar">
+              <div class="bar-brand"><span class="dot"></span>JENGA · 3D</div>
+              <div class="bar-tabs">
+                <button class="bar-tab"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+                <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">7/24</span></button>
+              </div>
+              <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+            </div>
+
+            <div class="screen ach-screen">
+              <div class="ach-head">
+                <h2>ACHIEVEMENTS</h2>
+                <div class="progress">unlocked<br><b>07/24</b></div>
+              </div>
+
+              <div class="ach-summary">
+                <div><div class="v done">7</div><div class="l">unlocked</div></div>
+                <div><div class="v">17</div><div class="l">locked</div></div>
+                <div><div class="v next">3</div><div class="l">close</div></div>
+                <div><div class="v">29%</div><div class="l">total</div></div>
+              </div>
+
+              <div class="section-title"><b>nearest</b></div>
+              <div class="ach-grid">
+                <div class="ach-card">
+                  <div class="ico"><svg class="ic ic--xl"><use href="#i-target"/></svg></div>
+                  <div>
+                    <div class="nm">Высотный риск</div>
+                    <div class="ds">Поставь блок на 16-й слой</div>
+                    <div class="meter"><i style="width:64%"></i></div>
+                    <div class="pct">14 / 16 layers · 64%</div>
+                  </div>
+                </div>
+                <div class="ach-card">
+                  <div class="ico"><svg class="ic ic--xl"><use href="#i-timer"/></svg></div>
+                  <div>
+                    <div class="nm">Хладнокровный</div>
+                    <div class="ds">Сделай ход &lt; 3 сек × 5 раз</div>
+                    <div class="meter"><i style="width:40%"></i></div>
+                    <div class="pct">2 / 5 · 40%</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-title"><b>unlocked</b></div>
+              <div class="ach-grid">
+                <div class="ach-card unlocked">
+                  <div class="ico"><svg class="ic ic--xl"><use href="#i-brick"/></svg></div>
+                  <div>
+                    <div class="nm">Первый ход</div>
+                    <div class="ds">Сделать первый ход</div>
+                    <div class="pct">unlocked · 2026-05-12</div>
+                  </div>
+                </div>
+                <div class="ach-card unlocked">
+                  <div class="ico"><svg class="ic ic--xl"><use href="#i-fire"/></svg></div>
+                  <div>
+                    <div class="nm">Серия из 10</div>
+                    <div class="ds">10 удачных ходов подряд</div>
+                    <div class="pct">unlocked · 2026-06-01</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-title"><b>locked</b></div>
+              <div class="ach-grid">
+                <div class="ach-card locked">
+                  <div class="ico"><svg class="ic ic--xl"><use href="#i-crown"/></svg></div>
+                  <div>
+                    <div class="nm">Король башни</div>
+                    <div class="ds">Достигни 50 ходов в одной игре</div>
+                    <div class="pct">locked</div>
+                  </div>
+                </div>
+                <div class="ach-card locked">
+                  <div class="ico"><svg class="ic ic--xl"><use href="#i-robot"/></svg></div>
+                  <div>
+                    <div class="nm">Анти-ИИ</div>
+                    <div class="ds">Победи AI на сложности «Hard»</div>
+                    <div class="pct">locked</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notes">
+          <h3>achievements · что закрыто из v0.2 фидбека</h3>
+          <ul>
+            <li><strong>Эмодзи заменены на SVG-моноline иконки</strong>: <code>target / timer / brick / fire / crown / robot</code>. Иконки выглядят одинаково на Win/Mac/iOS/Android, держат техническую эстетику. Stroke <code>1.6px</code>, 24×24 viewbox.</li>
+            <li>Структура Nearest / Unlocked / Locked сохранена — это работало.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ROW 4: SETTINGS + DAILY ═══════════════════════ -->
+  <h2 class="row-title"><b>04</b> settings & daily</h2>
+  <section class="screen-row">
+    <div class="screen-grid">
+
+      <!-- ─── SETTINGS ─── -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">screen · settings</div>
+          <div class="frame-body frame-body--pause" style="background:var(--paper)">
+            <div class="bar">
+              <div class="bar-brand"><span class="dot"></span>JENGA · 3D</div>
+              <div class="bar-tabs">
+                <button class="bar-tab"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+                <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">7/24</span></button>
+              </div>
+              <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+            </div>
+
+            <div class="screen set-screen">
+              <div class="set-head">
+                <h2>SETTINGS</h2>
+                <div class="progress" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);text-align:right">profile<br><b style="color:var(--ink);font-family:'Inter Tight';font-size:18px;letter-spacing:0;text-transform:none;font-weight:700">default</b></div>
+              </div>
+
+              <div class="set-row">
+                <div class="l"><span>volume</span><b>70%</b></div>
+                <div class="set-slider"><div class="fill" style="width:70%"></div><div class="knob" style="left:70%"></div></div>
+              </div>
+
+              <div class="set-row">
+                <div class="l"><span>move timer</span><b>30 s</b></div>
+                <div class="set-opt">
+                  <button>off</button>
+                  <button>15 s</button>
+                  <button aria-pressed="true">30 s</button>
+                  <button>60 s</button>
+                </div>
+              </div>
+
+              <div class="set-row">
+                <div class="l"><span>difficulty</span><b>normal</b></div>
+                <div class="set-opt">
+                  <button>easy</button>
+                  <button aria-pressed="true">normal</button>
+                  <button>hard</button>
+                </div>
+              </div>
+
+              <div class="set-row">
+                <div class="l"><span>block skin</span><b>classic</b></div>
+                <div class="set-swatch-row">
+                  <div class="set-swatch" aria-pressed="true"><div class="chip"></div><div class="nm">classic <svg class="ic" style="font-size:11px;color:var(--ok)"><use href="#i-check"/></svg></div></div>
+                  <div class="set-swatch skin-neon"><div class="chip"></div><div class="nm">neon</div></div>
+                  <div class="set-swatch skin-marble"><div class="chip"></div><div class="nm">marble</div></div>
+                  <div class="set-swatch skin-ice locked"><div class="chip"></div><div class="nm">ice <span class="lock"><svg class="ic" style="font-size:11px"><use href="#i-lock"/></svg></span></div></div>
+                  <div class="set-swatch skin-bamboo locked"><div class="chip"></div><div class="nm">bamboo <span class="lock"><svg class="ic" style="font-size:11px"><use href="#i-lock"/></svg></span></div></div>
+                  <div class="set-swatch skin-candy locked"><div class="chip"></div><div class="nm">candy <span class="lock"><svg class="ic" style="font-size:11px"><use href="#i-lock"/></svg></span></div></div>
+                </div>
+              </div>
+
+              <div class="set-foot">
+                <button class="reset">Сбросить</button>
+                <button class="ok">Готово</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notes">
+          <h3>settings · ключевые решения</h3>
+          <ul>
+            <li>Слайдер громкости — <code>2px</code> рамка, оранжевая заливка, чёрный «нож»-knob. Visceral, читается с расстояния.</li>
+            <li>Группы опций (timer / difficulty) — единый компонент <code>.set-opt</code>, который повторно используем под все enum-настройки. В React это будет <code>&lt;OptionGroup/&gt;</code>.</li>
+            <li>Скины блоков теперь <strong>визуальные превью</strong>, не текстовые лейблы с эмодзи. Locked-skin приглушён + замочек.</li>
+            <li>Окружение (env theme) дорисую тем же паттерном — сейчас не показано чтобы экран не разрастался.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── DAILY ─── -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">screen · daily challenge</div>
+          <div class="frame-body frame-body--pause" style="background:var(--paper)">
+            <div class="bar">
+              <div class="bar-brand"><span class="dot"></span>JENGA · 3D</div>
+              <div class="bar-tabs">
+                <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">7/24</span></button>
+              </div>
+              <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+            </div>
+
+            <div class="screen daily-screen">
+              <div class="daily-head">
+                <h2>DAILY<br>CHALLENGE</h2>
+                <div class="date">today<br><b>09 JUN</b></div>
+              </div>
+
+              <div class="daily-task">
+                <div class="badge"><svg class="ic ic--xl"><use href="#i-bolt"/></svg></div>
+                <div>
+                  <div class="nm">Speed Run · 60s</div>
+                  <div class="ds">Сделай как можно больше ходов за 60 секунд. Каждая разблокированная башня даёт +1 очко в недельный рейтинг.</div>
+                  <div class="stamp"><svg class="ic" style="font-size:10px;vertical-align:-1px"><use href="#i-check"/></svg> ВЫПОЛНЕНО · best 23 turns</div>
+                </div>
+              </div>
+
+              <div class="daily-section">
+                <div class="lb-tabs">
+                  <button aria-pressed="true">Глобальный</button>
+                  <button>Локальный</button>
+                </div>
+                <div class="lb-list">
+                  <div class="lb-row"><span class="rk">1</span><span class="nm">ctp_lok</span><span class="sc">34</span><span class="ly">17 LY</span></div>
+                  <div class="lb-row"><span class="rk">2</span><span class="nm">jenga_master</span><span class="sc">31</span><span class="ly">15 LY</span></div>
+                  <div class="lb-row you"><span class="rk">3</span><span class="nm">Игрок 1 (вы)</span><span class="sc">23</span><span class="ly">12 LY</span></div>
+                  <div class="lb-row"><span class="rk">4</span><span class="nm">tower_killer</span><span class="sc">21</span><span class="ly">11 LY</span></div>
+                  <div class="lb-row"><span class="rk">5</span><span class="nm">brick_dad</span><span class="sc">18</span><span class="ly">9 LY</span></div>
+                </div>
+              </div>
+
+              <button class="daily-cta">Играть ещё раз <svg class="ic ic--lg"><use href="#i-arrow-right"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="notes">
+          <h3>daily · ключевые решения</h3>
+          <ul>
+            <li>Задание дня — в строгой карточке, badge оранжевый, описание в Inter Tight. Состояние «выполнено» — зелёный stamp, читается мгновенно.</li>
+            <li>Лидерборд — таблица в моно: ранг (Archivo Black) · ник · счёт · слои. Строка пользователя залита оранжевым (<code>.lb-row.you</code>).</li>
+            <li>Tabs Global/Local — тот же <code>.set-opt</code>-подобный паттерн.</li>
+            <li>«Имя для рейтинга» (Firebase) спрятано в Settings, не загромождает экран — обычно меняется один раз.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ROW 5: PREMIUM + MOBILE COLUMN ═══════════════════════ -->
+  <h2 class="row-title"><b>05</b> premium & mobile compaction</h2>
+  <section class="screen-row">
+    <div class="screen-grid">
+
+      <!-- ─── PREMIUM ─── -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">screen · premium</div>
+          <div class="frame-body frame-body--pause" style="background:var(--paper)">
+            <div class="bar">
+              <div class="bar-brand"><span class="dot"></span>JENGA · 3D</div>
+              <div class="bar-tabs">
+                <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-menu"/></svg> Menu</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg> Settings</button>
+                <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg> Achv <span class="b">7/24</span></button>
+              </div>
+              <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+            </div>
+
+            <div class="screen prem-screen">
+              <div class="prem-head">
+                <h2>PREMIUM</h2>
+                <div class="pill"><svg class="ic" style="font-size:11px;vertical-align:-1px"><use href="#i-diamond"/></svg> shop</div>
+              </div>
+
+              <div class="prem-grid">
+                <div class="prem-card">
+                  <div class="nm">Ad-Free</div>
+                  <div class="ds">Убрать рекламу. Включая баннер и rewarded.</div>
+                  <div class="row"><span class="price">$ 2.99</span><button class="buy">Купить</button></div>
+                </div>
+                <div class="prem-card purchased">
+                  <div class="nm">Skin Pack</div>
+                  <div class="ds">Все темы блоков: ice / bamboo / candy + новые.</div>
+                  <div class="row"><span class="price"><svg class="ic" style="font-size:14px;vertical-align:-2px;color:var(--ok)"><use href="#i-check"/></svg> Куплено</span><span class="buy" style="background:var(--ok);cursor:default">Активно</span></div>
+                </div>
+                <div class="prem-card">
+                  <div class="nm">Env Pack</div>
+                  <div class="ds">4 окружения: space / beach / library / studio.</div>
+                  <div class="row"><span class="price">$ 1.99</span><button class="buy">Купить</button></div>
+                </div>
+                <div class="prem-card">
+                  <div class="nm">All Access</div>
+                  <div class="ds">Ad-Free + Skins + Envs + future drops.</div>
+                  <div class="row"><span class="price">$ 5.99</span><button class="buy">Купить</button></div>
+                </div>
+              </div>
+
+              <div class="prem-code">
+                <div class="lbl">redeem<br><b>Код активации</b></div>
+                <input type="text" placeholder="JNG-XXXX-XXXX" maxlength="14">
+                <button>Активировать</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notes">
+          <h3>premium · ключевые решения</h3>
+          <ul>
+            <li>Сетка 2×2 карточек: каждая — title / desc / price / CTA. Цена крупно, оранжевым (Archivo Black) — главный визуальный фокус.</li>
+            <li>Купленный товар — серая плашка, цена заменена на чек + «Активно». Не предлагаем покупать дважды.</li>
+            <li>Поле <code>JNG-XXXX-XXXX</code> — моноширинный input с трекинг-spacing'ом. Это узнаваемый код-стиль.</li>
+            <li>«Restore purchases» (для iOS-флоу) дорисую при портировании, если будет нужно — здесь не показал чтобы не отвлекать.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── MOBILE COLUMN: 4 screens stacked ─── -->
+      <div>
+        <div class="frame-mobile">
+          <div class="frame">
+            <div class="frame-label">mobile · 380w · start</div>
+            <div class="frame-body">
+              <div class="tower">
+                <div class="tower-shadow"></div>
+                <div class="tower-stack" style="width:200px;height:380px">
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                </div>
+              </div>
+              <div class="bar bar--m">
+                <div class="bar-tabs">
+                  <button class="bar-tab" aria-current="page"><svg class="ic"><use href="#i-menu"/></svg></button>
+                  <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg></button>
+                  <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg></button>
+                </div>
+                <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+              </div>
+              <div class="screen screen--m">
+                <h2 style="font-family:'Archivo Black',sans-serif;font-size:54px;line-height:.85;letter-spacing:-2px;margin:0 0 14px">JENGA<br><em style="font-style:normal;color:var(--accent)">3D</em></h2>
+                <div class="spec" style="margin-bottom:18px">
+                  <div style="padding:14px 14px 12px"><div class="spec-label">Best</div><div class="spec-val" style="font-size:32px">37</div></div>
+                  <div style="padding:14px 14px 12px"><div class="spec-label">Games</div><div class="spec-val" style="font-size:32px">142</div></div>
+                </div>
+                <div class="player-row" style="margin-bottom:14px">
+                  <button class="mode-btn" aria-pressed="true" style="padding:12px 8px"><span class="big" style="font-size:18px">1P</span>Соло</button>
+                  <button class="mode-btn" style="padding:12px 8px"><span class="big" style="font-size:18px">2P</span>Локал.</button>
+                  <button class="mode-btn" style="padding:12px 8px"><span class="big" style="font-size:18px">AI</span>vs ИИ</button>
+                </div>
+                <div class="cta" style="margin-top:auto">
+                  <button class="cta-main" style="padding:18px 16px;font-size:18px">Начать <svg class="ic ic--lg"><use href="#i-arrow-right"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame-mobile" style="margin-top:18px">
+          <div class="frame">
+            <div class="frame-label">mobile · HUD — achievement переехал вниз</div>
+            <div class="frame-body" style="min-height:620px">
+              <div class="tower">
+                <div class="tower-shadow"></div>
+                <div class="hud-stack" style="width:200px;height:380px;top:48%">
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk hi"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                  <div class="tower-row tower-row--rot"><div class="tower-blk"></div><div class="tower-blk"></div><div class="tower-blk"></div></div>
+                </div>
+              </div>
+              <div class="bar bar--m">
+                <div class="bar-tabs">
+                  <button class="bar-tab"><svg class="ic"><use href="#i-menu"/></svg></button>
+                  <button class="bar-tab"><svg class="ic"><use href="#i-settings"/></svg></button>
+                  <button class="bar-tab"><svg class="ic"><use href="#i-trophy"/></svg></button>
+                </div>
+                <button class="bar-mute"><svg class="ic"><use href="#i-volume"/></svg></button>
+              </div>
+
+              <div class="hud-top" style="padding:10px;gap:6px">
+                <div class="hud-player">
+                  <span class="glyph" style="width:42px;font-size:18px">P1</span>
+                  <div class="meta" style="padding:6px 8px"><span class="l">turn</span><span class="nm" style="font-size:12px">Игрок 1</span></div>
+                </div>
+                <div class="hud-card" style="min-width:54px;padding:6px 8px"><span>turns</span><span class="v" style="font-size:18px">28</span></div>
+                <div class="hud-spacer"></div>
+                <div class="hud-timer crit" style="min-width:64px;padding:6px 8px"><span>timer</span><span class="v" style="font-size:18px">04s</span></div>
+              </div>
+
+              <div class="hud-bottom hud-bottom--m">
+                <div class="hud-ach-mobile">
+                  <svg class="ic" style="font-size:14px;color:var(--accent)"><use href="#i-target"/></svg>
+                  <span class="nm">Высотный риск</span>
+                  <div class="meter"><i></i></div>
+                  <span>64%</span>
+                </div>
+                <div style="display:flex;gap:8px;align-items:stretch">
+                  <div class="hud-status" style="padding:0">
+                    <div class="msg" style="font-size:13px">Слой 14 · выбран</div>
+                    <div class="hint"><span class="kbd">TAP</span><span>оранжевый слот</span></div>
+                  </div>
+                  <button class="hud-restart" style="width:44px"><svg class="ic"><use href="#i-restart"/></svg></button>
+                  <button class="hud-action" style="padding:10px 14px;font-size:14px">Ход<span class="arr">TAP →</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notes">
+          <h3>mobile · что зафиксировано до React</h3>
+          <ul>
+            <li><strong>Нав-шапка → иконки без подписей</strong> (вариант <code>.bar--m</code>). Все 3 таба + mute помещаются в одну компактную строку.</li>
+            <li><strong>Achievement-карточка переехала вниз</strong>, в bottom action sheet как горизонтальный chip с минибаром. Это снимает конфликт с башней. Снизу теперь два ряда: chip + status/action.</li>
+            <li>Player card работает в том же виде, glyph уменьшен с 54px до 42px.</li>
+            <li>Timer в critical-state — компактный, той же ширины что обычный.</li>
+            <li>Brand-плашка в шапке скрыта (нет места), бренд только на Start.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ROW 6: CONFIRM DIALOG ═══════════════════════ -->
+  <h2 class="row-title"><b>06</b> confirm dialog · 2 variants</h2>
+  <section class="screen-row">
+    <div class="screen-grid">
+
+      <!-- Destructive variant -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">dialog · restart (destructive)</div>
+          <div class="frame-body cfm-frame" style="min-height:440px">
+            <div class="cfm-card">
+              <div class="ico-wrap"><svg class="ic ic--xl"><use href="#i-alert"/></svg></div>
+              <h3>Начать заново?</h3>
+              <p>Текущая игра будет потеряна. Это действие нельзя отменить.</p>
+              <div class="cfm-actions">
+                <button class="cfm-btn">Отмена <span class="k">ESC</span></button>
+                <button class="cfm-btn danger">Начать <span class="k">↵</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Soft confirm -->
+      <div>
+        <div class="frame">
+          <div class="frame-label">dialog · back to menu</div>
+          <div class="frame-body cfm-frame" style="min-height:440px">
+            <div class="cfm-card cancel-only">
+              <div class="ico-wrap"><svg class="ic ic--xl"><use href="#i-home"/></svg></div>
+              <h3>Выйти в меню?</h3>
+              <p>Прогресс текущей игры будет утерян.</p>
+              <div class="cfm-actions">
+                <button class="cfm-btn">Остаться <span class="k">ESC</span></button>
+                <button class="cfm-btn danger">Выйти <span class="k">↵</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="notes" style="margin-top:18px">
+      <h3>confirm · правила</h3>
+      <ul>
+        <li>Два размера риска. <strong>Destructive</strong>: красная рамка вокруг иконки, иконка <code>alert</code>, primary-кнопка с красной заливкой. <strong>Soft</strong>: чёрная рамка, иконка действия, тот же красный primary (т.к. результат всё равно — потеря прогресса).</li>
+        <li>Cancel всегда слева, привязан к <code>ESC</code>. Confirm справа, привязан к <code>Enter</code>. Hotkey-боксы видны.</li>
+        <li>Фон — diagonal hatched (45° штриховка) — это сразу читается как «модальное состояние», не путается с обычным экраном.</li>
+        <li>Под одну компонентную модель пойдут также: «Использовать Revive?», «Активировать код?», «Сменить тему?».</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─── Tokens & system ─── -->
+  <h2 class="row-title"><b>07</b> design tokens — готовы к экспорту в css-переменные React</h2>
+  <div class="palette">
+    <div class="sw-paper"><div class="name">paper</div><div class="hex">#F6EFE2</div></div>
+    <div class="sw-paper2"><div class="name">paper-2</div><div class="hex">#ECE3D1</div></div>
+    <div class="sw-ink"><div class="name">ink</div><div class="hex">#131110</div></div>
+    <div class="sw-accent"><div class="name">accent</div><div class="hex">#FF5B1F</div></div>
+    <div class="sw-warn"><div class="name">warn</div><div class="hex">#C43A17</div></div>
+    <div class="sw-ok"><div class="name">ok</div><div class="hex">#1F8A5A</div></div>
+  </div>
+
+  <div class="typo">
+    <div>
+      <div class="lbl">display · Archivo Black · big titles + record stamps only</div>
+      <div class="sample-display">JENGA 3D</div>
+    </div>
+    <div>
+      <div class="lbl">body · Inter Tight · 95% of UI text</div>
+      <div class="sample-body">Простая физика — холодная математика. 18 слоёв.</div>
+    </div>
+    <div>
+      <div class="lbl">metric · JetBrains Mono · numbers + labels</div>
+      <div class="sample-mono">75×25×15 mm · 42 turns</div>
+    </div>
+  </div>
+
+  <div class="icon-grid">
+    <div><svg class="ic"><use href="#i-menu"/></svg><div class="nm">menu</div></div>
+    <div><svg class="ic"><use href="#i-settings"/></svg><div class="nm">settings</div></div>
+    <div><svg class="ic"><use href="#i-trophy"/></svg><div class="nm">trophy</div></div>
+    <div><svg class="ic"><use href="#i-calendar"/></svg><div class="nm">calendar</div></div>
+    <div><svg class="ic"><use href="#i-diamond"/></svg><div class="nm">diamond</div></div>
+    <div><svg class="ic"><use href="#i-volume"/></svg><div class="nm">volume</div></div>
+    <div><svg class="ic"><use href="#i-mute"/></svg><div class="nm">mute</div></div>
+    <div><svg class="ic"><use href="#i-restart"/></svg><div class="nm">restart</div></div>
+    <div><svg class="ic"><use href="#i-pause"/></svg><div class="nm">pause</div></div>
+    <div><svg class="ic"><use href="#i-play"/></svg><div class="nm">play</div></div>
+    <div><svg class="ic"><use href="#i-home"/></svg><div class="nm">home</div></div>
+    <div><svg class="ic"><use href="#i-share"/></svg><div class="nm">share</div></div>
+    <div><svg class="ic"><use href="#i-copy"/></svg><div class="nm">copy</div></div>
+    <div><svg class="ic"><use href="#i-qr"/></svg><div class="nm">qr</div></div>
+    <div><svg class="ic"><use href="#i-ad"/></svg><div class="nm">ad</div></div>
+    <div><svg class="ic"><use href="#i-replay"/></svg><div class="nm">replay</div></div>
+    <div><svg class="ic"><use href="#i-target"/></svg><div class="nm">target</div></div>
+    <div><svg class="ic"><use href="#i-fire"/></svg><div class="nm">fire</div></div>
+    <div><svg class="ic"><use href="#i-crown"/></svg><div class="nm">crown</div></div>
+    <div><svg class="ic"><use href="#i-robot"/></svg><div class="nm">robot</div></div>
+    <div><svg class="ic"><use href="#i-brick"/></svg><div class="nm">brick</div></div>
+    <div><svg class="ic"><use href="#i-timer"/></svg><div class="nm">timer</div></div>
+    <div><svg class="ic"><use href="#i-bolt"/></svg><div class="nm">bolt</div></div>
+    <div><svg class="ic"><use href="#i-shield"/></svg><div class="nm">shield</div></div>
+    <div><svg class="ic"><use href="#i-star"/></svg><div class="nm">star</div></div>
+    <div><svg class="ic"><use href="#i-close"/></svg><div class="nm">close</div></div>
+    <div><svg class="ic"><use href="#i-arrow-right"/></svg><div class="nm">arrow</div></div>
+    <div><svg class="ic"><use href="#i-check"/></svg><div class="nm">check</div></div>
+    <div><svg class="ic"><use href="#i-lock"/></svg><div class="nm">lock</div></div>
+    <div><svg class="ic"><use href="#i-alert"/></svg><div class="nm">alert</div></div>
+    <div><svg class="ic"><use href="#i-tg"/></svg><div class="nm">telegram</div></div>
+    <div><svg class="ic"><use href="#i-vk"/></svg><div class="nm">vk</div></div>
+  </div>
+
+  <div class="foot">
+    <span>v0.3 · 9 экранов · 32 svg иконки · 2 confirm-варианта · 2 mobile-экрана</span>
+    <span>next: react port — design tokens → NavBar → MetricCard → ActionButton → AchievementCard → Modal</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -8,6 +8,8 @@ test-results/
 playwright-report/
 .kilo/
 .hermes/
+.codegraph/
+.serena/
 
 # graphify — machine-local artifacts (the graph itself IS committed, see README "Team setup")
 graphify-out/cost.json

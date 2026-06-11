@@ -76,8 +76,6 @@ export class VelocityThresholdOptimizer {
 
 /**
  * Главный оптимизатор физики — фасад над AdaptiveFrameRate + VelocityThreshold.
- * Камера трекается, чтобы потенциальные будущие LOD-расчёты могли её использовать;
- * сейчас updateCameraPosition — no-op заглушка, но API сохранён для GameSceneWithPhysics.
  */
 export class PhysicsOptimizer {
   constructor() {

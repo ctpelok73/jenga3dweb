@@ -5,11 +5,11 @@
 import { createPersistedStore } from './storage/createPersistedStore';
 
 const DEFAULT_SETTINGS = {
-  volume: 70,            // 0-100
-  moveTimer: 0,          // 0=off, 15, 30, 60 (seconds)
-  difficulty: 'normal',  // easy, normal, hard
-  theme: 'classic',      // classic, neon, marble — block textures
-  environment: 'classic', // classic, space, beach, library — scene environment
+  volume: 70,
+  moveTimer: 0,
+  difficulty: 'normal',
+  theme: 'classic',
+  environment: 'classic',
 };
 
 const store = createPersistedStore({
@@ -18,11 +18,20 @@ const store = createPersistedStore({
   defaults: () => ({ ...DEFAULT_SETTINGS }),
 });
 
+let cachedSettings = null;
+
 export function getSettings() {
-  return store.load();
+  if (cachedSettings) {
+    return cachedSettings;
+  }
+
+  cachedSettings = store.load();
+  return cachedSettings;
 }
 
 export function updateSetting(key, value) {
+  cacheInvalidate();
+
   return store.update((settings) => {
     settings[key] = value;
     return settings;
@@ -30,23 +39,29 @@ export function updateSetting(key, value) {
 }
 
 export function updateAllSettings(newSettings) {
+  cacheInvalidate();
+
   return store.update((settings) => ({ ...settings, ...newSettings }));
 }
 
 export function resetSettings() {
+  cacheInvalidate();
+
   store.save({ ...DEFAULT_SETTINGS });
+  cachedSettings = { ...DEFAULT_SETTINGS };
+
   return { ...DEFAULT_SETTINGS };
 }
 
-// Difficulty affects how many blocks become dynamic during simulation
-// easy: only removed block itself — very forgiving
-// normal: blocks at the same height as removed
-// hard: same height + layer below
+function cacheInvalidate() {
+  cachedSettings = null;
+}
+
 export function getDifficultyDynamicIds(blocks, selectedBlock, removedLayer) {
   const settings = store.load();
   const difficulty = settings.difficulty;
   const dynamicIds = new Set();
-  
+
   const holeY = selectedBlock.position[1];
   const LAYER_HEIGHT = 0.31; // BLOCK_H (0.3) + LAYER_GAP (0.01)
 

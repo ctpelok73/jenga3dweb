@@ -18,16 +18,20 @@ import { getBlockMaterialProps, getEnvironmentTheme } from './blockTextures';
 import { physicsOptimizer } from './physicsOptimizer';
 import { getPhysicsSettingsForMobile, getDynamicBlockLimit } from './mobileOptimizations';
 import { profiler } from './performanceProfiler';
+import { getThemeColors } from './settingsTracker';
 
 // ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
 const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedBlockGeometry);
 
+// ─── Reusable math objects (avoid per-frame allocations) ───
+const _q = new THREE.Quaternion();
+const _euler = new THREE.Euler();
+
 // ─── Edges component with theme-aware color ───
 function Edges({ edgeColor = '#3a2010' }) {
   const edgeMaterial = useMemo(() => new THREE.LineBasicMaterial({ color: edgeColor }), [edgeColor]);
 
-  // Dispose old material when edgeColor changes or component unmounts
   useEffect(() => {
     return () => {
       edgeMaterial.dispose();
@@ -39,10 +43,6 @@ function Edges({ edgeColor = '#3a2010' }) {
   );
 }
 
-// ─── Reusable math objects (avoid per-frame allocations) ───
-const _q = new THREE.Quaternion();
-const _euler = new THREE.Euler();
-
 const Block = memo(function Block({
   id,
   position,
@@ -53,7 +53,7 @@ const Block = memo(function Block({
   isGhost,
   onRigidRef,
   isDynamic = false,
-  theme = 'classic',
+  theme,
   isKeyboardFocused = false,
   lowPowerMode = false,
 }) {
@@ -62,7 +62,6 @@ const Block = memo(function Block({
   const materialRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Создаём material один раз при монтировании (устранение 54 аллокаций за рендер)
   if (!materialRef.current) {
     materialRef.current = new THREE.MeshStandardMaterial();
   }
@@ -71,25 +70,19 @@ const Block = memo(function Block({
     if (onRigidRef && rigidRef.current) onRigidRef(id, rigidRef.current);
   }, [id, onRigidRef]);
 
-  // Combine body type, position, rotation, and velocity sync into a single effect
   useEffect(() => {
     const body = rigidRef.current;
     if (!body) return;
-    // Set body type based on dynamic flag
     body.setBodyType(isDynamic ? 0 : 1, true);
-    // Sync position & rotation
     body.setTranslation({ x: position[0], y: position[1], z: position[2] }, true);
     _q.setFromEuler(_euler.set(rotation[0], rotation[1], rotation[2]));
     body.setRotation({ x: _q.x, y: _q.y, z: _q.z, w: _q.w }, true);
-    // Reset velocities to avoid residual momentum
     body.setLinvel({ x: 0, y: 0, z: 0 }, true);
     body.setAngvel({ x: 0, y: 0, z: 0 }, true);
   }, [position, rotation, isDynamic]);
 
-  // Ghost block: selected block shown semi-transparent to indicate it's "lifted"
   const opacity = isGhost ? 0.35 : 1;
 
-  // ─── Procedural texture material props ───
   const materialProps = useMemo(() => (
     lowPowerMode
       ? {
@@ -101,12 +94,10 @@ const Block = memo(function Block({
       : getBlockMaterialProps(theme, color)
   ), [theme, color, lowPowerMode]);
 
-  // ─── Императивное обновление материала (устранение per-render allocation) ───
   useEffect(() => {
     const mat = materialRef.current;
     if (!mat) return;
 
-    // Textures (только если не lowPowerMode)
     if (lowPowerMode) {
       mat.map = null;
       mat.normalMap = null;
@@ -117,29 +108,33 @@ const Block = memo(function Block({
       mat.roughnessMap = materialProps.roughnessMap || null;
     }
 
-    // Basic properties
-    if (lowPowerMode) {
-      mat.color.set(color);
-    } else {
-      mat.color.set('#ffffff'); // Текстура определяет цвет
-    }
+    mat.color.set(lowPowerMode ? color : '#ffffff');
     mat.roughness = materialProps.roughness;
     mat.metalness = materialProps.metalness;
-
-    // Transparency
     mat.transparent = isGhost;
     mat.opacity = opacity;
 
-    // Emissive (selection/hover/focus states)
-    const emissiveColor = isSelected ? '#4488ff' : (isKeyboardFocused ? '#ffcc00' : (isHovered ? '#88ccff' : materialProps.emissiveDefault));
-    const emissiveIntensity = isSelected ? 0.3 : (isKeyboardFocused ? 0.25 : (isHovered ? 0.15 : (materialProps.emissiveIntensityDefault || 0)));
+    const emissiveColor = isSelected
+      ? '#4488ff'
+      : isKeyboardFocused
+        ? '#ffcc00'
+        : isHovered
+          ? '#88ccff'
+          : materialProps.emissiveDefault || '#000000';
+
+    const emissiveIntensity = isSelected
+      ? 0.3
+      : isKeyboardFocused
+        ? 0.25
+        : isHovered
+          ? 0.15
+          : materialProps.emissiveIntensityDefault || 0;
+
     mat.emissive.set(emissiveColor);
     mat.emissiveIntensity = emissiveIntensity;
-
     mat.needsUpdate = true;
   }, [color, materialProps, isGhost, opacity, isSelected, isKeyboardFocused, isHovered, lowPowerMode]);
 
-  // Dispose material on unmount
   useEffect(() => {
     return () => {
       if (materialRef.current) {
@@ -149,40 +144,38 @@ const Block = memo(function Block({
     };
   }, []);
 
-  // Edge color depends on theme — вычисляем один раз через useMemo
   const edgeColor = useMemo(() => {
-    const EDGE_COLOR_MAP = {
+    const map = {
       neon: color,
       marble: '#8a7a6a',
       ice: '#88c8e8',
       bamboo: '#5d962d',
       candy: color,
     };
-    return EDGE_COLOR_MAP[theme] ?? '#3a2010';
+    return map[theme] || '#3a2010';
   }, [theme, color]);
 
-  // Мемоизированные обработчики (устранение inline функций)
-  const handlePointerDown = useCallback((e) => {
-    e.stopPropagation();
+  const handlePointerDown = useCallback((event) => {
+    event.stopPropagation();
     if (!isDynamic && !isGhost) {
       onClick(id);
     }
   }, [id, onClick, isDynamic, isGhost]);
 
-  const handlePointerOver = useCallback((e) => {
-    e.stopPropagation();
+  const handlePointerOver = useCallback((event) => {
+    event.stopPropagation();
     setIsHovered(true);
   }, []);
 
-  const handlePointerOut = useCallback((e) => {
-    e.stopPropagation();
+  const handlePointerOut = useCallback((event) => {
+    event.stopPropagation();
     setIsHovered(false);
   }, []);
 
   return (
     <RigidBody
       ref={rigidRef}
-      type={isDynamic ? "dynamic" : "fixed"}
+      type={isDynamic ? 'dynamic' : 'fixed'}
       position={position}
       rotation={rotation}
       colliders={false}
@@ -211,12 +204,23 @@ const Block = memo(function Block({
 });
 
 // ─── Drop slot: clickable placement zone on top of tower ───
-const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick, isDragHover = false }) {
+const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick }) {
   const [hovered, setHovered] = useState(false);
-  const groupRef = useRef();
-  const isHighlighted = hovered || isDragHover;
+  const groupRef = useRef(null);
+  const slotMaterialRef = useRef(null);
 
-  // Pulsing animation
+  if (!slotMaterialRef.current) {
+    slotMaterialRef.current = new THREE.MeshStandardMaterial({
+      color: '#2a6eff',
+      roughness: 0.35,
+      metalness: 0.05,
+      transparent: true,
+      opacity: 0.3,
+      emissive: '#2a6eff',
+      emissiveIntensity: 0.15,
+    });
+  }
+
   useFrame((state) => {
     if (groupRef.current) {
       const pulse = Math.sin(state.clock.elapsedTime * 3) * 0.03;
@@ -224,41 +228,48 @@ const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick
     }
   });
 
-  // Single material instance — update color imperatively to avoid recreation
-  const lineMaterial = useMemo(
-    () => new THREE.LineBasicMaterial({ color: '#2a6eff', linewidth: 1 }),
-    []
-  );
-
-  // Update material properties when highlight state changes
   useEffect(() => {
-    lineMaterial.color.set(isHighlighted ? '#44ff88' : '#2a6eff');
-    lineMaterial.linewidth = isHighlighted ? 3 : 1;
-    lineMaterial.needsUpdate = true;
-  }, [isHighlighted, lineMaterial]);
+    const mat = slotMaterialRef.current;
+    if (!mat) return;
+
+    const isActive = hovered;
+
+    mat.color.set(isActive ? '#44ff88' : '#2a6eff');
+    mat.opacity = isActive ? 0.7 : 0.3;
+    mat.emissive.set(isActive ? '#44ff88' : '#2a6eff');
+    mat.emissiveIntensity = isActive ? 0.6 : 0.15;
+    mat.needsUpdate = true;
+  }, [hovered]);
 
   useEffect(() => {
-    return () => { lineMaterial.dispose(); };
-  }, [lineMaterial]);
-  
+    return () => {
+      if (slotMaterialRef.current) {
+        slotMaterialRef.current.dispose();
+        slotMaterialRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
       <mesh
         geometry={sharedBlockGeometry}
-        onClick={(e) => { e.stopPropagation(); onClick(slotIndex); }}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-        onPointerOut={(e) => { e.stopPropagation(); setHovered(false); }}
+        onClick={(event) => {
+          event.stopPropagation();
+          onClick(slotIndex);
+        }}
+        onPointerOver={(event) => {
+          event.stopPropagation();
+          setHovered(true);
+        }}
+        onPointerOut={(event) => {
+          event.stopPropagation();
+          setHovered(false);
+        }}
       >
-        <meshStandardMaterial
-          color={isHighlighted ? '#44ff88' : '#2a6eff'}
-          transparent
-          opacity={isHighlighted ? 0.7 : 0.3}
-          emissive={isHighlighted ? '#44ff88' : '#2a6eff'}
-          emissiveIntensity={isHighlighted ? 0.6 : 0.15}
-        />
+        {slotMaterialRef.current}
       </mesh>
-      {/* Glow outline */}
-      <lineSegments geometry={sharedEdgesGeometry} material={lineMaterial} raycast={() => null} />
+      <lineSegments geometry={sharedEdgesGeometry} material={slotMaterialRef.current} raycast={() => null} />
     </group>
   );
 });
@@ -278,7 +289,6 @@ function GroundSurface({ envTheme, lowPowerMode = false }) {
     ctx.fillStyle = theme.groundColor;
     ctx.fillRect(0, 0, size, size);
 
-    // radial gradient — darker edges, lighter center under tower
     const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
     grad.addColorStop(0, 'rgba(255,255,255,0.08)');
     grad.addColorStop(0.5, 'rgba(255,255,255,0.03)');
@@ -286,7 +296,6 @@ function GroundSurface({ envTheme, lowPowerMode = false }) {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
 
-    // subtle noise
     for (let x = 0; x < size; x += 4) {
       for (let y = 0; y < size; y += 4) {
         const b = Math.random() * 0.06;
@@ -301,9 +310,12 @@ function GroundSurface({ envTheme, lowPowerMode = false }) {
     return tex;
   }, [theme.groundColor, lowPowerMode]);
 
-  // Освобождаем GPU-память текстуры при смене темы
   useEffect(() => {
-    return () => { if (groundTexture) groundTexture.dispose(); };
+    return () => {
+      if (groundTexture) {
+        groundTexture.dispose();
+      }
+    };
   }, [groundTexture]);
 
   return (
@@ -323,7 +335,7 @@ function GroundSurface({ envTheme, lowPowerMode = false }) {
 function TowerGlow({ envTheme, lowPowerMode = false }) {
   if (lowPowerMode) return null;
   const theme = getEnvironmentTheme(envTheme);
-  const glowColor = envTheme === 'space' ? '#2244aa' : (envTheme === 'library' ? '#ff9944' : '#ffcc77');
+  const glowColor = envTheme === 'space' ? '#2244aa' : envTheme === 'library' ? '#ff9944' : '#ffcc77';
 
   return (
     <mesh position={[0, 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
@@ -353,7 +365,7 @@ function FloorCollider() {
 
 // ─── Stars for space theme ───
 function SpaceStars({ lowPowerMode = false }) {
-  const starsRef = useRef();
+  const starsRef = useRef(null);
   const positions = useMemo(() => {
     const arr = [];
     const count = lowPowerMode ? 60 : 200;
@@ -361,7 +373,7 @@ function SpaceStars({ lowPowerMode = false }) {
       arr.push(
         (Math.random() - 0.5) * 30,
         Math.random() * 15 + 2,
-        (Math.random() - 0.5) * 30
+        (Math.random() - 0.5) * 30,
       );
     }
     return new Float32Array(arr);
@@ -383,18 +395,31 @@ function SpaceStars({ lowPowerMode = false }) {
 }
 
 // ─── Main Scene ───
-function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, dropSlots, onDropSlot, lastMovedBlockId, lastExtractionPosition, blockTheme, envTheme, keyboardFocusId, lowPowerMode = false, maxDynamicBlocks = 10 }) {
+function Scene({
+  blocks,
+  selectedId,
+  onBlockClick,
+  simulatingBlockIds,
+  onSimulationComplete,
+  dropSlots,
+  onDropSlot,
+  lastMovedBlockId,
+  lastExtractionPosition,
+  blockTheme,
+  envTheme,
+  keyboardFocusId,
+  lowPowerMode = false,
+  maxDynamicBlocks = 10,
+}) {
   const rigidRefs = useRef({});
   const simulateTime = useRef(0);
   const completionCalled = useRef(false);
   const [particleBlockId, setParticleBlockId] = useState(null);
 
-  // ─── Батчевая загрузка блоков: рендерим по 9 блоков за кадр (≈6 кадров на 54 блока)
-  // Предотвращает spike первого кадра при создании 54 RigidBody одновременно.
   const [visibleCount, setVisibleCount] = useState(9);
   const visibleCountRef = useRef(9);
-  // Сбрасываем батч при рестарте (длина blocks меняется только при reset)
   const prevBlocksLenRef = useRef(blocks.length);
+
   useEffect(() => {
     if (blocks.length !== prevBlocksLenRef.current) {
       prevBlocksLenRef.current = blocks.length;
@@ -402,27 +427,25 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       setVisibleCount(9);
       return;
     }
+
     if (visibleCountRef.current >= blocks.length) return;
+
     const id = requestAnimationFrame(() => {
       visibleCountRef.current = Math.min(visibleCountRef.current + 9, blocks.length);
       setVisibleCount(visibleCountRef.current);
     });
     return () => cancelAnimationFrame(id);
   }, [visibleCount, blocks.length]);
+
   const visibleBlocks = visibleCount >= blocks.length ? blocks : blocks.slice(0, visibleCount);
 
-  // ─── Cascading state: tracks which block IDs are currently dynamic ───
   const [cascadeDynamicIds, setCascadeDynamicIds] = useState(null);
-  // Tracks the working blocks state during cascade (updated as layers settle)
   const cascadeBlocksRef = useRef(null);
-  // Delay timer for cascade visual effect
   const cascadeDelayRef = useRef(0);
   const cascadeWaiting = useRef(false);
 
-  // ─── Environment theme config ───
   const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
 
-  // ─── Show particles when block is moved ───
   useEffect(() => {
     if (lastMovedBlockId) {
       setParticleBlockId(lastMovedBlockId);
@@ -433,24 +456,24 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
   const movedBlockPos = useMemo(() => {
     if (!particleBlockId) return null;
-    // Используем позицию, где блок БЫЛ до извлечения, а не где он сейчас (наверху башни)
     return lastExtractionPosition;
   }, [particleBlockId, lastExtractionPosition]);
 
-  // ─── Merge simulatingBlockIds and cascadeDynamicIds for rendering ───
   const effectiveDynamicIds = useMemo(() => {
     if (!simulatingBlockIds && !cascadeDynamicIds) return null;
     const merged = new Set();
-    if (simulatingBlockIds) for (const id of simulatingBlockIds) merged.add(id);
-    if (cascadeDynamicIds) for (const id of cascadeDynamicIds) merged.add(id);
+    if (simulatingBlockIds) {
+      for (const id of simulatingBlockIds) merged.add(id);
+    }
+    if (cascadeDynamicIds) {
+      for (const id of cascadeDynamicIds) merged.add(id);
+    }
     return merged.size > 0 ? merged : null;
   }, [simulatingBlockIds, cascadeDynamicIds]);
 
-  // ─── Helper: find the next unsupported layer above the current dynamic set ───
   const findNextUnsupportedLayer = useCallback((currentBlocks, alreadyDynamicIds) => {
-    // Build a set of layers that have active (non-fallen, non-dynamic) blocks
-    const layerBlockCounts = {};  // layer -> count of blocks that are still "fixed" (in place)
-    const layerBlocks = {};       // layer -> block ids in that layer
+    const layerBlockCounts = {};
+    const layerBlocks = {};
     let maxLayer = 0;
 
     for (const b of currentBlocks) {
@@ -458,13 +481,11 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       if (!layerBlocks[b.layer]) layerBlocks[b.layer] = [];
       layerBlocks[b.layer].push(b);
 
-      // Count blocks that are NOT in the dynamic set and have NOT fallen
       if (!alreadyDynamicIds.has(b.id) && b.position[1] > -0.5) {
         layerBlockCounts[b.layer] = (layerBlockCounts[b.layer] || 0) + 1;
       }
     }
 
-    // Find which layers are currently dynamic (to check the layer above them)
     const dynamicLayers = new Set();
     for (const b of currentBlocks) {
       if (alreadyDynamicIds.has(b.id)) {
@@ -472,34 +493,27 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       }
     }
 
-    // For each dynamic layer, check if the layer above has support
-    // A layer is "unsupported" if the layer below it has 0 fixed blocks
     for (const dynLayer of dynamicLayers) {
       const layerAbove = dynLayer + 1;
       if (layerAbove > maxLayer) continue;
       if (!layerBlocks[layerAbove]) continue;
 
-      // Check if layerAbove blocks are already dynamic
-      const aboveAlreadyDynamic = layerBlocks[layerAbove].every(b => alreadyDynamicIds.has(b.id));
+      const aboveAlreadyDynamic = layerBlocks[layerAbove].every((b) => alreadyDynamicIds.has(b.id));
       if (aboveAlreadyDynamic) continue;
 
-      // The support layer is dynLayer. Check how many fixed blocks remain in dynLayer
       const fixedInSupport = layerBlockCounts[dynLayer] || 0;
-      
-      // Check if dynamic blocks in this layer have actually fallen
+
       let supportLayerCollapsed = false;
       if (fixedInSupport === 0) {
-        // No fixed blocks in support layer — check if dynamic ones have fallen
-        const dynBlocksInLayer = layerBlocks[dynLayer].filter(b => alreadyDynamicIds.has(b.id));
+        const dynBlocksInLayer = layerBlocks[dynLayer].filter((b) => alreadyDynamicIds.has(b.id));
         let allFallen = true;
         for (const b of dynBlocksInLayer) {
           const rigid = rigidRefs.current[b.id];
           if (rigid) {
             const trans = rigid.translation();
-            // Check if block has dropped significantly from its original Y position
             const originalY = b.layer * (BLOCK_H + LAYER_GAP) + BLOCK_H / 2;
             if (trans.y > originalY - 0.2) {
-              allFallen = false; // Block hasn't fallen yet
+              allFallen = false;
               break;
             }
           }
@@ -510,15 +524,13 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       }
 
       if (supportLayerCollapsed) {
-        // Return the layer above as unsupported — it should cascade
         return layerAbove;
       }
     }
 
-    return null; // No more layers to cascade
+    return null;
   }, []);
 
-  // ─── Settling detection with cascade support and physics optimization ───
   useFrame((state, delta) => {
     profiler.mark('frame_start');
 
@@ -526,26 +538,21 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
     if (!activeIds || activeIds.size === 0 || completionCalled.current) return;
 
     profiler.mark('physics_start');
-    // Update physics optimizer state — только когда идёт симуляция
     physicsOptimizer.updateSimulationState(true, activeIds.size);
     const cam = state.camera.position;
     physicsOptimizer.updateCameraPosition([cam.x, cam.y, cam.z]);
 
-    // Get optimized frame parameters
     const frameParams = physicsOptimizer.getFrameParams(activeIds.size);
-
-    // Skip physics update on low-priority frames (adaptive frame rate)
     if (!frameParams.shouldUpdatePhysics) {
       profiler.measure('frame_total', 'frame_start', 'total');
       return;
     }
 
-    // Handle cascade delay (brief pause between layer activations for visual effect)
     if (cascadeWaiting.current) {
       cascadeDelayRef.current += delta * 1000;
       if (cascadeDelayRef.current < 150) {
         profiler.measure('frame_total', 'frame_start', 'total');
-        return; // 150ms pause before next layer falls
+        return;
       }
       cascadeWaiting.current = false;
       cascadeDelayRef.current = 0;
@@ -559,7 +566,8 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
     let allSettled = true;
     const VT = frameParams.velocityThreshold;
-    const VT2 = VT * VT; // сравниваем квадраты — избегаем Math.sqrt на каждый блок
+    const VT2 = VT * VT;
+
     for (const id of activeIds) {
       const rigid = rigidRefs.current[id];
       if (rigid) {
@@ -575,12 +583,10 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
     }
     profiler.measure('physics_check', 'physics_start', 'physics');
 
-    // Use a more conservative timeout to prevent hanging (max 5 seconds)
     const maxTimeout = Math.min(frameParams.timeout, 5000);
     if (allSettled || simulateTime.current >= maxTimeout) {
       profiler.mark('snapshot_start');
-      // Snapshot current positions of dynamic blocks
-      const workingBlocks = (cascadeBlocksRef.current || blocks).map(b => {
+      const workingBlocks = (cascadeBlocksRef.current || blocks).map((b) => {
         if (activeIds.has(b.id)) {
           const rigid = rigidRefs.current[b.id];
           if (rigid) {
@@ -588,22 +594,23 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
             const rot = rigid.rotation();
             _q.set(rot.x, rot.y, rot.z, rot.w);
             _euler.setFromQuaternion(_q);
-            return { ...b, position: [trans.x, trans.y, trans.z], rotation: [_euler.x, _euler.y, _euler.z] };
+            return {
+              ...b,
+              position: [trans.x, trans.y, trans.z],
+              rotation: [_euler.x, _euler.y, _euler.z],
+            };
           }
         }
         return b;
       });
       profiler.measure('snapshot', 'snapshot_start', 'logic');
 
-      // Check if there's an unsupported layer above that should cascade
       profiler.mark('cascade_check_start');
       const nextResult = findNextUnsupportedLayer(workingBlocks, activeIds);
       profiler.measure('cascade_check', 'cascade_check_start', 'logic');
 
       if (nextResult !== null) {
-        // ─── CASCADE: activate the next unsupported layer ───
         const newDynamicIds = new Set(activeIds);
-        // If nextResult is an array of IDs, use them. If it's a number (old style), handle it too.
         if (Array.isArray(nextResult)) {
           for (const id of nextResult) {
             if (id !== lastMovedBlockId) newDynamicIds.add(id);
@@ -621,19 +628,17 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
         simulateTime.current = 0;
         cascadeWaiting.current = true;
         cascadeDelayRef.current = 0;
-        // Don't call completion — continue simulating
       } else {
-        // ─── DONE: no more layers to cascade, finalize ───
         completionCalled.current = true;
         simulateTime.current = 0;
         cascadeBlocksRef.current = null;
         setCascadeDynamicIds(null);
         physicsOptimizer.updateSimulationState(false);
-        // Reset all dynamic blocks to fixed state to prevent hanging blocks
+
         for (const id of activeIds) {
           const rigid = rigidRefs.current[id];
           if (rigid) {
-            rigid.setBodyType(1, true); // 1 = fixed
+            rigid.setBodyType(1, true);
           }
         }
         onSimulationComplete(workingBlocks);
@@ -659,7 +664,6 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
       for (const b of blocks) {
         const rigid = rigidRefs.current[b.id];
         if (rigid) {
-          // Ensure block is fixed (not dynamic) when simulation ends
           rigid.setBodyType(1, true);
           rigid.setTranslation({ x: b.position[0], y: b.position[1], z: b.position[2] }, true);
           _q.setFromEuler(_euler.set(b.rotation[0], b.rotation[1], b.rotation[2]));
@@ -673,21 +677,24 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
   return (
     <>
-      {/* ─── Fog ─── */}
       <fog attach="fog" args={[env.fogColor, env.fogNear, env.fogFar]} />
 
-      {/* Subtle tower base glow */}
       {!lowPowerMode && (
         <pointLight
           position={[0, 0.5, 0]}
           intensity={0.3}
-          color={envTheme === 'space' ? '#4466cc' : envTheme === 'library' ? '#ff9944' : '#ffddaa'}
+          color={
+            envTheme === 'space'
+              ? '#4466cc'
+              : envTheme === 'library'
+                ? '#ff9944'
+                : '#ffddaa'
+          }
           distance={5}
           decay={2}
         />
       )}
 
-      {/* ─── Lighting ─── */}
       <ambientLight intensity={env.ambientIntensity} />
       <hemisphereLight args={[env.hemiSkyColor, env.hemiGroundColor, env.hemiIntensity]} />
       {env.dirLights.slice(0, lowPowerMode ? 1 : env.dirLights.length).map((dl, i) => (
@@ -719,39 +726,32 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
         />
       )}
 
-      {/* ─── Space stars ─── */}
       {envTheme === 'space' && <SpaceStars lowPowerMode={lowPowerMode} />}
 
-      {/* ─── Ground ─── */}
       <GroundSurface envTheme={envTheme} />
       <GroundCollider envTheme={envTheme} />
 
-      {/* Decorative table platform */}
       {!lowPowerMode && (
         <group>
-          {/* Table top */}
           <mesh position={[0, -0.06, 0]} receiveShadow castShadow raycast={() => null}>
             <cylinderGeometry args={[2.2, 2.4, 0.08, 32]} />
-            {/* eslint-disable-next-line no-nested-ternary */}
             <meshStandardMaterial
-              color={{ space: '#1a1a2e', beach: '#b8956a' }[envTheme] ?? '#5a3a1a'}
+              color={{ space: '#1a1a2e', beach: '#b8956a' }[envTheme] || '#5a3a1a'}
               roughness={0.7}
               metalness={0.05}
             />
           </mesh>
-          {/* Table leg */}
           <mesh position={[0, -1.5, 0]} raycast={() => null}>
             <cylinderGeometry args={[0.4, 0.6, 2.8, 16]} />
             <meshStandardMaterial
-              color={{ space: '#121228', beach: '#a07848' }[envTheme] ?? '#3a2210'}
+              color={{ space: '#121228', beach: '#a07848' }[envTheme] || '#3a2210'}
               roughness={0.8}
             />
           </mesh>
-          {/* Table base */}
           <mesh position={[0, -2.95, 0]} raycast={() => null}>
             <cylinderGeometry args={[1.2, 1.3, 0.1, 24]} />
             <meshStandardMaterial
-              color={{ space: '#151530', beach: '#a07848' }[envTheme] ?? '#4a2a14'}
+              color={{ space: '#151530', beach: '#a07848' }[envTheme] || '#4a2a14'}
               roughness={0.75}
             />
           </mesh>
@@ -760,24 +760,30 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
 
       <FloorCollider />
 
-      {/* Particle effect for successful move */}
       {!lowPowerMode && movedBlockPos && (
         <ParticleEffect position={movedBlockPos} enabled={particleBlockId !== null} duration={0.6} />
       )}
 
-      {/* Tower blocks — первые кадры загружаем батчами по 9 для снижения spike */}
       {visibleBlocks.map((b) => (
-        <Block key={b.id} id={b.id} position={b.position} rotation={b.rotation} color={b.color}
-          onClick={onBlockClick} isSelected={b.id === selectedId}
+        <Block
+          key={b.id}
+          id={b.id}
+          position={b.position}
+          rotation={b.rotation}
+          color={b.color}
+          onClick={onBlockClick}
+          isSelected={b.id === selectedId}
           isGhost={b.id === selectedId && dropSlots && dropSlots.length > 0}
-          onRigidRef={(id, ref) => { rigidRefs.current[id] = ref; }}
+          onRigidRef={(id, ref) => {
+            rigidRefs.current[id] = ref;
+          }}
           isDynamic={effectiveDynamicIds != null && effectiveDynamicIds.has(b.id)}
           theme={blockTheme}
           isKeyboardFocused={b.id === keyboardFocusId}
-          lowPowerMode={lowPowerMode} />
+          lowPowerMode={lowPowerMode}
+        />
       ))}
 
-      {/* Drop slots: clickable placement zones on top of tower */}
       {dropSlots && dropSlots.map((slot) => (
         <DropSlot
           key={`drop-${slot.slotIndex}`}
@@ -791,8 +797,26 @@ function Scene({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulat
   );
 }
 
-export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick, simulatingBlockIds, onSimulationComplete, restartKey, dropSlots, onDropSlot, lastMovedBlockId, lastExtractionPosition, blockTheme, envTheme, keyboardFocusId, onReady, lowPowerMode = false, maxDynamicBlocks = null }) {
+export default function GameSceneWithPhysics({
+  blocks,
+  selectedId,
+  onBlockClick,
+  simulatingBlockIds,
+  onSimulationComplete,
+  restartKey,
+  dropSlots,
+  onDropSlot,
+  lastMovedBlockId,
+  lastExtractionPosition,
+  blockTheme,
+  envTheme,
+  keyboardFocusId,
+  onReady,
+  lowPowerMode = false,
+  maxDynamicBlocks = null,
+}) {
   const readyCalled = useRef(false);
+
   useEffect(() => {
     if (!readyCalled.current && onReady) {
       readyCalled.current = true;
@@ -800,7 +824,6 @@ export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick,
     }
   }, [onReady]);
 
-  // Получаем настройки физики для мобильных устройств
   const physicsSettings = useMemo(() => {
     if (lowPowerMode) {
       return getPhysicsSettingsForMobile();
@@ -813,28 +836,33 @@ export default function GameSceneWithPhysics({ blocks, selectedId, onBlockClick,
     };
   }, [lowPowerMode]);
 
-  // Используем переданный maxDynamicBlocks или значение по умолчанию
   const effectiveMaxDynamicBlocks = maxDynamicBlocks ?? getDynamicBlockLimit();
+
   return (
-      <Suspense fallback={null}>
-        <Physics key={restartKey} gravity={[0, -9.81, 0]} debug={false} timeStep={physicsSettings.timeStep}>
-          <Scene
-            blocks={blocks}
-            selectedId={selectedId}
-            onBlockClick={onBlockClick}
-            simulatingBlockIds={simulatingBlockIds}
-            onSimulationComplete={onSimulationComplete}
-            dropSlots={dropSlots}
-            onDropSlot={onDropSlot}
-            lastMovedBlockId={lastMovedBlockId}
-            lastExtractionPosition={lastExtractionPosition}
-            blockTheme={blockTheme}
-            envTheme={envTheme}
-            keyboardFocusId={keyboardFocusId}
-            lowPowerMode={lowPowerMode}
-            maxDynamicBlocks={effectiveMaxDynamicBlocks}
-          />
-        </Physics>
-      </Suspense>
-    );
+    <Suspense fallback={null}>
+      <Physics
+        key={restartKey}
+        gravity={[0, -9.81, 0]}
+        debug={false}
+        timeStep={physicsSettings.timeStep}
+      >
+        <Scene
+          blocks={blocks}
+          selectedId={selectedId}
+          onBlockClick={onBlockClick}
+          simulatingBlockIds={simulatingBlockIds}
+          onSimulationComplete={onSimulationComplete}
+          dropSlots={dropSlots}
+          onDropSlot={onDropSlot}
+          lastMovedBlockId={lastMovedBlockId}
+          lastExtractionPosition={lastExtractionPosition}
+          blockTheme={blockTheme}
+          envTheme={envTheme}
+          keyboardFocusId={keyboardFocusId}
+          lowPowerMode={lowPowerMode}
+          maxDynamicBlocks={effectiveMaxDynamicBlocks}
+        />
+      </Physics>
+    </Suspense>
+  );
 }
