@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { getSettings, updateAllSettings } from '../settingsTracker';
+import { useModalA11y } from '../hooks/useModalA11y';
+import { getSettings, updateAllSettings, resetSettings } from '../settingsTracker';
 import { updateMasterVolume } from '../soundEngine';
 import { clearTextureCache } from '../blockTextureCache';
 import { getAvailableSkins, getAvailableEnvThemes } from '../purchaseService';
@@ -8,6 +9,7 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
   const [settings, setSettings] = useState(() => getSettings());
   const availableSkins = useMemo(() => getAvailableSkins(), []);
   const availableEnvThemes = useMemo(() => getAvailableEnvThemes(), []);
+  const modalRef = useModalA11y({ onEscape: onClose });
 
   const handleChange = (key, value) => {
     const updated = { ...settings, [key]: value };
@@ -18,9 +20,8 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
   };
 
   const handleReset = () => {
-    const defaults = { volume: 70, moveTimer: 0, difficulty: 'normal', theme: 'classic', environment: 'classic' };
+    const defaults = resetSettings();
     setSettings(defaults);
-    updateAllSettings(defaults);
     updateMasterVolume();
     if (onSettingsChange) onSettingsChange(defaults);
   };
@@ -55,7 +56,7 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
   ];
 
   return (
-    <div className="j-overlay" role="dialog" aria-label="Настройки">
+    <div className="j-overlay" role="dialog" aria-label="Настройки" ref={modalRef}>
       <div className="j-card j-card--wide j-card--left">
         <div className="j-header">
           <h2 className="j-heading j-heading--sm">⚙️ Настройки</h2>
@@ -100,7 +101,8 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
                 <button key={opt.value}
                   className={`j-opt-btn${settings.theme === opt.value ? ' is-active' : ''}${locked ? ' j-opt-btn--locked' : ''}`}
                   onClick={() => { if (!locked) { handleChange('theme', opt.value); clearTextureCache(); } }}
-                  disabled={locked}
+                  aria-disabled={locked}
+                  aria-label={locked ? `${opt.label} — премиум, доступно после покупки` : undefined}
                   title={locked ? 'Премиум — доступно после покупки' : ''}
                 >{opt.label}</button>
               );
@@ -117,7 +119,8 @@ export default function SettingsPanel({ onClose, onSettingsChange }) {
                 <button key={opt.value}
                   className={`j-opt-btn${settings.environment === opt.value ? ' is-active' : ''}${locked ? ' j-opt-btn--locked' : ''}`}
                   onClick={() => { if (!locked) handleChange('environment', opt.value); }}
-                  disabled={locked}
+                  aria-disabled={locked}
+                  aria-label={locked ? `${opt.label} — премиум, доступно после покупки` : undefined}
                   title={locked ? 'Премиум — доступно после покупки' : ''}
                 >{opt.label}</button>
               );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useModalA11y } from '../hooks/useModalA11y';
 import { PLAYER_NAMES } from '../styles';
 import { getBestScore, getTotalGames } from '../scoreTracker';
 import SocialSharePanel from '../SocialSharePanel';
@@ -15,16 +16,23 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
   const [showQR, setShowQR] = useState(false);
   const [showReplays, setShowReplays] = useState(false);
   const [selectedReplay, setSelectedReplay] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const replays = listGameReplays();
   const playerClass = currentPlayer === 0 ? 'j-player--p1' : (currentPlayer === 1 && playerMode === 3 ? 'j-player--ai' : 'j-player--p2');
+  const modalRef = useModalA11y();
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const link = generateShareLink({
       turns,
       difficulty: 'normal',
     });
-    navigator.clipboard.writeText(link);
-    alert('Ссылка скопирована в буфер обмена!');
+    try {
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy share link:', err);
+    }
   };
 
   const shareText = playerMode === 2
@@ -34,7 +42,7 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
     : `🧱 Jenga 3D — башня рухнула после ${turns} ходов! Мой лучший: ${best}. Попробуй побить! 🎮`;
 
   return (
-    <div className="j-overlay" role="dialog" aria-label="Конец игры">
+    <div className="j-overlay" role="dialog" aria-label="Конец игры" ref={modalRef}>
       <div className={`j-card${showQR ? ' j-card--wide' : ''}`}>
         <div className="j-gameover-icon">{gameMode === 'speed' ? '⏱' : '💥'}</div>
         <h1 className="j-heading j-heading--danger">{gameMode === 'speed' ? 'Время вышло!' : 'Башня рухнула!'}</h1>
@@ -87,11 +95,11 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
             {showQR ? '✓ QR' : '📱 QR'}
           </button>
           <button
-            className="j-btn j-btn--secondary"
+            className={`j-btn j-btn--secondary${linkCopied ? ' j-share-btn--copied' : ''}`}
             aria-label="Поделиться результатом"
             onClick={handleShare}
           >
-            🔗 Поделиться
+            {linkCopied ? '✓ Скопировано' : '🔗 Поделиться'}
           </button>
           {replays.length > 0 && (
             <button

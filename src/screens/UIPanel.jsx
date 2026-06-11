@@ -48,7 +48,7 @@ export default function UIPanel({ canMove, onMakeMove, onRestart, message, tower
   }, [turnCount]);
 
   return (
-    <div className="j-hud-overlay" role="status" aria-label="Игровая панель">
+    <div className="j-hud-overlay" aria-label="Игровая панель">
       <div className="j-hud">
         <div className="j-hud__header">
           <h2 className="j-hud__title">🧱 Jenga</h2>
@@ -70,14 +70,14 @@ export default function UIPanel({ canMove, onMakeMove, onRestart, message, tower
           </div>
         )}
         {gameMode === 'speed' && speedTimeLeft !== null && (
-          <div className={`j-hud__speed-timer${speedTimeLeft <= 10 ? ' j-hud__speed-timer--critical' : ''}`}>
+          <div className={`j-hud__speed-timer${speedTimeLeft <= 10 ? ' j-hud__speed-timer--critical' : ''}`} aria-hidden="true">
             {Math.floor(speedTimeLeft / 60)}:{String(speedTimeLeft % 60).padStart(2, '0')}
           </div>
         )}
         {aiThinking && <div className="j-hud__status j-hud__status--ai">🤖 ИИ думает...</div>}
         {stabilizing && <div className="j-hud__status j-hud__status--stabilizing">⏳ Стабилизация...</div>}
         {moveTimeLeft !== null && (
-          <div className={`j-hud__timer ${moveTimeLeft <= 5 ? 'j-hud__timer--warning' : ''}`}>
+          <div className={`j-hud__timer ${moveTimeLeft <= 5 ? 'j-hud__timer--warning' : ''}`} aria-hidden="true">
             ⏱ {moveTimeLeft}с
           </div>
         )}

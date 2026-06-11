@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useModalA11y } from './hooks/useModalA11y';
 
 /**
  * PauseMenu: полноэкранное меню паузы
@@ -10,6 +11,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 /* ─── Confirmation dialog ─── */
 function ConfirmDialog({ icon, title, text, confirmLabel, confirmVariant, onConfirm, onCancel }) {
+  // Focus trap + restore; Escape is handled by the window listener below.
+  const dialogRef = useModalA11y();
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') { e.preventDefault(); onCancel(); } };
     window.addEventListener('keydown', handler);
@@ -17,7 +20,7 @@ function ConfirmDialog({ icon, title, text, confirmLabel, confirmVariant, onConf
   }, [onCancel]);
 
   return (
-    <div className="pm-confirm-overlay" role="alertdialog" aria-label={title}>
+    <div className="pm-confirm-overlay" role="alertdialog" aria-label={title} ref={dialogRef}>
       <div className="pm-confirm-card">
         <div className="pm-confirm-icon">{icon}</div>
         <h3 className="pm-confirm-title">{title}</h3>
@@ -51,6 +54,8 @@ export function PauseMenu({
   onBackToMenu,
 }) {
   const [confirmAction, setConfirmAction] = useState(null); // 'restart' | 'menu' | null
+  // Focus trap + restore; Escape is handled by the window listener below.
+  const menuRef = useModalA11y();
 
   const playerName = playerMode === 2 ? (currentPlayer === 0 ? 'Игрок 1' : 'Игрок 2') : playerMode === 3 ? (currentPlayer === 0 ? 'Игрок 1' : '🤖 ИИ') : '';
   const playerTagClass = currentPlayer === 0 ? 'pm-player-tag--p1' : currentPlayer === 1 && playerMode === 3 ? 'pm-player-tag--ai' : 'pm-player-tag--p2';
@@ -85,7 +90,7 @@ export function PauseMenu({
 
   return (
     <>
-      <div className="pm-overlay" role="dialog" aria-label="Меню паузы">
+      <div className="pm-overlay" role="dialog" aria-label="Меню паузы" ref={menuRef}>
         <div className="pm-card">
           <h2 className="pm-heading">⏸ Пауза</h2>
 

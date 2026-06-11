@@ -21,7 +21,7 @@
   --j-card-border: rgba(100, 160, 255, 0.12);
   --j-card-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 60px rgba(42, 110, 255, 0.06), inset 0 1px 0 rgba(255,255,255,0.06);
   --j-text: #fff;
-  --j-text-dim: rgba(255,255,255,0.4);
+  --j-text-dim: rgba(255,255,255,0.55);
   --j-text-muted: rgba(255,255,255,0.6);
   --j-divider: rgba(255,255,255,0.06);
 }
@@ -787,6 +787,52 @@
   margin-bottom: 10px;
 }
 
+/* ─── Game Over: replay list ─── */
+.j-gameover-replays {
+  border-top: 1px solid var(--j-divider);
+  padding-top: 14px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+.j-heading--secondary {
+  font-size: 14px;
+  font-weight: 700;
+  color: #5b9aff;
+  margin: 0 0 10px;
+}
+.j-replays-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.j-replay-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.j-btn--small {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--j-font);
+  -webkit-tap-highlight-color: transparent;
+}
+.j-btn--small:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+  color: #fff;
+}
+.j-btn--small:focus-visible {
+  outline: 2px solid #5b9aff;
+  outline-offset: 2px;
+}
+
 /* ─── Game Over improvements ─── */
 @keyframes j-collapse-bounce {
   0% { transform: scale(0.3) rotate(-15deg); opacity: 0; }
@@ -842,7 +888,9 @@
   font-size: 12px;
   font-weight: 600;
   border-radius: 8px;
+  border: 1px solid var(--share-color, #888);
   background: transparent;
+  color: var(--share-color, #888);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -853,6 +901,9 @@
 .j-share-btn:hover {
   transform: translateY(-1px);
   filter: brightness(1.2);
+  background: var(--share-color, #888);
+  color: #fff;
+  opacity: 0.9;
 }
 .j-share-btn:active {
   transform: translateY(0);
@@ -860,6 +911,10 @@
 .j-share-btn:focus-visible {
   outline: 2px solid #5b9aff;
   outline-offset: 2px;
+}
+.j-share-btn--copied {
+  background: var(--share-color, #888);
+  color: #fff;
 }
 
 /* ─── QR code card ─── */
@@ -884,32 +939,6 @@
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 8px;
 }
-.j-ach-item {
-  border-radius: 12px;
-  padding: 12px 14px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.j-ach-item:hover {
-  transform: translateY(-2px);
-}
-.j-ach-item--unlocked {
-  background: rgba(42,110,255,0.08);
-  border: 1px solid rgba(42,110,255,0.2);
-}
-.j-ach-item--unlocked:hover {
-  box-shadow: 0 4px 16px rgba(42,110,255,0.15);
-}
-.j-ach-item--locked {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.04);
-  opacity: 0.55;
-}
-.j-ach-item--locked .j-ach-item__emoji { filter: grayscale(1); }
-.j-ach-item--locked .j-ach-item__title { color: rgba(255,255,255,0.45); }
-.j-ach-item__emoji { font-size: 24px; margin-bottom: 4px; }
-.j-ach-item__title { font-size: 13px; font-weight: 700; }
-.j-ach-item__desc { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
-.j-ach-item__date { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 4px; }
 .j-ach-count {
   font-size: 14px;
   color: #5b9aff;
@@ -1102,7 +1131,7 @@
 }
 .j-tutorial-hint {
   font-size: 11px;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.4);
   margin-bottom: 16px;
   font-style: italic;
 }
@@ -1118,12 +1147,19 @@
   justify-content: center;
 }
 .j-tutorial-dot {
+  position: relative;
   width: 8px; height: 8px;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
   padding: 0;
+}
+/* Expand the tap target to 24px (WCAG 2.5.8) without enlarging the visible dot. */
+.j-tutorial-dot::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 .j-tutorial-dot--active {
   background: var(--j-blue);
@@ -1694,6 +1730,14 @@
   .j-hud__menu-btn { min-height: 44px; min-width: 44px; font-size: 20px; }
   .j-close-btn { min-height: 44px; min-width: 44px; }
   .j-btn--primary { min-height: 48px; }
+  /* Ensure all remaining interactive controls meet the 44px tap-target min. */
+  .j-btn, .j-action-btn, .j-mode-btn, .j-opt-btn, .j-lb-tab, .j-share-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .j-toast__close { min-height: 44px; min-width: 44px; }
 }
 
 @media (max-width: 360px) {
@@ -1711,22 +1755,6 @@
   margin: 0 auto;
 }
 
-/* ─── Share buttons (SocialSharePanel) ─── */
-.j-share-btn {
-  border: 1px solid var(--share-color, #888);
-  background: transparent;
-  color: var(--share-color, #888);
-  transition: background 0.2s, color 0.2s, opacity 0.2s;
-}
-.j-share-btn:hover {
-  background: var(--share-color, #888);
-  color: #fff;
-  opacity: 0.9;
-}
-.j-share-btn--copied {
-  background: var(--share-color, #888);
-  color: #fff;
-}
 
 /* ─── Loading Progress Bar ─── */
 .j-loading-container {
@@ -2235,5 +2263,31 @@
   .j-hud__info { font-size: 12px; margin-bottom: 6px; }
   .j-hud-btn { padding: 6px 12px; font-size: 13px; }
   .j-toast { top: 8px; right: 8px; max-width: 250px; padding: 10px 14px; }
+}
+
+/* ─── Reduced motion (vestibular safety) ───
+   Kills the high-impact / infinite / large-displacement animations.
+   Entrance fades are kept but made near-instant so layout still settles. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Screen shake on collapse — disable the transform entirely */
+  .j-shake { animation: none !important; }
+  /* Rotating conic background on the start screen */
+  .j-overlay--start::before { animation: none !important; }
+  /* Infinite pulses (player tag, timers, record badge, spotlight) */
+  .j-hud__player-tag,
+  .j-hud__timer--warning,
+  .j-hud__speed-timer--critical,
+  .j-gameover-record,
+  .pm-player-tag,
+  .j-spotlight__glow { animation: none !important; }
+  /* Loading spinners/indeterminate bars: stop spin but keep them visible */
+  .j-spinner-ring,
+  .j-loading-overlay__progress { animation: none !important; }
 }
 

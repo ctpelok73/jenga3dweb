@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useModalA11y } from './hooks/useModalA11y';
 
 /**
  * InteractiveTutorialOverlay: интерактивный гайд с подсвечиванием элементов
@@ -6,6 +7,7 @@ import React, { useState } from 'react';
  */
 export function InteractiveTutorialOverlay({ onDone }) {
   const [step, setStep] = useState(0);
+  const modalRef = useModalA11y();
 
   const steps = [
     {
@@ -24,8 +26,8 @@ export function InteractiveTutorialOverlay({ onDone }) {
     },
     {
       emoji: '⬆️',
-      title: 'Шаг 2: Перетащи блок',
-      text: 'Перетащи выбранный блок на зелёный слот наверху башни. Или нажми кнопку "Сделать ход".',
+      title: 'Шаг 2: Поставь блок наверх',
+      text: 'Нажми на зелёный слот наверху башни или на кнопку "Сделать ход", чтобы переставить выбранный блок.',
       highlight: 'dropslot',
       nextText: 'Далее →',
     },
@@ -41,7 +43,7 @@ export function InteractiveTutorialOverlay({ onDone }) {
   const currentStep = steps[step];
 
   return (
-    <div className="j-tutorial-overlay">
+    <div className="j-tutorial-overlay" role="dialog" aria-label="Обучение" ref={modalRef}>
       {/* Spotlight highlight */}
       {currentStep.highlight && (
         <div className="j-spotlight">
