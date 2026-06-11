@@ -418,6 +418,8 @@ function App() {
     currentSettings,
     onSelectBlock: setSelectedId,
     onMessage: setMessage,
+    aiThinking,
+    onAiThinkingChange: useCallback((value) => dispatch(gameActions.setAiThinking(value)), [dispatch]),
   });
 
   const handleBackToMenu = useCallback(() => {

@@ -36,9 +36,10 @@ export function useAIPlayer({
   currentSettings,
   onSelectBlock,
   onMessage,
+  aiThinking,
+  onAiThinkingChange,
 }) {
-  // ─── Состояние: думает ли ИИ ──────────────────────────────────────────────
-  const [aiThinking, setAiThinking] = useState(false);
+  // aiThinking comes from props so the reducer remains the single source of truth.
 
   // ─── Ref для таймеров ИИ (think / move / safety) ──────────────────────────
   const aiTimersRef = useRef([]);
@@ -57,7 +58,7 @@ export function useAIPlayer({
     if (playerMode !== 3 || currentPlayer !== 1 || phase !== 'playing' || simulatingBlockIds !== null) return;
     if (aiThinking) return;
 
-    setAiThinking(true);
+    onAiThinkingChange(true);
     onMessage('🤖 ИИ думает...');
 
     // --- Задержка «размышления» ИИ ---
@@ -84,7 +85,7 @@ export function useAIPlayer({
       }
 
       if (!aiBlock) {
-        setAiThinking(false);
+        onAiThinkingChange(false);
         onMessage('🤖 ИИ не может найти блок!');
         return;
       }
@@ -101,7 +102,7 @@ export function useAIPlayer({
 
       // Safety timeout: если симуляция не завершилась за 8 секунд, сбрасываем AI
       const safetyTimeout = setTimeout(() => {
-        setAiThinking(false);
+        onAiThinkingChange(false);
       }, 8000);
       aiTimersRef.current.push(safetyTimeout);
     }, AI_THINK_DELAY);
@@ -113,7 +114,7 @@ export function useAIPlayer({
     };
   }, [playerMode, currentPlayer, phase, simulatingBlockIds]); // aiThinking excluded: setting it inside triggers cleanup
 
-  return { aiThinking, setAiThinking };
+  return { aiThinking, setAiThinking: onAiThinkingChange };
 }
 
 export default useAIPlayer;

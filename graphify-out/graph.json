@@ -4,703 +4,13 @@
   "graph": {},
   "nodes": [
     {
-      "label": "CLAUDE.md",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "claude",
-      "community": 5,
-      "norm_label": "claude.md"
-    },
-    {
-      "label": "CLAUDE.md",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "claude_claude_md",
-      "community": 5,
-      "norm_label": "claude.md"
-    },
-    {
-      "label": "Commands",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L5",
-      "_origin": "ast",
-      "id": "claude_commands",
-      "community": 5,
-      "norm_label": "commands"
-    },
-    {
-      "label": "Architecture",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L34",
-      "_origin": "ast",
-      "id": "claude_architecture",
-      "community": 5,
-      "norm_label": "architecture"
-    },
-    {
-      "label": "Layers",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L36",
-      "_origin": "ast",
-      "id": "claude_layers",
-      "community": 5,
-      "norm_label": "layers"
-    },
-    {
-      "label": "Data flow",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L45",
-      "_origin": "ast",
-      "id": "claude_data_flow",
-      "community": 5,
-      "norm_label": "data flow"
-    },
-    {
-      "label": "Hooks layer (`src/hooks/`)",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L61",
-      "_origin": "ast",
-      "id": "claude_hooks_layer_src_hooks",
-      "community": 5,
-      "norm_label": "hooks layer (`src/hooks/`)"
-    },
-    {
-      "label": "Tower & physics",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L72",
-      "_origin": "ast",
-      "id": "claude_tower_physics",
-      "community": 5,
-      "norm_label": "tower & physics"
-    },
-    {
-      "label": "Stability / collapse detection",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L78",
-      "_origin": "ast",
-      "id": "claude_stability_collapse_detection",
-      "community": 5,
-      "norm_label": "stability / collapse detection"
-    },
-    {
-      "label": "Lazy loading & build budget",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L87",
-      "_origin": "ast",
-      "id": "claude_lazy_loading_build_budget",
-      "community": 5,
-      "norm_label": "lazy loading & build budget"
-    },
-    {
-      "label": "Performance profiler",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L99",
-      "_origin": "ast",
-      "id": "claude_performance_profiler",
-      "community": 5,
-      "norm_label": "performance profiler"
-    },
-    {
-      "label": "AI",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L113",
-      "_origin": "ast",
-      "id": "claude_ai",
-      "community": 5,
-      "norm_label": "ai"
-    },
-    {
-      "label": "Achievements",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L117",
-      "_origin": "ast",
-      "id": "claude_achievements",
-      "community": 26,
-      "norm_label": "achievements"
-    },
-    {
-      "label": "Camera & rendering",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L121",
-      "_origin": "ast",
-      "id": "claude_camera_rendering",
-      "community": 5,
-      "norm_label": "camera & rendering"
-    },
-    {
-      "label": "Performance targets",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L125",
-      "_origin": "ast",
-      "id": "claude_performance_targets",
-      "community": 5,
-      "norm_label": "performance targets"
-    },
-    {
-      "label": "Notes",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L131",
-      "_origin": "ast",
-      "id": "claude_notes",
-      "community": 5,
-      "norm_label": "notes"
-    },
-    {
-      "label": "Mandatory skill & tool usage",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L138",
-      "_origin": "ast",
-      "id": "claude_mandatory_skill_tool_usage",
-      "community": 5,
-      "norm_label": "mandatory skill & tool usage"
-    },
-    {
-      "label": "Codegraph (MCP)",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L142",
-      "_origin": "ast",
-      "id": "claude_codegraph_mcp",
-      "community": 5,
-      "norm_label": "codegraph (mcp)"
-    },
-    {
-      "label": "Graphify",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L147",
-      "_origin": "ast",
-      "id": "claude_graphify",
-      "community": 5,
-      "norm_label": "graphify"
-    },
-    {
-      "label": "frontend-design (skill)",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L152",
-      "_origin": "ast",
-      "id": "claude_frontend_design_skill",
-      "community": 5,
-      "norm_label": "frontend-design (skill)"
-    },
-    {
-      "label": "feature-dev (skill)",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L156",
-      "_origin": "ast",
-      "id": "claude_feature_dev_skill",
-      "community": 5,
-      "norm_label": "feature-dev (skill)"
-    },
-    {
-      "label": "superpowers:writing-plans",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L160",
-      "_origin": "ast",
-      "id": "claude_superpowers_writing_plans",
-      "community": 5,
-      "norm_label": "superpowers:writing-plans"
-    },
-    {
-      "label": "superpowers:verification-before-completion",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L164",
-      "_origin": "ast",
-      "id": "claude_superpowers_verification_before_completion",
-      "community": 5,
-      "norm_label": "superpowers:verification-before-completion"
-    },
-    {
-      "label": "verify / run (skills)",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L168",
-      "_origin": "ast",
-      "id": "claude_verify_run_skills",
-      "community": 5,
-      "norm_label": "verify / run (skills)"
-    },
-    {
-      "label": "code-review (skill)",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L172",
-      "_origin": "ast",
-      "id": "claude_code_review_skill",
-      "community": 5,
-      "norm_label": "code-review (skill)"
-    },
-    {
-      "label": "superpowers:brainstorming",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L176",
-      "_origin": "ast",
-      "id": "claude_superpowers_brainstorming",
-      "community": 5,
-      "norm_label": "superpowers:brainstorming"
-    },
-    {
-      "label": "graphify",
-      "file_type": "document",
-      "source_file": "CLAUDE.md",
-      "source_location": "L180",
-      "_origin": "ast",
-      "id": "claude_graphify_180",
-      "community": 5,
-      "norm_label": "graphify"
-    },
-    {
-      "label": "ui-audit.mjs",
-      "file_type": "code",
-      "source_file": "scripts/ui-audit.mjs",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "scripts_ui_audit",
-      "community": 34,
-      "norm_label": "ui-audit.mjs"
-    },
-    {
-      "label": "log()",
-      "file_type": "code",
-      "source_file": "scripts/ui-audit.mjs",
-      "source_location": "L8",
-      "_origin": "ast",
-      "id": "scripts_ui_audit_log",
-      "community": 34,
-      "norm_label": "log()"
-    },
-    {
-      "label": "errors",
-      "file_type": "code",
-      "source_file": "scripts/ui-audit.mjs",
-      "source_location": "L14",
-      "_origin": "ast",
-      "id": "scripts_ui_audit_errors",
-      "community": 34,
-      "norm_label": "errors"
-    },
-    {
-      "label": "shot()",
-      "file_type": "code",
-      "source_file": "scripts/ui-audit.mjs",
-      "source_location": "L18",
-      "_origin": "ast",
-      "id": "scripts_ui_audit_shot",
-      "community": 34,
-      "norm_label": "shot()"
-    },
-    {
-      "label": "GameSceneWithPhysics.jsx",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics",
-      "community": 7,
-      "norm_label": "gamescenewithphysics.jsx"
-    },
-    {
-      "label": "sharedBlockGeometry",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L24",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_sharedblockgeometry",
-      "community": 7,
-      "norm_label": "sharedblockgeometry"
-    },
-    {
-      "label": "sharedEdgesGeometry",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L25",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_sharededgesgeometry",
-      "community": 7,
-      "norm_label": "sharededgesgeometry"
-    },
-    {
-      "label": "_q",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L28",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_q",
-      "community": 7,
-      "norm_label": "_q"
-    },
-    {
-      "label": "_euler",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L29",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_euler",
-      "community": 7,
-      "norm_label": "_euler"
-    },
-    {
-      "label": "Edges()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L32",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_edges",
-      "community": 7,
-      "norm_label": "edges()"
-    },
-    {
-      "label": "Block",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L46",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_block",
-      "community": 7,
-      "norm_label": "block"
-    },
-    {
-      "label": "DropSlot",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L207",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_dropslot",
-      "community": 7,
-      "norm_label": "dropslot"
-    },
-    {
-      "label": "GroundSurface()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L278",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_groundsurface",
-      "community": 7,
-      "norm_label": "groundsurface()"
-    },
-    {
-      "label": "TowerGlow()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L335",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_towerglow",
-      "community": 7,
-      "norm_label": "towerglow()"
-    },
-    {
-      "label": "GroundCollider()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L348",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_groundcollider",
-      "community": 7,
-      "norm_label": "groundcollider()"
-    },
-    {
-      "label": "FloorCollider()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L358",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_floorcollider",
-      "community": 7,
-      "norm_label": "floorcollider()"
-    },
-    {
-      "label": "SpaceStars()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L367",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_spacestars",
-      "community": 7,
-      "norm_label": "spacestars()"
-    },
-    {
-      "label": "Scene()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L398",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_scene",
-      "community": 7,
-      "norm_label": "scene()"
-    },
-    {
-      "label": "GameSceneWithPhysics()",
-      "file_type": "code",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L800",
-      "_origin": "ast",
-      "id": "src_gamescenewithphysics_gamescenewithphysics",
-      "community": 7,
-      "norm_label": "gamescenewithphysics()"
-    },
-    {
-      "label": "useGameSimulation.js",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation",
-      "community": 1,
-      "norm_label": "usegamesimulation.js"
-    },
-    {
-      "label": "buildCleanedBlocks()",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L15",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation_buildcleanedblocks",
-      "community": 1,
-      "norm_label": "buildcleanedblocks()"
-    },
-    {
-      "label": "computeCurrentHeight()",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L19",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation_computecurrentheight",
-      "community": 1,
-      "norm_label": "computecurrentheight()"
-    },
-    {
-      "label": "handleDailyChallenge()",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L27",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation_handledailychallenge",
-      "community": 1,
-      "norm_label": "handledailychallenge()"
-    },
-    {
-      "label": "handleCollapseOutcome()",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L37",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation_handlecollapseoutcome",
-      "community": 1,
-      "norm_label": "handlecollapseoutcome()"
-    },
-    {
-      "label": "handleSuccessfulOutcome()",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L78",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation_handlesuccessfuloutcome",
-      "community": 1,
-      "norm_label": "handlesuccessfuloutcome()"
-    },
-    {
-      "label": "useGameSimulation()",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L110",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation_usegamesimulation",
-      "community": 1,
-      "norm_label": "usegamesimulation()"
-    },
-    {
-      "label": "continueAfterCollapseUpdate()",
-      "file_type": "code",
-      "source_file": "src/hooks/useGameSimulation.js",
-      "source_location": "L167",
-      "_origin": "ast",
-      "id": "hooks_usegamesimulation_continueaftercollapseupdate",
-      "community": 1,
-      "norm_label": "continueaftercollapseupdate()"
-    },
-    {
-      "label": "physicsOptimizer.js",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer",
-      "community": 15,
-      "norm_label": "physicsoptimizer.js"
-    },
-    {
-      "label": "AdaptiveFrameRateController",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L19",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_adaptiveframeratecontroller",
-      "community": 15,
-      "norm_label": "adaptiveframeratecontroller"
-    },
-    {
-      "label": ".constructor()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L20",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_adaptiveframeratecontroller_constructor",
-      "community": 15,
-      "norm_label": ".constructor()"
-    },
-    {
-      "label": ".setSimulating()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L26",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_adaptiveframeratecontroller_setsimulating",
-      "community": 15,
-      "norm_label": ".setsimulating()"
-    },
-    {
-      "label": ".shouldUpdatePhysics()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L42",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_adaptiveframeratecontroller_shouldupdatephysics",
-      "community": 15,
-      "norm_label": ".shouldupdatephysics()"
-    },
-    {
-      "label": ".getFrameRate()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L49",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_adaptiveframeratecontroller_getframerate",
-      "community": 15,
-      "norm_label": ".getframerate()"
-    },
-    {
-      "label": "VelocityThresholdOptimizer",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L58",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_velocitythresholdoptimizer",
-      "community": 15,
-      "norm_label": "velocitythresholdoptimizer"
-    },
-    {
-      "label": ".constructor()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L59",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_velocitythresholdoptimizer_constructor",
-      "community": 15,
-      "norm_label": ".constructor()"
-    },
-    {
-      "label": ".getThreshold()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L65",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_velocitythresholdoptimizer_getthreshold",
-      "community": 15,
-      "norm_label": ".getthreshold()"
-    },
-    {
-      "label": ".getTimeout()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L70",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_velocitythresholdoptimizer_gettimeout",
-      "community": 15,
-      "norm_label": ".gettimeout()"
-    },
-    {
-      "label": "PhysicsOptimizer",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L80",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_physicsoptimizer",
-      "community": 15,
-      "norm_label": "physicsoptimizer"
-    },
-    {
-      "label": ".constructor()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L81",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_physicsoptimizer_constructor",
-      "community": 15,
-      "norm_label": ".constructor()"
-    },
-    {
-      "label": ".updateSimulationState()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L87",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_physicsoptimizer_updatesimulationstate",
-      "community": 15,
-      "norm_label": ".updatesimulationstate()"
-    },
-    {
-      "label": ".updateCameraPosition()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L91",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_physicsoptimizer_updatecameraposition",
-      "community": 15,
-      "norm_label": ".updatecameraposition()"
-    },
-    {
-      "label": ".getFrameParams()",
-      "file_type": "code",
-      "source_file": "src/physicsOptimizer.js",
-      "source_location": "L95",
-      "_origin": "ast",
-      "id": "src_physicsoptimizer_physicsoptimizer_getframeparams",
-      "community": 15,
-      "norm_label": ".getframeparams()"
-    },
-    {
       "label": "settingsTracker.js",
       "file_type": "code",
       "source_file": "src/settingsTracker.js",
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_settingstracker",
-      "community": 3,
+      "community": 26,
       "norm_label": "settingstracker.js"
     },
     {
@@ -710,7 +20,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_settingstracker_default_settings",
-      "community": 3,
+      "community": 26,
       "norm_label": "default_settings"
     },
     {
@@ -720,7 +30,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_settingstracker_store",
-      "community": 3,
+      "community": 26,
       "norm_label": "store"
     },
     {
@@ -747,61 +57,751 @@
       "label": "updateAllSettings()",
       "file_type": "code",
       "source_file": "src/settingsTracker.js",
-      "source_location": "L41",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "src_settingstracker_updateallsettings",
-      "community": 14,
+      "community": 3,
       "norm_label": "updateallsettings()"
     },
     {
       "label": "resetSettings()",
       "file_type": "code",
       "source_file": "src/settingsTracker.js",
-      "source_location": "L47",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "src_settingstracker_resetsettings",
-      "community": 3,
+      "community": 26,
       "norm_label": "resetsettings()"
     },
     {
       "label": "cacheInvalidate()",
       "file_type": "code",
       "source_file": "src/settingsTracker.js",
-      "source_location": "L56",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "src_settingstracker_cacheinvalidate",
-      "community": 3,
+      "community": 26,
       "norm_label": "cacheinvalidate()"
     },
     {
       "label": "getDifficultyDynamicIds()",
       "file_type": "code",
       "source_file": "src/settingsTracker.js",
-      "source_location": "L60",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "src_settingstracker_getdifficultydynamicids",
-      "community": 3,
+      "community": 1,
       "norm_label": "getdifficultydynamicids()"
     },
     {
       "label": "THEME_COLORS",
       "file_type": "code",
       "source_file": "src/settingsTracker.js",
-      "source_location": "L98",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "src_settingstracker_theme_colors",
-      "community": 3,
+      "community": 26,
       "norm_label": "theme_colors"
     },
     {
       "label": "getThemeColors()",
       "file_type": "code",
       "source_file": "src/settingsTracker.js",
-      "source_location": "L125",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "src_settingstracker_getthemecolors",
-      "community": 3,
+      "community": 26,
       "norm_label": "getthemecolors()"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "claude.md",
+      "id": "claude"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "claude.md",
+      "id": "claude_claude_md"
+    },
+    {
+      "label": "Commands",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "commands",
+      "id": "claude_commands"
+    },
+    {
+      "label": "Architecture",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L34",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "architecture",
+      "id": "claude_architecture"
+    },
+    {
+      "label": "Layers",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "layers",
+      "id": "claude_layers"
+    },
+    {
+      "label": "Data flow",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "data flow",
+      "id": "claude_data_flow"
+    },
+    {
+      "label": "Hooks layer (`src/hooks/`)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L61",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "hooks layer (`src/hooks/`)",
+      "id": "claude_hooks_layer_src_hooks"
+    },
+    {
+      "label": "Tower & physics",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L72",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "tower & physics",
+      "id": "claude_tower_physics"
+    },
+    {
+      "label": "Stability / collapse detection",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L78",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "stability / collapse detection",
+      "id": "claude_stability_collapse_detection"
+    },
+    {
+      "label": "Lazy loading & build budget",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L87",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "lazy loading & build budget",
+      "id": "claude_lazy_loading_build_budget"
+    },
+    {
+      "label": "Performance profiler",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L99",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "performance profiler",
+      "id": "claude_performance_profiler"
+    },
+    {
+      "label": "AI",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L113",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "ai",
+      "id": "claude_ai"
+    },
+    {
+      "label": "Achievements",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L117",
+      "_origin": "ast",
+      "community": 26,
+      "norm_label": "achievements",
+      "id": "claude_achievements"
+    },
+    {
+      "label": "Camera & rendering",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L121",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "camera & rendering",
+      "id": "claude_camera_rendering"
+    },
+    {
+      "label": "Performance targets",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L125",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "performance targets",
+      "id": "claude_performance_targets"
+    },
+    {
+      "label": "Notes",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L131",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "notes",
+      "id": "claude_notes"
+    },
+    {
+      "label": "Mandatory skill & tool usage",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L138",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "mandatory skill & tool usage",
+      "id": "claude_mandatory_skill_tool_usage"
+    },
+    {
+      "label": "Codegraph (MCP)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L142",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "codegraph (mcp)",
+      "id": "claude_codegraph_mcp"
+    },
+    {
+      "label": "Graphify",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L147",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "graphify",
+      "id": "claude_graphify"
+    },
+    {
+      "label": "frontend-design (skill)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L152",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "frontend-design (skill)",
+      "id": "claude_frontend_design_skill"
+    },
+    {
+      "label": "feature-dev (skill)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L156",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "feature-dev (skill)",
+      "id": "claude_feature_dev_skill"
+    },
+    {
+      "label": "superpowers:writing-plans",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L160",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "superpowers:writing-plans",
+      "id": "claude_superpowers_writing_plans"
+    },
+    {
+      "label": "superpowers:verification-before-completion",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L164",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "superpowers:verification-before-completion",
+      "id": "claude_superpowers_verification_before_completion"
+    },
+    {
+      "label": "verify / run (skills)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L168",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "verify / run (skills)",
+      "id": "claude_verify_run_skills"
+    },
+    {
+      "label": "code-review (skill)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L172",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "code-review (skill)",
+      "id": "claude_code_review_skill"
+    },
+    {
+      "label": "superpowers:brainstorming",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L176",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "superpowers:brainstorming",
+      "id": "claude_superpowers_brainstorming"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L180",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "graphify",
+      "id": "claude_graphify_180"
+    },
+    {
+      "label": "ui-audit.mjs",
+      "file_type": "code",
+      "source_file": "scripts/ui-audit.mjs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 34,
+      "norm_label": "ui-audit.mjs",
+      "id": "scripts_ui_audit"
+    },
+    {
+      "label": "log()",
+      "file_type": "code",
+      "source_file": "scripts/ui-audit.mjs",
+      "source_location": "L8",
+      "_origin": "ast",
+      "community": 34,
+      "norm_label": "log()",
+      "id": "scripts_ui_audit_log"
+    },
+    {
+      "label": "errors",
+      "file_type": "code",
+      "source_file": "scripts/ui-audit.mjs",
+      "source_location": "L14",
+      "_origin": "ast",
+      "community": 34,
+      "norm_label": "errors",
+      "id": "scripts_ui_audit_errors"
+    },
+    {
+      "label": "shot()",
+      "file_type": "code",
+      "source_file": "scripts/ui-audit.mjs",
+      "source_location": "L18",
+      "_origin": "ast",
+      "community": 34,
+      "norm_label": "shot()",
+      "id": "scripts_ui_audit_shot"
+    },
+    {
+      "label": "GameSceneWithPhysics.jsx",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "gamescenewithphysics.jsx",
+      "id": "src_gamescenewithphysics"
+    },
+    {
+      "label": "sharedBlockGeometry",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L24",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "sharedblockgeometry",
+      "id": "src_gamescenewithphysics_sharedblockgeometry"
+    },
+    {
+      "label": "sharedEdgesGeometry",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L25",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "sharededgesgeometry",
+      "id": "src_gamescenewithphysics_sharededgesgeometry"
+    },
+    {
+      "label": "_q",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L28",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "_q",
+      "id": "src_gamescenewithphysics_q"
+    },
+    {
+      "label": "_euler",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L29",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "_euler",
+      "id": "src_gamescenewithphysics_euler"
+    },
+    {
+      "label": "Edges()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L32",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "edges()",
+      "id": "src_gamescenewithphysics_edges"
+    },
+    {
+      "label": "Block",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L46",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "block",
+      "id": "src_gamescenewithphysics_block"
+    },
+    {
+      "label": "DropSlot",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L207",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "dropslot",
+      "id": "src_gamescenewithphysics_dropslot"
+    },
+    {
+      "label": "GroundSurface()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L278",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "groundsurface()",
+      "id": "src_gamescenewithphysics_groundsurface"
+    },
+    {
+      "label": "TowerGlow()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L335",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "towerglow()",
+      "id": "src_gamescenewithphysics_towerglow"
+    },
+    {
+      "label": "GroundCollider()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L348",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "groundcollider()",
+      "id": "src_gamescenewithphysics_groundcollider"
+    },
+    {
+      "label": "FloorCollider()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L358",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "floorcollider()",
+      "id": "src_gamescenewithphysics_floorcollider"
+    },
+    {
+      "label": "SpaceStars()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L367",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "spacestars()",
+      "id": "src_gamescenewithphysics_spacestars"
+    },
+    {
+      "label": "Scene()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L398",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "scene()",
+      "id": "src_gamescenewithphysics_scene"
+    },
+    {
+      "label": "GameSceneWithPhysics()",
+      "file_type": "code",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L800",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "gamescenewithphysics()",
+      "id": "src_gamescenewithphysics_gamescenewithphysics"
+    },
+    {
+      "label": "useGameSimulation.js",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "usegamesimulation.js",
+      "id": "hooks_usegamesimulation"
+    },
+    {
+      "label": "buildCleanedBlocks()",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L15",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "buildcleanedblocks()",
+      "id": "hooks_usegamesimulation_buildcleanedblocks"
+    },
+    {
+      "label": "computeCurrentHeight()",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L19",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "computecurrentheight()",
+      "id": "hooks_usegamesimulation_computecurrentheight"
+    },
+    {
+      "label": "handleDailyChallenge()",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L27",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "handledailychallenge()",
+      "id": "hooks_usegamesimulation_handledailychallenge"
+    },
+    {
+      "label": "handleCollapseOutcome()",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L37",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "handlecollapseoutcome()",
+      "id": "hooks_usegamesimulation_handlecollapseoutcome"
+    },
+    {
+      "label": "handleSuccessfulOutcome()",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L78",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "handlesuccessfuloutcome()",
+      "id": "hooks_usegamesimulation_handlesuccessfuloutcome"
+    },
+    {
+      "label": "useGameSimulation()",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L110",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "usegamesimulation()",
+      "id": "hooks_usegamesimulation_usegamesimulation"
+    },
+    {
+      "label": "continueAfterCollapseUpdate()",
+      "file_type": "code",
+      "source_file": "src/hooks/useGameSimulation.js",
+      "source_location": "L167",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "continueaftercollapseupdate()",
+      "id": "hooks_usegamesimulation_continueaftercollapseupdate"
+    },
+    {
+      "label": "physicsOptimizer.js",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "physicsoptimizer.js",
+      "id": "src_physicsoptimizer"
+    },
+    {
+      "label": "AdaptiveFrameRateController",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L19",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "adaptiveframeratecontroller",
+      "id": "src_physicsoptimizer_adaptiveframeratecontroller"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L20",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".constructor()",
+      "id": "src_physicsoptimizer_adaptiveframeratecontroller_constructor"
+    },
+    {
+      "label": ".setSimulating()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L26",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".setsimulating()",
+      "id": "src_physicsoptimizer_adaptiveframeratecontroller_setsimulating"
+    },
+    {
+      "label": ".shouldUpdatePhysics()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L42",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".shouldupdatephysics()",
+      "id": "src_physicsoptimizer_adaptiveframeratecontroller_shouldupdatephysics"
+    },
+    {
+      "label": ".getFrameRate()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L49",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".getframerate()",
+      "id": "src_physicsoptimizer_adaptiveframeratecontroller_getframerate"
+    },
+    {
+      "label": "VelocityThresholdOptimizer",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L58",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "velocitythresholdoptimizer",
+      "id": "src_physicsoptimizer_velocitythresholdoptimizer"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L59",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".constructor()",
+      "id": "src_physicsoptimizer_velocitythresholdoptimizer_constructor"
+    },
+    {
+      "label": ".getThreshold()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L65",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".getthreshold()",
+      "id": "src_physicsoptimizer_velocitythresholdoptimizer_getthreshold"
+    },
+    {
+      "label": ".getTimeout()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L70",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".gettimeout()",
+      "id": "src_physicsoptimizer_velocitythresholdoptimizer_gettimeout"
+    },
+    {
+      "label": "PhysicsOptimizer",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L80",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "physicsoptimizer",
+      "id": "src_physicsoptimizer_physicsoptimizer"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L81",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".constructor()",
+      "id": "src_physicsoptimizer_physicsoptimizer_constructor"
+    },
+    {
+      "label": ".updateSimulationState()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L87",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".updatesimulationstate()",
+      "id": "src_physicsoptimizer_physicsoptimizer_updatesimulationstate"
+    },
+    {
+      "label": ".updateCameraPosition()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L91",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".updatecameraposition()",
+      "id": "src_physicsoptimizer_physicsoptimizer_updatecameraposition"
+    },
+    {
+      "label": ".getFrameParams()",
+      "file_type": "code",
+      "source_file": "src/physicsOptimizer.js",
+      "source_location": "L95",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".getframeparams()",
+      "id": "src_physicsoptimizer_physicsoptimizer_getframeparams"
     },
     {
       "label": "settings.json",
@@ -1319,7 +1319,7 @@
       "source_file": "public/manifest.json",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "theme_color",
       "id": "public_manifest_theme_color"
     },
@@ -2489,7 +2489,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "blocktexturecache.js",
       "id": "src_blocktexturecache"
     },
@@ -2499,7 +2499,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "texturecache",
       "id": "src_blocktexturecache_texturecache"
     },
@@ -2509,7 +2509,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "thememapcache",
       "id": "src_blocktexturecache_thememapcache"
     },
@@ -2519,7 +2519,7 @@
       "source_file": "src/blockTextureCache.js",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "cleartexturecache()",
       "id": "src_blocktexturecache_cleartexturecache"
     },
@@ -2529,7 +2529,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "blocktextures.js",
       "id": "src_blocktextures"
     },
@@ -2539,7 +2539,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "createtexture()",
       "id": "src_blocktextures_createtexture"
     },
@@ -2549,7 +2549,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generatewoodtexture()",
       "id": "src_blocktextures_generatewoodtexture"
     },
@@ -2559,7 +2559,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L64",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generateneontexture()",
       "id": "src_blocktextures_generateneontexture"
     },
@@ -2569,7 +2569,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L111",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generateicetexture()",
       "id": "src_blocktextures_generateicetexture"
     },
@@ -2579,7 +2579,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L155",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generatebambootexture()",
       "id": "src_blocktextures_generatebambootexture"
     },
@@ -2589,7 +2589,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L198",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generatecandytexture()",
       "id": "src_blocktextures_generatecandytexture"
     },
@@ -2599,7 +2599,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L239",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generatemarbletexture()",
       "id": "src_blocktextures_generatemarbletexture"
     },
@@ -2609,7 +2609,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L288",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generatenormalmap()",
       "id": "src_blocktextures_generatenormalmap"
     },
@@ -2619,7 +2619,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L431",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "generateroughnessmap()",
       "id": "src_blocktextures_generateroughnessmap"
     },
@@ -2629,7 +2629,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L547",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getthememaps()",
       "id": "src_blocktextures_getthememaps"
     },
@@ -2639,7 +2639,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L559",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getblockmaterialprops()",
       "id": "src_blocktextures_getblockmaterialprops"
     },
@@ -2649,7 +2649,7 @@
       "source_file": "src/blockTextures.js",
       "source_location": "L647",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "environment_themes",
       "id": "src_blocktextures_environment_themes"
     },
@@ -4459,7 +4459,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L122",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getavailableskins()",
       "id": "src_purchaseservice_getavailableskins"
     },
@@ -4469,7 +4469,7 @@
       "source_file": "src/purchaseService.js",
       "source_location": "L130",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "getavailableenvthemes()",
       "id": "src_purchaseservice_getavailableenvthemes"
     },
@@ -4519,7 +4519,7 @@
       "source_file": "src/scoreTracker.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "scoretracker.js",
       "id": "src_scoretracker"
     },
@@ -4529,7 +4529,7 @@
       "source_file": "src/scoreTracker.js",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "store",
       "id": "src_scoretracker_store"
     },
@@ -4569,7 +4569,7 @@
       "source_file": "src/scoreTracker.js",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "recordgame()",
       "id": "src_scoretracker_recordgame"
     },
@@ -4579,7 +4579,7 @@
       "source_file": "src/scoreTracker.js",
       "source_location": "L39",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "resetallscores()",
       "id": "src_scoretracker_resetallscores"
     },
@@ -4629,7 +4629,7 @@
       "source_file": "src/screens/SettingsPanel.jsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "settingspanel.jsx",
       "id": "screens_settingspanel"
     },
@@ -4639,7 +4639,7 @@
       "source_file": "src/screens/SettingsPanel.jsx",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 14,
+      "community": 3,
       "norm_label": "settingspanel()",
       "id": "screens_settingspanel_settingspanel"
     },
@@ -5069,7 +5069,7 @@
       "source_file": "src/storage/createPersistedStore.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "createpersistedstore.js",
       "id": "storage_createpersistedstore"
     },
@@ -5079,7 +5079,7 @@
       "source_file": "src/storage/createPersistedStore.js",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "saferead()",
       "id": "storage_createpersistedstore_saferead"
     },
@@ -5089,7 +5089,7 @@
       "source_file": "src/storage/createPersistedStore.js",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "safewrite()",
       "id": "storage_createpersistedstore_safewrite"
     },
@@ -5099,7 +5099,7 @@
       "source_file": "src/storage/createPersistedStore.js",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "makedefaults()",
       "id": "storage_createpersistedstore_makedefaults"
     },
@@ -5109,7 +5109,7 @@
       "source_file": "src/storage/createPersistedStore.js",
       "source_location": "L55",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "createpersistedstore()",
       "id": "storage_createpersistedstore_createpersistedstore"
     },
@@ -5219,7 +5219,7 @@
       "source_file": "src/test/setup.js",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 3,
+      "community": 26,
       "norm_label": "setup.js",
       "id": "test_setup"
     },
@@ -6488,7 +6488,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 0,
       "norm_label": "block_w/h/d + step/layer_gap",
       "id": "src_towerconfig_dimensions"
     },
@@ -6527,7 +6527,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "localstorage tracker pattern",
       "id": "concept_persisted_store_pattern"
     },
@@ -6657,7 +6657,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "test/achievements.test.js",
       "id": "test_achievements"
     },
@@ -6670,7 +6670,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "test/collapse.test.js",
       "id": "test_collapse"
     },
@@ -6683,7 +6683,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "test/keyboardcontroller.test.js",
       "id": "test_keyboardcontroller"
     },
@@ -6696,7 +6696,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "test/mobileoptimizations.test.js",
       "id": "test_mobileoptimizations"
     },
@@ -6709,7 +6709,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "test/storageservices.test.js",
       "id": "test_storageservices"
     },
@@ -6722,7 +6722,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "test/touchgesturecontroller.test.js",
       "id": "test_touchgesturecontroller"
     },
@@ -6735,7 +6735,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "test/uismoke.test.jsx",
       "id": "test_uismoke"
     },
@@ -6813,7 +6813,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "unit test family (vitest)",
       "id": "concept_unit_test_suite"
     },
@@ -6852,7 +6852,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 26,
       "norm_label": "persistence test family",
       "id": "concept_persistence_test_family"
     },
@@ -7014,6 +7014,570 @@
     }
   ],
   "links": [
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/SettingsPanel.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "screens_settingspanel",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/UIPanel.jsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "screens_uipanel",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": null,
+      "source_location": null,
+      "weight": 0.85,
+      "source": "src_achievementstracker",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/aiController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_aicontroller",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_gamescenewithphysics",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": null,
+      "source_location": null,
+      "weight": 0.85,
+      "source": "src_scoretracker",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "instance_of",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": null,
+      "source_location": null,
+      "weight": 1.0,
+      "source": "src_settingstracker",
+      "target": "concept_persisted_store_pattern"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L83",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "public_manifest_theme_color"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L56",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_cacheinvalidate"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_default_settings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_getdifficultydynamicids"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L110",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_getthemecolors"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_resetsettings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_store"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L83",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_theme_colors"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L32",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_updateallsettings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "src_settingstracker_updatesetting"
+    },
+    {
+      "relation": "uses",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": null,
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "storage_createpersistedstore"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker",
+      "target": "storage_createpersistedstore_createpersistedstore"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/soundEngine.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_soundengine",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "tests",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/test/storageServices.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "test_storageservices",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/storageServices.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "test_storageservices_test",
+      "target": "src_settingstracker"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/SettingsPanel.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "screens_settingspanel",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/screens/SettingsPanel.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "screens_settingspanel_settingspanel",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/aiController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_aicontroller",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/aiController.js",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "src_aicontroller_chooseaiblock",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L166",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "src_settingstracker_getdifficultydynamicids",
+      "target": "src_settingstracker_getsettings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L128",
+      "weight": 1.0,
+      "source": "src_settingstracker_getthemecolors",
+      "target": "src_settingstracker_getsettings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/soundEngine.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_soundengine",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/soundEngine.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "src_soundengine_getvolumelevel",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/soundEngine.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "src_soundengine_updatemastervolume",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/storageServices.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "test_storageservices_test",
+      "target": "src_settingstracker_getsettings"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/UIPanel.jsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "screens_uipanel",
+      "target": "src_settingstracker_updatesetting"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/screens/UIPanel.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "screens_uipanel_uipanel",
+      "target": "src_settingstracker_updatesetting"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker_updatesetting",
+      "target": "src_settingstracker_cacheinvalidate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/storageServices.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "test_storageservices_test",
+      "target": "src_settingstracker_updatesetting"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/SettingsPanel.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "screens_settingspanel",
+      "target": "src_settingstracker_updateallsettings"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/screens/SettingsPanel.jsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "screens_settingspanel_settingspanel",
+      "target": "src_settingstracker_updateallsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker_updateallsettings",
+      "target": "src_settingstracker_cacheinvalidate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/SettingsPanel.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "screens_settingspanel",
+      "target": "src_settingstracker_resetsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/settingsTracker.js",
+      "source_location": "L48",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_settingstracker_resetsettings",
+      "target": "src_settingstracker_cacheinvalidate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/test/storageServices.test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "test_storageservices_test",
+      "target": "src_settingstracker_resetsettings"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_settingstracker_getdifficultydynamicids"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L373",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_settingstracker_getdifficultydynamicids"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_settingstracker_getthemecolors"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L59",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app_generatethemedtower",
+      "target": "src_settingstracker_getthemecolors"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/dailyChallengeTracker.js",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "src_dailychallengetracker_generatedailytower",
+      "target": "src_settingstracker_getthemecolors"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/GameSceneWithPhysics.jsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_gamescenewithphysics",
+      "target": "src_settingstracker_getthemecolors"
+    },
+    {
+      "relation": "reads",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/settingsTracker.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "src_settingstracker_getthemecolors",
+      "target": "public_manifest_theme_color"
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -7802,28 +8366,6 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L21",
-      "weight": 1.0,
-      "source": "src_gamescenewithphysics",
-      "target": "src_settingstracker",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/GameSceneWithPhysics.jsx",
-      "source_location": "L21",
-      "weight": 1.0,
-      "source": "src_gamescenewithphysics",
-      "target": "src_settingstracker_getthemecolors",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/GameSceneWithPhysics.jsx",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -8017,9 +8559,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation",
-      "target": "hooks_usegamesimulation_buildcleanedblocks",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_buildcleanedblocks"
     },
     {
       "relation": "contains",
@@ -8027,9 +8569,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation",
-      "target": "hooks_usegamesimulation_computecurrentheight",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_computecurrentheight"
     },
     {
       "relation": "contains",
@@ -8047,9 +8589,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation",
-      "target": "hooks_usegamesimulation_handlecollapseoutcome",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_handlecollapseoutcome"
     },
     {
       "relation": "contains",
@@ -8057,9 +8599,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation",
-      "target": "hooks_usegamesimulation_handledailychallenge",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_handledailychallenge"
     },
     {
       "relation": "contains",
@@ -8067,9 +8609,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation",
-      "target": "hooks_usegamesimulation_handlesuccessfuloutcome",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_handlesuccessfuloutcome"
     },
     {
       "relation": "contains",
@@ -8341,9 +8883,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation_handlecollapseoutcome",
-      "target": "hooks_usegamesimulation_computecurrentheight",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_computecurrentheight"
     },
     {
       "relation": "calls",
@@ -8352,9 +8894,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation_handlesuccessfuloutcome",
-      "target": "hooks_usegamesimulation_computecurrentheight",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_computecurrentheight"
     },
     {
       "relation": "calls",
@@ -8363,9 +8905,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation_handlecollapseoutcome",
-      "target": "hooks_usegamesimulation_handledailychallenge",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_handledailychallenge"
     },
     {
       "relation": "calls",
@@ -8374,9 +8916,9 @@
       "source_file": "src/hooks/useGameSimulation.js",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usegamesimulation_handlesuccessfuloutcome",
-      "target": "hooks_usegamesimulation_handledailychallenge",
-      "confidence_score": 1.0
+      "target": "hooks_usegamesimulation_handledailychallenge"
     },
     {
       "relation": "calls",
@@ -8686,526 +9228,6 @@
       "confidence_score": 1.0,
       "source": "src_physicsoptimizer_physicsoptimizer_updatesimulationstate",
       "target": "hooks_usegamereducer_setsimulation"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/SettingsPanel.jsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "screens_settingspanel",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/UIPanel.jsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "screens_uipanel",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": null,
-      "source_location": null,
-      "weight": 0.85,
-      "source": "src_achievementstracker",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/aiController.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_aicontroller",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L20",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": null,
-      "source_location": null,
-      "weight": 0.85,
-      "source": "src_scoretracker",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "instance_of",
-      "confidence": "INFERRED",
-      "confidence_score": 0.95,
-      "source_file": null,
-      "source_location": null,
-      "weight": 1.0,
-      "source": "src_settingstracker",
-      "target": "concept_persisted_store_pattern"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L83",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "public_manifest_theme_color"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L56",
-      "weight": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_cacheinvalidate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_default_settings"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L45",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_getdifficultydynamicids"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L21",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L110",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_getthemecolors"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L36",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_resetsettings"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L15",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_store"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L83",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_theme_colors"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L32",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_updateallsettings"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L25",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "src_settingstracker_updatesetting"
-    },
-    {
-      "relation": "uses",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": null,
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "storage_createpersistedstore"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_settingstracker",
-      "target": "storage_createpersistedstore_createpersistedstore"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/soundEngine.js",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_soundengine",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "tests",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/test/storageServices.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "source": "test_storageservices",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/storageServices.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "test_storageservices_test",
-      "target": "src_settingstracker"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/SettingsPanel.jsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "screens_settingspanel",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/screens/SettingsPanel.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "screens_settingspanel_settingspanel",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/aiController.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_aicontroller",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/aiController.js",
-      "source_location": "L59",
-      "weight": 1.0,
-      "source": "src_aicontroller_chooseaiblock",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L20",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L166",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app_app",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/soundEngine.js",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_soundengine",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/soundEngine.js",
-      "source_location": "L36",
-      "weight": 1.0,
-      "source": "src_soundengine_getvolumelevel",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/soundEngine.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "src_soundengine_updatemastervolume",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/storageServices.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "test_storageservices_test",
-      "target": "src_settingstracker_getsettings"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/UIPanel.jsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "screens_uipanel",
-      "target": "src_settingstracker_updatesetting"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/screens/UIPanel.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "screens_uipanel_uipanel",
-      "target": "src_settingstracker_updatesetting"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L33",
-      "weight": 1.0,
-      "source": "src_settingstracker_updatesetting",
-      "target": "src_settingstracker_cacheinvalidate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/storageServices.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "test_storageservices_test",
-      "target": "src_settingstracker_updatesetting"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/SettingsPanel.jsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "screens_settingspanel",
-      "target": "src_settingstracker_updateallsettings"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/screens/SettingsPanel.jsx",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "screens_settingspanel_settingspanel",
-      "target": "src_settingstracker_updateallsettings"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L42",
-      "weight": 1.0,
-      "source": "src_settingstracker_updateallsettings",
-      "target": "src_settingstracker_cacheinvalidate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/screens/SettingsPanel.jsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "screens_settingspanel",
-      "target": "src_settingstracker_resetsettings"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/settingsTracker.js",
-      "source_location": "L48",
-      "weight": 1.0,
-      "source": "src_settingstracker_resetsettings",
-      "target": "src_settingstracker_cacheinvalidate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/test/storageServices.test.js",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "test_storageservices_test",
-      "target": "src_settingstracker_resetsettings"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L20",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_settingstracker_getdifficultydynamicids"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L373",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app_app",
-      "target": "src_settingstracker_getdifficultydynamicids"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L20",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_settingstracker_getthemecolors"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L59",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "src_app_generatethemedtower",
-      "target": "src_settingstracker_getthemecolors"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/dailyChallengeTracker.js",
-      "source_location": "L96",
-      "weight": 1.0,
-      "source": "src_dailychallengetracker_generatedailytower",
-      "target": "src_settingstracker_getthemecolors"
-    },
-    {
-      "relation": "reads",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/settingsTracker.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "src_settingstracker_getthemecolors",
-      "target": "public_manifest_theme_color"
     },
     {
       "relation": "contains",
@@ -21439,5 +21461,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d2cfe813860ee59c415092250efe922bbe188c95"
+  "built_at_commit": "eb39a4519a6b7612cdeb65996984ebc535cfa701"
 }
