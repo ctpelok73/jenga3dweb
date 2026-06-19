@@ -413,12 +413,18 @@ function Scene({
 
   const visibleBlocks = visibleCount >= blocks.length ? blocks : blocks.slice(0, visibleCount);
 
+  const cascadeDynamicIdsRef = useRef(null);
   const [cascadeDynamicIds, setCascadeDynamicIds] = useState(null);
   const cascadeBlocksRef = useRef(null);
   const cascadeDelayRef = useRef(0);
   const cascadeWaiting = useRef(false);
 
   const env = useMemo(() => getEnvironmentTheme(envTheme), [envTheme]);
+
+  const onSimulationCompleteRef = useRef(onSimulationComplete);
+  onSimulationCompleteRef.current = onSimulationComplete;
+  const lastMovedBlockIdRef = useRef(lastMovedBlockId);
+  lastMovedBlockIdRef.current = lastMovedBlockId;
 
   useEffect(() => {
     if (lastMovedBlockId) {
@@ -444,6 +450,10 @@ function Scene({
     }
     return merged.size > 0 ? merged : null;
   }, [simulatingBlockIds, cascadeDynamicIds]);
+
+  const storeRigidRef = useCallback((id, ref) => {
+    rigidRefs.current[id] = ref;
+  }, []);
 
   const findNextUnsupportedLayer = useCallback((currentBlocks, alreadyDynamicIds) => {
     const layerBlockCounts = {};
@@ -583,21 +593,24 @@ function Scene({
       const nextResult = findNextUnsupportedLayer(workingBlocks, activeIds);
       profiler.measure('cascade_check', 'cascade_check_start', 'logic');
 
+      const currentLastMoved = lastMovedBlockIdRef.current;
+
       if (nextResult !== null) {
         const newDynamicIds = new Set(activeIds);
         if (Array.isArray(nextResult)) {
           for (const id of nextResult) {
-            if (id !== lastMovedBlockId) newDynamicIds.add(id);
+            if (id !== currentLastMoved) newDynamicIds.add(id);
           }
         } else {
           const nextLayer = nextResult;
           for (const b of workingBlocks) {
-            if (b.layer === nextLayer && b.id !== lastMovedBlockId) {
+            if (b.layer === nextLayer && b.id !== currentLastMoved) {
               newDynamicIds.add(b.id);
             }
           }
         }
         cascadeBlocksRef.current = workingBlocks;
+        cascadeDynamicIdsRef.current = newDynamicIds;
         setCascadeDynamicIds(newDynamicIds);
         simulateTime.current = 0;
         cascadeWaiting.current = true;
@@ -606,6 +619,7 @@ function Scene({
         completionCalled.current = true;
         simulateTime.current = 0;
         cascadeBlocksRef.current = null;
+        cascadeDynamicIdsRef.current = null;
         setCascadeDynamicIds(null);
         physicsOptimizer.updateSimulationState(false);
 
@@ -615,7 +629,7 @@ function Scene({
             rigid.setBodyType(1, true);
           }
         }
-        onSimulationComplete(workingBlocks);
+        onSimulationCompleteRef.current(workingBlocks);
       }
     }
 
@@ -748,9 +762,7 @@ function Scene({
           onClick={onBlockClick}
           isSelected={b.id === selectedId}
           isGhost={b.id === selectedId && dropSlots && dropSlots.length > 0}
-          onRigidRef={(id, ref) => {
-            rigidRefs.current[id] = ref;
-          }}
+          onRigidRef={storeRigidRef}
           isDynamic={effectiveDynamicIds != null && effectiveDynamicIds.has(b.id)}
           theme={blockTheme}
           isKeyboardFocused={b.id === keyboardFocusId}
