@@ -52,18 +52,6 @@ export function generateShareLink(config = {}) {
 }
 
 /**
- * Генерировать challenge-link для друга
- */
-export function generateChallengeLink(towerConfig, playerName = 'Игрок') {
-  const config = {
-    ...towerConfig,
-    challengedBy: playerName,
-    challengeType: 'tower', // или 'daily', 'speed', etc.
-  };
-  return generateShareLink(config);
-}
-
-/**
  * Получить конфигурацию из URL параметров
  */
 export function getChallengeFromUrl() {
@@ -124,21 +112,6 @@ function _pruneReplays() {
 }
 
 /**
- * Загрузить replay по ID
- */
-export function loadGameReplay(gameId) {
-  try {
-    const key = `jenga3d_replay_${gameId}`;
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (error) {
-    console.error('[ShareService] Failed to load replay:', error);
-    return null;
-  }
-}
-
-/**
  * Получить список всех сохранённых replays.
  * Безопасно обрабатывает повреждённые записи в localStorage.
  */
@@ -175,43 +148,10 @@ export function listGameReplays() {
 }
 
 /**
- * Удалить replay
- */
-export function deleteGameReplay(gameId) {
-  try {
-    const key = `jenga3d_replay_${gameId}`;
-    localStorage.removeItem(key);
-    return true;
-  } catch (error) {
-    console.error('[ShareService] Failed to delete replay:', error);
-    return false;
-  }
-}
-
-/**
  * Генерировать уникальный ID для игры
  */
 export function generateGameId() {
   return `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-/**
- * Генерировать seed для детерминированной башни
- */
-export function generateTowerSeed(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const dateStr = `${year}-${month}-${day}`;
-
-  // Простой hash функция
-  let hash = 0;
-  for (let i = 0; i < dateStr.length; i++) {
-    const char = dateStr.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
 }
 
 /**
@@ -223,6 +163,7 @@ export class ReplayPlayer {
     this.currentMoveIndex = 0;
     this.isPlaying = false;
     this.playbackSpeed = 1.0;
+    this._timerId = null;
     this.callbacks = {
       onMove: null,
       onComplete: null,
@@ -234,9 +175,15 @@ export class ReplayPlayer {
    * Начать воспроизведение
    */
   play(onMove, onComplete) {
-    this.isPlaying = true;
     this.callbacks.onMove = onMove;
     this.callbacks.onComplete = onComplete;
+
+    if (!this.replay.moves || this.replay.moves.length === 0) {
+      if (onComplete) onComplete();
+      return;
+    }
+
+    this.isPlaying = true;
     this.playNextMove();
   }
 
@@ -266,7 +213,7 @@ export class ReplayPlayer {
       ? (nextMove.timestamp - move.timestamp) / this.playbackSpeed
       : 1000;
 
-    setTimeout(() => this.playNextMove(), delay);
+    this._timerId = setTimeout(() => this.playNextMove(), delay);
   }
 
   /**
@@ -274,6 +221,10 @@ export class ReplayPlayer {
    */
   pause() {
     this.isPlaying = false;
+    if (this._timerId !== null) {
+      clearTimeout(this._timerId);
+      this._timerId = null;
+    }
     if (this.callbacks.onPause) {
       this.callbacks.onPause();
     }
@@ -294,6 +245,10 @@ export class ReplayPlayer {
    */
   stop() {
     this.isPlaying = false;
+    if (this._timerId !== null) {
+      clearTimeout(this._timerId);
+      this._timerId = null;
+    }
     this.currentMoveIndex = 0;
   }
 
@@ -315,10 +270,11 @@ export class ReplayPlayer {
    * Получить текущий прогресс
    */
   getProgress() {
+    const total = this.replay.moves.length;
     return {
       current: this.currentMoveIndex,
-      total: this.replay.moves.length,
-      percentage: Math.round((this.currentMoveIndex / this.replay.moves.length) * 100),
+      total,
+      percentage: total > 0 ? Math.round((this.currentMoveIndex / total) * 100) : 0,
     };
   }
 }

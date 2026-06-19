@@ -24,89 +24,6 @@ function computeCurrentHeight(blocks) {
   return maxLayer + 1;
 }
 
-function handleDailyChallenge({ isDailyChallengeMode, dispatch, currentTurnCount, cleanedBlocks, currentHeight }) {
-  if (!isDailyChallengeMode) return Promise.resolve();
-
-  return recordDailyChallengeAttempt(currentTurnCount, currentHeight, true).then((challengeResult) => {
-    if (challengeResult.completed) {
-      dispatch(gameActions.setAnnouncement('Челлендж дня выполнен! 🎉'));
-    }
-  });
-}
-
-function handleCollapseOutcome({ dispatch, timersRef, setAiThinking, showAchievementNotification, replayMovesRef, gameIdRef, currentTurnCount, playerMode, updatedBlocks }) {
-  playCollapse();
-  setAiThinking(false);
-
-  const gameOverTimer = setTimeout(() => playGameOver(), 300);
-  timersRef.current.push(gameOverTimer);
-
-  recordGame(currentTurnCount, true);
-  const best = getBestScore();
-  const isNewRecord = currentTurnCount > best;
-  trackGameOver(currentTurnCount, best, isNewRecord);
-
-  const { newUnlocks } = recordCollapse(currentTurnCount);
-  if (newUnlocks && newUnlocks.length > 0) {
-    const achievementTimer = setTimeout(() => showAchievementNotification(newUnlocks), 1500);
-    timersRef.current.push(achievementTimer);
-  }
-
-  const currentHeight = computeCurrentHeight(updatedBlocks);
-  handleDailyChallenge({ isDailyChallengeMode, dispatch, currentTurnCount, cleanedBlocks: updatedBlocks, currentHeight });
-
-  if (replayMovesRef.current.length > 0) {
-    try {
-      saveGameReplay(gameIdRef.current, replayMovesRef.current, {
-        totalMoves: currentTurnCount,
-        collapsed: true,
-        playerMode,
-        date: Date.now(),
-      });
-    } catch (error) {
-      // ignore storage/replay errors
-    }
-  }
-
-  dispatch(gameActions.setScreenShake(true));
-  const shakeTimer = setTimeout(() => dispatch(gameActions.setScreenShake(false)), 600);
-  timersRef.current.push(shakeTimer);
-
-  dispatch(gameActions.setPhase(PHASE_GAME_OVER));
-}
-
-function handleSuccessfulOutcome({ dispatch, timersRef, playerMode, currentPlayer, setAiThinking, isDailyChallengeMode, currentTurnCount, cleanedBlocks }) {
-  playStabilize();
-  const placeTimer = setTimeout(() => playPlace(), 150);
-  timersRef.current.push(placeTimer);
-
-  const { newUnlocks: successUnlocks } = recordSuccessfulMove(currentTurnCount);
-  if (successUnlocks && successUnlocks.length > 0) {
-    const successTimer = setTimeout(() => showAchievementNotification(successUnlocks), 300);
-    timersRef.current.push(successTimer);
-  }
-
-  const currentHeight = computeCurrentHeight(cleanedBlocks);
-  handleDailyChallenge({ isDailyChallengeMode, dispatch, currentTurnCount, cleanedBlocks, currentHeight });
-
-  if (playerMode === 2) {
-    const nextPlayer = currentPlayer === 0 ? 1 : 0;
-    dispatch(gameActions.setCurrentPlayer(nextPlayer));
-    dispatch(gameActions.setMessage(`Ход: ${PLAYER_NAMES[nextPlayer]}. Выберите блок.`));
-    return;
-  }
-
-  if (playerMode === 3) {
-    setAiThinking(false);
-    const nextPlayer = currentPlayer === 0 ? 1 : 0;
-    dispatch(gameActions.setCurrentPlayer(nextPlayer));
-    dispatch(gameActions.setMessage(nextPlayer === 1 ? '🤖 ИИ думает...' : `Ход: ${PLAYER_NAMES[0]}. Выберите блок.`));
-    return;
-  }
-
-  dispatch(gameActions.setMessage('Выберите блок.'));
-}
-
 export function useGameSimulation({
   dispatch,
   playerMode,
@@ -119,6 +36,88 @@ export function useGameSimulation({
   replayMovesRef,
   gameIdRef,
 }) {
+  const handleDailyChallenge = useCallback((currentTurnCount, cleanedBlocks) => {
+    if (!isDailyChallengeMode) return Promise.resolve();
+
+    const currentHeight = computeCurrentHeight(cleanedBlocks);
+    return recordDailyChallengeAttempt(currentTurnCount, currentHeight, true).then((challengeResult) => {
+      if (challengeResult.completed) {
+        dispatch(gameActions.setAnnouncement('Челлендж дня выполнен! 🎉'));
+      }
+    }).catch(() => {});
+  }, [isDailyChallengeMode, dispatch]);
+
+  const handleCollapseOutcome = useCallback((currentTurnCount, updatedBlocks) => {
+    playCollapse();
+    setAiThinking(false);
+
+    const gameOverTimer = setTimeout(() => playGameOver(), 300);
+    timersRef.current.push(gameOverTimer);
+
+    recordGame(currentTurnCount, true);
+    const best = getBestScore();
+    const isNewRecord = currentTurnCount > best;
+    trackGameOver(currentTurnCount, best, isNewRecord);
+
+    const { newUnlocks } = recordCollapse(currentTurnCount);
+    if (newUnlocks && newUnlocks.length > 0) {
+      const achievementTimer = setTimeout(() => showAchievementNotification(newUnlocks), 1500);
+      timersRef.current.push(achievementTimer);
+    }
+
+    handleDailyChallenge(currentTurnCount, updatedBlocks);
+
+    if (replayMovesRef.current.length > 0) {
+      try {
+        saveGameReplay(gameIdRef.current, replayMovesRef.current, {
+          totalMoves: currentTurnCount,
+          collapsed: true,
+          playerMode,
+          date: Date.now(),
+        });
+      } catch (error) {
+        // ignore storage/replay errors
+      }
+    }
+
+    dispatch(gameActions.setScreenShake(true));
+    const shakeTimer = setTimeout(() => dispatch(gameActions.setScreenShake(false)), 600);
+    timersRef.current.push(shakeTimer);
+
+    dispatch(gameActions.setPhase(PHASE_GAME_OVER));
+  }, [dispatch, playerMode, setAiThinking, showAchievementNotification, timersRef, replayMovesRef, gameIdRef, handleDailyChallenge]);
+
+  const handleSuccessfulOutcome = useCallback((currentTurnCount, cleanedBlocks) => {
+    playStabilize();
+    const placeTimer = setTimeout(() => playPlace(), 150);
+    timersRef.current.push(placeTimer);
+
+    const { newUnlocks: successUnlocks } = recordSuccessfulMove(currentTurnCount);
+    if (successUnlocks && successUnlocks.length > 0) {
+      const successTimer = setTimeout(() => showAchievementNotification(successUnlocks), 300);
+      timersRef.current.push(successTimer);
+    }
+
+    handleDailyChallenge(currentTurnCount, cleanedBlocks);
+
+    if (playerMode === 2) {
+      const nextPlayer = currentPlayer === 0 ? 1 : 0;
+      dispatch(gameActions.setCurrentPlayer(nextPlayer));
+      dispatch(gameActions.setMessage(`Ход: ${PLAYER_NAMES[nextPlayer]}. Выберите блок.`));
+      return;
+    }
+
+    if (playerMode === 3) {
+      setAiThinking(false);
+      const nextPlayer = currentPlayer === 0 ? 1 : 0;
+      dispatch(gameActions.setCurrentPlayer(nextPlayer));
+      dispatch(gameActions.setMessage(nextPlayer === 1 ? '🤖 ИИ думает...' : `Ход: ${PLAYER_NAMES[0]}. Выберите блок.`));
+      return;
+    }
+
+    dispatch(gameActions.setMessage('Выберите блок.'));
+  }, [dispatch, playerMode, currentPlayer, setAiThinking, showAchievementNotification, timersRef, handleDailyChallenge]);
+
   const handleSimulationComplete = useCallback(async (updatedBlocks) => {
     let hasCollapsed = false;
     for (const b of updatedBlocks) {
@@ -135,31 +134,12 @@ export function useGameSimulation({
     const currentTurnCount = latestTurnCountRef.current;
 
     if (hasCollapsed) {
-      handleCollapseOutcome({
-        dispatch,
-        timersRef,
-        setAiThinking,
-        showAchievementNotification,
-        replayMovesRef,
-        gameIdRef,
-        currentTurnCount,
-        playerMode,
-        updatedBlocks,
-      });
+      handleCollapseOutcome(currentTurnCount, updatedBlocks);
       return;
     }
 
-    handleSuccessfulOutcome({
-      dispatch,
-      timersRef,
-      playerMode,
-      currentPlayer,
-      setAiThinking,
-      isDailyChallengeMode,
-      currentTurnCount,
-      cleanedBlocks,
-    });
-  }, [dispatch, playerMode, currentPlayer, isDailyChallengeMode, setAiThinking, showAchievementNotification, timersRef, latestTurnCountRef, replayMovesRef, gameIdRef]);
+    handleSuccessfulOutcome(currentTurnCount, cleanedBlocks);
+  }, [dispatch, latestTurnCountRef, handleCollapseOutcome, handleSuccessfulOutcome]);
 
   return { handleSimulationComplete };
 }

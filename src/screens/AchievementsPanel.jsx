@@ -21,7 +21,7 @@ export default function AchievementsPanel({ onClose }) {
           <button onClick={onClose} aria-label="Закрыть достижения" className="j-close-btn">✕</button>
         </div>
 
-        <AchievementStats unlockedIds={unlockedIds} stats={data.stats} />
+        <AchievementStats unlockedIds={unlockedIds} stats={stats} />
 
         <div className="j-ach-grid">
           {unlocked.map(a => (

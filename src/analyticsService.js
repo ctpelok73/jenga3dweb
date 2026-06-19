@@ -5,13 +5,15 @@
 
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_ID || 'G-XXXXXXXXXX';
 const GA_PLACEHOLDER_ID = 'G-XXXXXXXXXX';
+let _analyticsInitialized = false;
 
 export function isAnalyticsConfigured() {
   return Boolean(GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== GA_PLACEHOLDER_ID);
 }
 
 export function initializeAnalytics() {
-  if (!isAnalyticsConfigured()) return;
+  if (!isAnalyticsConfigured() || _analyticsInitialized) return;
+  _analyticsInitialized = true;
 
   // Загружаем GA скрипт динамически
   if (typeof window !== 'undefined' && !window.gtag) {
@@ -50,16 +52,6 @@ export function trackGameStart(source = 'ui_button', playerMode = 1) {
     'source': source,
     'player_mode': playerMode,
     'timestamp': new Date().toISOString(),
-  });
-}
-
-/**
- * Трекинг хода
- */
-export function trackBlockPlaced(turn, tower_height) {
-  trackEvent('block_placed', {
-    'turn': turn,
-    'tower_height': tower_height,
   });
 }
 
@@ -126,24 +118,5 @@ export function trackRewardedVideoReward(ad_free_continuation = false) {
 export function trackRewardedVideoError(error_code) {
   trackEvent('rewarded_video_error', {
     'error_code': error_code,
-  });
-}
-
-/**
- * Трекинг установки PWA
- */
-export function trackPWAInstall() {
-  trackEvent('pwa_install', {
-    'timestamp': new Date().toISOString(),
-  });
-}
-
-/**
- * Трекинг покупки премиума
- */
-export function trackPremiumPurchase(price, currency = 'USD') {
-  trackEvent('premium_purchase', {
-    'value': price,
-    'currency': currency,
   });
 }

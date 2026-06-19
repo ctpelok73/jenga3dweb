@@ -26,6 +26,7 @@ export default function ReplayPlayer({ replay, onClose }) {
       playerRef.current.pause();
       setIsPlaying(false);
     } else {
+      playerRef.current.stop();
       playerRef.current.play(
         (move) => {
           setProgress(playerRef.current.getProgress().percentage);
@@ -77,7 +78,7 @@ export default function ReplayPlayer({ replay, onClose }) {
         </div>
         <div className="j-replay-player__stat">
           <span className="j-replay-player__label">Сложность:</span>
-          <span className="j-replay-player__value">{replay.config.difficulty}</span>
+          <span className="j-replay-player__value">{replay.config?.difficulty ?? '—'}</span>
         </div>
       </div>
 

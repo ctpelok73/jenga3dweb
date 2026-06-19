@@ -20,7 +20,7 @@ export class AdaptiveFrameRateController {
   constructor() {
     this.isSimulating = false;
     this.frameCount = 0;
-    this.skipFrames = 0; // 0 = 60fps, 1 = 30fps (skip every other frame)
+    this.skipFrames = 0; // 0 = 60fps, 1 = 30fps, 2 = 20fps
   }
 
   setSimulating(isSimulating, dynamicBlockCount = 0) {
@@ -47,7 +47,7 @@ export class AdaptiveFrameRateController {
   }
 
   getFrameRate() {
-    return this.skipFrames === 0 ? 60 : 30;
+    return this.skipFrames === 0 ? 60 : Math.round(60 / (this.skipFrames + 1));
   }
 }
 
@@ -58,7 +58,6 @@ export class AdaptiveFrameRateController {
 export class VelocityThresholdOptimizer {
   constructor() {
     this.baseThreshold = 0.08;
-    this.minThreshold = 0.05;
     this.maxThreshold = 0.15;
   }
 

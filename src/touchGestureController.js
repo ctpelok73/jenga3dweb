@@ -129,6 +129,7 @@ export class TouchGestureController {
       const dx = touch2.clientX - touch1.clientX;
       const dy = touch2.clientY - touch1.clientY;
       const currentDistance = Math.sqrt(dx * dx + dy * dy);
+      if (this.touchStartDistance === 0) return;
       const scale = currentDistance / this.touchStartDistance;
 
       if (Math.abs(scale - 1) > PINCH_THRESHOLD && this.callbacks.onPinch) {

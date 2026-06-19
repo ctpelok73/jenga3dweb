@@ -92,7 +92,6 @@ function getGPUInfo() {
       const isLowEnd = lowEndKeywords.some(k => renderer.includes(k));
       const isModern = modernGPUKeywords.some(k => renderer.includes(k)) && !isLowEnd;
 
-      // Освобождаем контекст временного canvas
       const ext = gl.getExtension('WEBGL_lose_context');
       if (ext) ext.loseContext();
 
@@ -102,31 +101,10 @@ function getGPUInfo() {
     // ignore
   }
 
+  const ext = gl.getExtension('WEBGL_lose_context');
+  if (ext) ext.loseContext();
+
   return (_gpuInfoCache = { isModern: true, renderer: 'unknown' });
-}
-
-// ─── Оценка производительности ───
-export function getPerformanceScore() {
-  if (typeof window === 'undefined') return 50;
-
-  let score = 50;
-
-  // CPU cores
-  const cores = navigator.hardwareConcurrency || 4;
-  score += Math.min(cores * 5, 20);
-
-  // RAM
-  const ram = navigator.deviceMemory || 4;
-  score += Math.min((ram - 2) * 5, 15);
-
-  // GPU (оценка на основе renderer)
-  const gpu = getGPUInfo();
-  if (gpu.isModern) score += 15;
-
-  // Touch capability
-  if (isTouchSupported()) score += 10;
-
-  return Math.min(Math.max(score, 0), 100);
 }
 
 // ─── Класс для управления оптимизациями ───
@@ -358,10 +336,4 @@ export function getDynamicBlockLimit() {
     default:
       return 18;
   }
-}
-
-// Проверка, нужно ли использовать low-power режим
-export function shouldUseLowPowerMode() {
-  const deviceLevel = getDeviceLevel();
-  return deviceLevel === DEVICE_LEVELS.LOW;
 }

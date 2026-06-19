@@ -148,7 +148,7 @@ export function purchaseItem(itemId, { verified = false } = {}) {
   savePurchases(purchases);
 
   if (itemId === 'remove_ads') {
-    localStorage.setItem('jenga3d_ad_free', '1');
+    try { localStorage.setItem('jenga3d_ad_free', '1'); } catch {}
   }
 
   return true;

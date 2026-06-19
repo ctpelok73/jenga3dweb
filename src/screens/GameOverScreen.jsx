@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { PLAYER_NAMES } from '../styles';
 import { getBestScore, getTotalGames } from '../scoreTracker';
@@ -12,14 +12,19 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
   const best = getBestScore();
   const total = getTotalGames();
   const isNewRecord = turns >= best && turns > 0;
-  const loser = playerMode === 2 ? PLAYER_NAMES[currentPlayer] : playerMode === 3 ? PLAYER_NAMES[currentPlayer] : 'Вы';
+  const loser = playerMode >= 2 ? PLAYER_NAMES[currentPlayer] : 'Вы';
   const [showQR, setShowQR] = useState(false);
   const [showReplays, setShowReplays] = useState(false);
   const [selectedReplay, setSelectedReplay] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
-  const replays = listGameReplays();
+  const replays = useMemo(() => listGameReplays(), []);
   const playerClass = currentPlayer === 0 ? 'j-player--p1' : (currentPlayer === 1 && playerMode === 3 ? 'j-player--ai' : 'j-player--p2');
   const modalRef = useModalA11y();
+  const copiedTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearTimeout(copiedTimerRef.current);
+  }, []);
 
   const handleShare = async () => {
     const link = generateShareLink({
@@ -27,9 +32,14 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
       difficulty: 'normal',
     });
     try {
-      await navigator.clipboard.writeText(link);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        return;
+      }
       setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
+      clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => setLinkCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy share link:', err);
     }
@@ -117,7 +127,7 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
             <h3 className="j-heading j-heading--secondary">Ваши повторы</h3>
             <div className="j-replays-list">
               {replays.map((replay, idx) => (
-                <div key={idx} className="j-replay-item">
+                <div key={replay.id || idx} className="j-replay-item">
                   <button
                     className="j-btn j-btn--small"
                     onClick={() => setSelectedReplay(selectedReplay === idx ? null : idx)}

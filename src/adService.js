@@ -8,6 +8,7 @@ const ADS_ENABLED = ADSENSE_ID !== 'ca-pub-XXXXXXX' && ADSENSE_ID.length > 0;
 
 let sdkLoaded = false;
 let rewardedCallback = null;
+let rewardedAdInProgress = false;
 
 export function areAdsConfigured() {
   return ADS_ENABLED;
@@ -89,6 +90,12 @@ export function showRewardedVideo(onReward, onError) {
     return;
   }
 
+  if (rewardedAdInProgress) {
+    if (onError) onError('ad_already_in_progress');
+    return;
+  }
+
+  rewardedAdInProgress = true;
   trackRewardedVideoStart();
 
   rewardedCallback = { onReward, onError };
@@ -97,6 +104,7 @@ export function showRewardedVideo(onReward, onError) {
     trackRewardedVideoError('sdk_not_loaded');
     if (onError) onError('sdk_not_loaded');
     rewardedCallback = null;
+    rewardedAdInProgress = false;
     return;
   }
 
@@ -108,6 +116,7 @@ export function showRewardedVideo(onReward, onError) {
       rewarded_ad_callback: () => {
         trackRewardedVideoReward(false);
         trackAdClick('rewarded');
+        rewardedAdInProgress = false;
         if (rewardedCallback && rewardedCallback.onReward) {
           rewardedCallback.onReward();
         }
@@ -115,6 +124,7 @@ export function showRewardedVideo(onReward, onError) {
       },
       rewarded_ad_error_callback: (err) => {
         trackRewardedVideoError('ad_error');
+        rewardedAdInProgress = false;
         if (rewardedCallback && rewardedCallback.onError) {
           rewardedCallback.onError('ad_error');
         }
@@ -124,6 +134,7 @@ export function showRewardedVideo(onReward, onError) {
   } catch (e) {
     console.warn('[AdService] Rewarded video push failed:', e);
     trackRewardedVideoError('push_failed');
+    rewardedAdInProgress = false;
     if (onError) onError('push_failed');
     rewardedCallback = null;
   }

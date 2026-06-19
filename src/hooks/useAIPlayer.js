@@ -1,5 +1,5 @@
 // src/hooks/useAIPlayer.js
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { getRecentHistory } from '../scoreTracker';
 import { chooseAIBlockAdvanced, aiPersonality, minimaxAI } from '../aiControllerAdvanced';
 import { computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from '../aiController';
@@ -23,7 +23,7 @@ import { computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from '../aiControlle
  * @param {function} options.onSelectBlock — callback(id) для установки selectedId
  * @param {function} options.onMessage     — callback(msg) для отображения сообщения
  *
- * @returns {{ aiThinking: boolean, setAiThinking: function }}
+ * @returns {{ aiThinking: boolean }}
  */
 export function useAIPlayer({
   playerMode,
@@ -96,7 +96,7 @@ export function useAIPlayer({
 
       // --- Задержка перед выполнением хода ---
       const t2 = setTimeout(() => {
-        executeMoveRef.current(dropSlot, aiBlock);
+        if (executeMoveRef.current) executeMoveRef.current(dropSlot, aiBlock);
       }, AI_MOVE_DELAY);
       aiTimersRef.current.push(t2);
 
@@ -114,7 +114,7 @@ export function useAIPlayer({
     };
   }, [playerMode, currentPlayer, phase, simulatingBlockIds]); // aiThinking excluded: setting it inside triggers cleanup
 
-  return { aiThinking, setAiThinking: onAiThinkingChange };
+  return { aiThinking };
 }
 
 export default useAIPlayer;

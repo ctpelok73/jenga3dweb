@@ -60,7 +60,8 @@ export function useTimers({
         if (prev === null || prev <= 1) {
           clearInterval(moveTimerRef.current);
           // Время вышло — авто-ход если блок выбран
-          if (selectedId !== null) {
+          // Use executeMoveRef (always current) instead of stale closure value
+          if (executeMoveRef.current) {
             executeMoveRef.current(null);
           }
           return null;
@@ -70,7 +71,7 @@ export function useTimers({
     }, 1000);
 
     return () => clearInterval(moveTimerRef.current);
-  }, [phase, simulatingBlockIds, moveTimerSetting, turnCount]);
+  }, [phase, simulatingBlockIds, moveTimerSetting, turnCount, executeMoveRef]);
 
   // ─── Таймер скорости (speed mode) ────────────────────────────────────────────
   // Запускается вручную через startSpeedTimer() при старте игры в режиме speed.
@@ -105,6 +106,9 @@ export function useTimers({
     clearInterval(speedTimerRef.current);
     setSpeedTimeLeft(null);
   }, []);
+
+  // Cleanup speed timer on unmount
+  useEffect(() => () => clearInterval(speedTimerRef.current), []);
 
   return {
     moveTimeLeft,

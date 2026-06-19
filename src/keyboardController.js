@@ -114,7 +114,7 @@ export function handleKeyEvent(event, blocks, topCompleteLayer, currentFocusId, 
   const selectableIds = getSelectableBlocks(blocks, topCompleteLayer);
   
   // Ignore keys when typing in input fields
-  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return null;
+  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') return null;
 
   switch (event.key) {
     case 'Tab': {
