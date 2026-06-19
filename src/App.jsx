@@ -23,8 +23,6 @@ import DailyChallengePanel from './DailyChallengePanel';
 import { generateDailyTower } from './dailyChallengeTracker';
 import PurchasePanel from './PurchasePanel';
 import { isPremiumStoreAvailable, isRemoveAdsPurchased } from './purchaseService';
-import { computeAIDropSlot, AI_THINK_DELAY, AI_MOVE_DELAY } from './aiController';
-import { chooseAIBlockAdvanced, aiPersonality, minimaxAI } from './aiControllerAdvanced';
 import { useTouchGestures } from './touchGestureController';
 import { useMobileOptimizations } from './mobileOptimizations';
 import { generateGameId, getChallengeFromUrl } from './shareService';
@@ -32,6 +30,7 @@ import useAIPlayer from './hooks/useAIPlayer';
 import useKeyboardNavigation from './hooks/useKeyboardNavigation';
 import useTimers from './hooks/useTimers';
 import useGameReducer, * as gameActions from './hooks/useGameReducer';
+import { useDispatchers } from './hooks/useDispatchers';
 import useAchievementToasts from './hooks/useAchievementToasts';
 import useGameSimulation, { continueAfterCollapseUpdate } from './hooks/useGameSimulation';
 
@@ -90,34 +89,17 @@ function App() {
     lastExtractionPosition,
     gameMode,
     speedDuration,
+    aiThinking,
   } = state;
 
-  const setPhase = useCallback((v) => dispatch(gameActions.setPhase(v)), []);
-  const setBlocks = useCallback((v) => dispatch(gameActions.setBlocks(typeof v === 'function' ? v(state.blocks) : v)), [state.blocks]);
-  const setSelectedId = useCallback((v) => dispatch(gameActions.setSelectedId(v)), []);
-  const setMessage = useCallback((v) => dispatch(gameActions.setMessage(v)), []);
-  const setTurnCount = useCallback((v) => dispatch(gameActions.setTurnCount(typeof v === 'function' ? v(state.turnCount) : v)), [state.turnCount]);
-  const setSimulatingBlockIds = useCallback((v) => dispatch(gameActions.setSimulatingBlockIds(v)), []);
-  const bumpRestartKey = useCallback(() => dispatch({ type: gameActions.INCREMENT_RESTART_KEY }), []);
-  const setShowTutorial = useCallback((v) => dispatch(gameActions.setShowTutorial(v)), []);
-  const setPlayerMode = useCallback((v) => dispatch(gameActions.setPlayerMode(v)), []);
-  const setCurrentPlayer = useCallback((v) => dispatch(gameActions.setCurrentPlayer(typeof v === 'function' ? v(state.currentPlayer) : v)), [state.currentPlayer]);
-  const setLastMovedBlockId = useCallback((v) => dispatch(gameActions.setLastMovedBlockId(v)), []);
-  const setAchievementToast = useCallback((v) => dispatch(gameActions.setAchievementToast(v)), []);
-  const setShowSettings = useCallback((v) => dispatch(gameActions.setShowSettings(v)), []);
-  const setShowAchievements = useCallback((v) => dispatch(gameActions.setShowAchievements(v)), []);
-  const setShowPauseMenu = useCallback((v) => dispatch(gameActions.setShowPauseMenu(v)), []);
-  const setShowDailyChallenge = useCallback((v) => dispatch(gameActions.setShowDailyChallenge(v)), []);
-  const setIsDailyChallengeMode = useCallback((v) => dispatch(gameActions.setIsDailyChallengeMode(v)), []);
-  const setShowPurchase = useCallback((v) => dispatch(gameActions.setShowPurchase(v)), []);
-  const setKeyboardFocusId = useCallback((v) => dispatch(gameActions.setKeyboardFocusId(v)), []);
-  const setAnnouncement = useCallback((v) => dispatch(gameActions.setAnnouncement(v)), []);
-  const setContinuedAfterCollapse = useCallback((v) => dispatch(gameActions.setContinuedAfterCollapse(v)), []);
-  const setAdFree = useCallback((v) => dispatch(gameActions.setAdFree(v)), []);
-  const setScreenShake = useCallback((v) => dispatch(gameActions.setScreenShake(v)), []);
-  const setLastExtractionPosition = useCallback((v) => dispatch(gameActions.setLastExtractionPosition(v)), []);
-  const setGameMode = useCallback((v) => dispatch(gameActions.setGameMode(v)), []);
-  const setSpeedDuration = useCallback((v) => dispatch(gameActions.setSpeedDuration(v)), []);
+  const {
+    setPhase, setBlocks, setSelectedId, setMessage, setTurnCount, setSimulatingBlockIds,
+    bumpRestartKey, setShowTutorial, setPlayerMode, setCurrentPlayer, setLastMovedBlockId,
+    setAchievementToast, setShowSettings, setShowAchievements, setShowPauseMenu,
+    setShowDailyChallenge, setIsDailyChallengeMode, setShowPurchase, setKeyboardFocusId,
+    setAnnouncement, setContinuedAfterCollapse, setAdFree, setScreenShake,
+    setLastExtractionPosition, setGameMode, setSpeedDuration, setAiThinking,
+  } = useDispatchers(dispatch, state);
 
   // Lazy initial value for adFree (the reducer defaults to false; sync the real value on mount)
   useEffect(() => {
@@ -285,6 +267,7 @@ function App() {
       // Fallback path (no UI slot, e.g. timer auto-move): drop into the
       // first available top-layer slot via the same domain logic.
       const slots = getDropSlots(blocks);
+      if (slots.length === 0) return;
       const fallback = slots[0];
       targetPosition = fallback.position;
       targetRotation = fallback.rotation;
@@ -407,7 +390,7 @@ function App() {
     initGame();
   }, [initGame]);
 
-  const { aiThinking, setAiThinking } = useAIPlayer({
+  useAIPlayer({
     playerMode,
     currentPlayer,
     phase,
@@ -419,7 +402,7 @@ function App() {
     onSelectBlock: setSelectedId,
     onMessage: setMessage,
     aiThinking,
-    onAiThinkingChange: useCallback((value) => dispatch(gameActions.setAiThinking(value)), [dispatch]),
+    onAiThinkingChange: setAiThinking,
   });
 
   const handleBackToMenu = useCallback(() => {

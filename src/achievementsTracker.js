@@ -113,20 +113,6 @@ export function recordCollapse(turns) {
   return updateAchievementStats(stats, data);
 }
 
-export function recordSuccess(turns) {
-  const data = store.load();
-  const stats = data.stats;
-
-  stats.totalGames += 1;
-  stats.consecutiveLosses = 0;
-
-  if (turns > stats.bestTurns) {
-    stats.bestTurns = turns;
-  }
-
-  return updateAchievementStats(stats, data);
-}
-
 export function resetAchievements() {
   store.reset();
 }

@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect, useCallback, memo, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
+import { Physics } from '@react-three/rapier';
 
 import * as THREE from 'three';
 import {
@@ -8,17 +8,15 @@ import {
   BLOCK_H,
   BLOCK_D,
   LAYER_GAP,
-  BLOCKS_PER_LAYER,
   STEP,
-  WOOD_COLORS,
-  BLOCK_PHYSICS
+  WOOD_COLORS
 } from './towerConfig';
+import { BlockBody, FixedBody } from './physics';
 import ParticleEffect from './ParticleEffect';
 import { getBlockMaterialProps, getEnvironmentTheme } from './blockTextures';
 import { physicsOptimizer } from './physicsOptimizer';
 import { getPhysicsSettingsForMobile, getDynamicBlockLimit } from './mobileOptimizations';
 import { profiler } from './performanceProfiler';
-import { getThemeColors } from './settingsTracker';
 
 // ─── Shared geometries ───
 const sharedBlockGeometry = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
@@ -61,10 +59,6 @@ const Block = memo(function Block({
   const meshRef = useRef(null);
   const materialRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
-
-  if (!materialRef.current) {
-    materialRef.current = new THREE.MeshStandardMaterial();
-  }
 
   useEffect(() => {
     if (onRigidRef && rigidRef.current) onRigidRef(id, rigidRef.current);
@@ -173,33 +167,18 @@ const Block = memo(function Block({
   }, []);
 
   return (
-    <RigidBody
-      ref={rigidRef}
-      type={isDynamic ? 'dynamic' : 'fixed'}
-      position={position}
-      rotation={rotation}
-      colliders={false}
-      mass={BLOCK_PHYSICS.mass}
-      linearDamping={BLOCK_PHYSICS.linearDamping}
-      angularDamping={BLOCK_PHYSICS.angularDamping}
-      userData={{ id }}
-    >
-      <CuboidCollider
-        args={[BLOCK_W / 2, BLOCK_H / 2, BLOCK_D / 2]}
-        restitution={BLOCK_PHYSICS.restitution}
-        friction={BLOCK_PHYSICS.friction}
-      />
+    <BlockBody position={position} rotation={rotation} type={isDynamic ? 'dynamic' : 'fixed'} ref={rigidRef} userData={{ id }}>
       <mesh
         ref={meshRef}
         geometry={sharedBlockGeometry}
-        material={materialRef.current}
         onPointerDown={handlePointerDown}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
+        <meshStandardMaterial ref={materialRef} />
         {(!lowPowerMode || isSelected || isKeyboardFocused) && <Edges edgeColor={edgeColor} />}
       </mesh>
-    </RigidBody>
+    </BlockBody>
   );
 });
 
@@ -254,6 +233,7 @@ const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick
     <group ref={groupRef} position={position} rotation={rotation}>
       <mesh
         geometry={sharedBlockGeometry}
+        material={slotMaterialRef.current}
         onClick={(event) => {
           event.stopPropagation();
           onClick(slotIndex);
@@ -266,9 +246,7 @@ const DropSlot = memo(function DropSlot({ position, rotation, slotIndex, onClick
           event.stopPropagation();
           setHovered(false);
         }}
-      >
-        {slotMaterialRef.current}
-      </mesh>
+      />
       <lineSegments geometry={sharedEdgesGeometry} material={slotMaterialRef.current} raycast={() => null} />
     </group>
   );
@@ -349,17 +327,13 @@ function GroundCollider({ envTheme }) {
   const theme = getEnvironmentTheme(envTheme);
   const halfSize = theme.groundSize / 2;
   return (
-    <RigidBody type="fixed" position={[0, -0.05, 0]}>
-      <CuboidCollider args={[halfSize, 0.05, halfSize]} restitution={0} friction={0.9} />
-    </RigidBody>
+    <FixedBody position={[0, -0.05, 0]} args={[halfSize, 0.05, halfSize]} />
   );
 }
 
 function FloorCollider() {
   return (
-    <RigidBody type="fixed" position={[0, -5, 0]}>
-      <CuboidCollider args={[10, 0.1, 10]} restitution={0} friction={0.9} />
-    </RigidBody>
+    <FixedBody position={[0, -5, 0]} args={[10, 0.1, 10]} />
   );
 }
 
