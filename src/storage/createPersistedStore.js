@@ -85,7 +85,11 @@ export function createPersistedStore({ key, version = 1, defaults, migrate }) {
 
   function update(mutator) {
     const current = load();
-    const next = mutator(current) || current;
+    const next = mutator(current);
+    if (next === undefined || next === null) {
+      console.warn('[createPersistedStore] mutator returned falsy — changes discarded');
+      return current;
+    }
     save(next);
     return next;
   }

@@ -4,8 +4,6 @@ export function QRCodeDisplay({ url = 'https://jenga3d.app', size = 120 }) {
   const containerRef = useRef(null);
   const qrInstanceRef = useRef(null);
   const scriptLoadedRef = useRef(false);
-  const prevUrlRef = useRef(url);
-  const prevSizeRef = useRef(size);
 
   const generateQR = useCallback(() => {
     if (!containerRef.current || !window.QRCode) return;
@@ -24,11 +22,6 @@ export function QRCodeDisplay({ url = 'https://jenga3d.app', size = 120 }) {
       colorLight: '#ffffff',
       correctLevel: window.QRCode.CorrectLevel.H,
     });
-  }, [url, size]);
-
-  useEffect(() => {
-    prevUrlRef.current = url;
-    prevSizeRef.current = size;
   }, [url, size]);
 
   useEffect(() => {

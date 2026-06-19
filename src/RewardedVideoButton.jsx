@@ -6,12 +6,17 @@
  * Shows loading state while video is playing
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { showRewardedVideo, isAdFree } from './adService';
 
 export default function RewardedVideoButton({ onRewardGranted }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const errorTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearTimeout(errorTimerRef.current);
+  }, []);
 
   const handleClick = () => {
     if (loading) return;
@@ -34,7 +39,8 @@ export default function RewardedVideoButton({ onRewardGranted }) {
           setError('Ошибка загрузки рекламы');
         }
         // Auto-clear error after 3 seconds
-        setTimeout(() => setError(null), 3000);
+        clearTimeout(errorTimerRef.current);
+        errorTimerRef.current = setTimeout(() => setError(null), 3000);
       }
     );
   };

@@ -87,7 +87,7 @@ class WasmLoader {
       // Попытаться динамически загрузить Rapier
       // (обычно это делает @react-three/rapier автоматически)
       // Здесь мы просто проверяем, что он доступен
-      await new Promise(resolve => {
+      const found = await new Promise(resolve => {
         const checkInterval = setInterval(() => {
           if (window.RAPIER) {
             clearInterval(checkInterval);
@@ -102,7 +102,7 @@ class WasmLoader {
         }, 5000);
       });
 
-      return true;
+      return found;
     } catch (error) {
       console.error('[WasmLoader] Failed to load WASM:', error);
       return false;

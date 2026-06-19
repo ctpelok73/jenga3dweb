@@ -8,11 +8,16 @@ const HEAVY_PRECACHE_PATTERN = /assets\/(?:rapier|r3f|three|firebase)-[^"',)]+\.
 const distDir = new URL('../dist/', import.meta.url);
 const distPath = fileURLToPath(distDir);
 const indexHtml = readFileSync(new URL('index.html', distDir), 'utf8');
+
+// Check <script> tags (actual loads)
 const initialScripts = [...indexHtml.matchAll(/<script[^>]+src="([^"]+)"/g)].map((match) => match[1]);
-const forbiddenInitial = initialScripts.filter((src) => HEAVY_CHUNK_PATTERN.test(src));
+// Check <link rel="modulepreload"> (eager preloads that defeat lazy boundaries)
+const modulePreloads = [...indexHtml.matchAll(/<link[^>]+rel="modulepreload"[^>]+href="([^"]+)"/g)].map((match) => match[1]);
+const allInitialAssets = [...initialScripts, ...modulePreloads];
+const forbiddenInitial = allInitialAssets.filter((src) => HEAVY_CHUNK_PATTERN.test(src));
 
 if (forbiddenInitial.length > 0) {
-  throw new Error(`Heavy chunks are loaded by index.html: ${forbiddenInitial.join(', ')}`);
+  throw new Error(`Heavy chunks found in index.html (script or modulepreload): ${forbiddenInitial.join(', ')}`);
 }
 
 const files = readdirSync(distPath);

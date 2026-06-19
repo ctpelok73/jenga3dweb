@@ -45,7 +45,7 @@ export function analyzeBlockStability(block, blocks) {
 
   // 4. Высота (блоки выше менее стабильны)
   const maxLayer = blocks.reduce((m, b) => Math.max(m, b.layer), 0);
-  const heightPenalty = (block.layer / maxLayer) * 0.1;
+  const heightPenalty = maxLayer > 0 ? (block.layer / maxLayer) * 0.1 : 0;
   stabilityScore -= heightPenalty;
 
   return Math.max(0, Math.min(1, stabilityScore));

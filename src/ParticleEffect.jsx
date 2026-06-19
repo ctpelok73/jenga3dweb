@@ -135,10 +135,13 @@ export function ParticleEffect({ position, enabled = true, duration = 0.6 }) {
     const progress = elapsedRef.current / duration;
 
     if (progress >= 1) {
-      // Remove particles when done
+      // Remove particles and dispose GPU resources when done
       if (groupRef.current && data.points.parent) {
         groupRef.current.remove(data.points);
       }
+      data.geometry.dispose();
+      data.material.dispose();
+      dataRef.current = null;
       return;
     }
 

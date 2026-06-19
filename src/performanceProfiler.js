@@ -56,7 +56,8 @@ class PerformanceProfiler {
     const avg = data.reduce((a, b) => a + b, 0) / data.length;
     const max = Math.max(...data);
     const min = Math.min(...data);
-    const p95 = data.sort((a, b) => a - b)[Math.floor(data.length * 0.95)];
+    const sorted = [...data].sort((a, b) => a - b);
+    const p95 = sorted[Math.floor(data.length * 0.95)];
 
     return { avg, max, min, p95, samples: data.length };
   }

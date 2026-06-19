@@ -3,6 +3,7 @@
 // `createPersistedStore`.
 
 import { createPersistedStore } from './storage/createPersistedStore';
+import { BLOCK_H, LAYER_GAP } from './towerConfig';
 
 const DEFAULT_SETTINGS = {
   volume: 70,
@@ -65,7 +66,7 @@ export function getDifficultyDynamicIds(blocks, selectedBlock, removedLayer) {
   const dynamicIds = new Set();
 
   const holeY = selectedBlock.position[1];
-  const LAYER_HEIGHT = 0.31; // BLOCK_H (0.3) + LAYER_GAP (0.01)
+  const LAYER_HEIGHT = BLOCK_H + LAYER_GAP;
 
   for (const b of blocks) {
     if (b.id === selectedBlock.id) {

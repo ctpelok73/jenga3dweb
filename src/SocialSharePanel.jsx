@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { trackShareClick } from './analyticsService';
 
 /**
@@ -12,6 +12,11 @@ export function SocialSharePanel({
   onCopySuccess = null
 }) {
   const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearTimeout(copiedTimerRef.current);
+  }, []);
 
   const socialPlatforms = [
     {
@@ -82,7 +87,8 @@ export function SocialSharePanel({
           trackShareClick('copy');
           setCopied(true);
           if (onCopySuccess) onCopySuccess();
-          setTimeout(() => setCopied(false), 2000);
+          clearTimeout(copiedTimerRef.current);
+          copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
         } catch (err) {
           console.error('Failed to copy:', err);
         }
