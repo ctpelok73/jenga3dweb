@@ -16,7 +16,7 @@ export default function LoadingProgressBar({ isLoading = true, progress = 0 }) {
   }
 
   return (
-    <div className="j-loading-overlay">
+    <div className="j-loading-overlay" role="status" aria-label="Загрузка игры">
       <div className="j-loading-container">
         <div className="j-loading-spinner">
           <div className="j-spinner-ring"></div>

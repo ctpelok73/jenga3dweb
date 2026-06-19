@@ -12,7 +12,7 @@ import AchievementsPanel from './screens/AchievementsPanel';
 import { PLAYER_NAMES } from './styles';
 import { getTopCompleteLayer, getMaxLayer, getDropSlots, generateTower } from './domain/tower';
 import { capDynamicIdsForMobile } from './domain/dynamicBlocks';
-import { playSelect, playPull, playGameOver, resumeAudio } from './soundEngine';
+import { playSelect, playPull, playGameOver, resumeAudio, cancelPendingSounds } from './soundEngine';
 import { recordGame } from './scoreTracker';
 import { initializeAnalytics, trackGameStart, trackRewardedVideoReward } from './analyticsService';
 import { initAdSDK, isAdFree } from './adService';
@@ -46,7 +46,7 @@ function markTutorialSeen() { try { localStorage.setItem(TUTORIAL_KEY, '1'); } c
 
 function SceneLoadingFallback() {
   return (
-    <div className="j-loading-overlay">
+    <div className="j-loading-overlay" role="status" aria-label="Загрузка сцены">
       <div className="j-loading-overlay__icon">3D</div>
       <div className="j-loading-overlay__text">Загрузка сцены...</div>
       <div className="j-loading-overlay__bar">
@@ -139,6 +139,7 @@ function App() {
     replayMovesRef.current = [];
     gameIdRef.current = generateGameId();
     clearToasts();
+    cancelPendingSounds();
   }, [clearToasts]);
 
   const towerHeight = useMemo(() => getMaxLayer(blocks) + 1, [blocks]);

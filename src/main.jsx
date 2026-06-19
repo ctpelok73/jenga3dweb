@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './ui.css';
 import App from './App';
-import './profilerConsole'; // Load profiling utilities
+if (import.meta.env.DEV) import('./profilerConsole');
 
 // Подавляем известные предупреждения из сторонних библиотек,
 // которые нельзя исправить в нашем коде.

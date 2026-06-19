@@ -26,7 +26,7 @@ function LoadingOverlay() {
   }, []);
 
   return (
-    <div className="j-loading-overlay">
+    <div className="j-loading-overlay" role="status" aria-label="Загрузка 3D-сцены">
       <div className="j-loading-overlay__icon">🧱</div>
       <div className="j-loading-overlay__text">
         Загрузка 3D-сцены{'.'.repeat(dots)}

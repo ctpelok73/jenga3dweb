@@ -70,6 +70,12 @@ export default defineConfig({
     modulePreload: false,
     chunkSizeWarningLimit: 2500, // increased limit to accommodate large rapier chunk
     minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
     sourcemap: false,
     target: 'es2020',
     rollupOptions: {

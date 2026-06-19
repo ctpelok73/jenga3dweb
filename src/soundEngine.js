@@ -6,6 +6,8 @@ import { getSettings } from './settingsTracker';
 
 let audioCtx = null;
 let masterGainNode = null;
+let _noiseBuffer = null;
+const _pendingTimers = [];
 
 function getCtx() {
   if (!audioCtx) {
@@ -20,6 +22,30 @@ function getCtx() {
 function getMasterGain() {
   getCtx(); // ensure initialized
   return masterGainNode;
+}
+
+function getNoiseBuffer(duration) {
+  const ctx = getCtx();
+  const neededSamples = Math.ceil(ctx.sampleRate * duration);
+  if (!_noiseBuffer || _noiseBuffer.length < neededSamples) {
+    const size = Math.max(neededSamples, ctx.sampleRate); // at least 1 second
+    _noiseBuffer = ctx.createBuffer(1, size, ctx.sampleRate);
+    const data = _noiseBuffer.getChannelData(0);
+    for (let i = 0; i < size; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.5;
+    }
+  }
+  return _noiseBuffer;
+}
+
+function _scheduleTimer(fn, delay) {
+  const id = setTimeout(() => {
+    const idx = _pendingTimers.indexOf(id);
+    if (idx !== -1) _pendingTimers.splice(idx, 1);
+    fn();
+  }, delay);
+  _pendingTimers.push(id);
+  return id;
 }
 
 // ─── Volume control ───
@@ -63,12 +89,7 @@ function playTone(freq, duration, type = 'sine', volume = 0.15, decay = true) {
 function playNoise(duration, volume = 0.1) {
   const ctx = getCtx();
   const master = getMasterGain();
-  const bufferSize = ctx.sampleRate * duration;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * 0.5;
-  }
+  const buffer = getNoiseBuffer(duration);
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   const gain = ctx.createGain();
@@ -81,45 +102,44 @@ function playNoise(duration, volume = 0.1) {
   filter.frequency.value = 800;
   source.connect(filter);
   filter.connect(gain);
-  gain.connect(master); // route through master volume
-  source.start(ctx.currentTime);
+  gain.connect(master);
+  source.start(ctx.currentTime, 0, duration);
+}
+
+export function cancelPendingSounds() {
+  for (const id of _pendingTimers) clearTimeout(id);
+  _pendingTimers.length = 0;
 }
 
 // ─── Game sounds ───
 
 export function playSelect() {
-  // Short click — block selected
   playTone(880, 0.08, 'square', 0.12);
 }
 
 export function playPull() {
-  // Sliding wood sound — block pulled out
   playNoise(0.3, 0.15);
   playTone(220, 0.2, 'sawtooth', 0.06);
 }
 
 export function playPlace() {
-  // Thud — block placed on top
   playTone(150, 0.15, 'triangle', 0.2);
   playNoise(0.1, 0.08);
 }
 
 export function playCollapse() {
-  // Crash — tower falls
   playNoise(0.8, 0.25);
   playTone(80, 0.5, 'sawtooth', 0.15);
-  setTimeout(() => playNoise(0.4, 0.15), 200);
-  setTimeout(() => playTone(60, 0.3, 'sawtooth', 0.1), 400);
+  _scheduleTimer(() => playNoise(0.4, 0.15), 200);
+  _scheduleTimer(() => playTone(60, 0.3, 'sawtooth', 0.1), 400);
 }
 
 export function playStabilize() {
-  // Soft confirmation — tower settled
   playTone(660, 0.12, 'sine', 0.08);
-  setTimeout(() => playTone(880, 0.1, 'sine', 0.06), 100);
+  _scheduleTimer(() => playTone(880, 0.1, 'sine', 0.06), 100);
 }
 
 export function playGameOver() {
-  // Dramatic descending tone
   const ctx = getCtx();
   const master = getMasterGain();
   const osc = ctx.createOscillator();
@@ -130,17 +150,14 @@ export function playGameOver() {
   gain.gain.setValueAtTime(0.15, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
   osc.connect(gain);
-  gain.connect(master); // route through master volume
+  gain.connect(master);
   osc.start(ctx.currentTime);
   osc.stop(ctx.currentTime + 1.2);
 }
 
-// ─── New sounds ───
-
 export function playAchievementUnlock() {
-  // Triumphant ascending arpeggio
   playTone(523, 0.15, 'sine', 0.12);
-  setTimeout(() => playTone(659, 0.15, 'sine', 0.10), 120);
-  setTimeout(() => playTone(784, 0.15, 'sine', 0.08), 240);
-  setTimeout(() => playTone(1047, 0.2, 'sine', 0.12), 360);
+  _scheduleTimer(() => playTone(659, 0.15, 'sine', 0.10), 120);
+  _scheduleTimer(() => playTone(784, 0.15, 'sine', 0.08), 240);
+  _scheduleTimer(() => playTone(1047, 0.2, 'sine', 0.12), 360);
 }
