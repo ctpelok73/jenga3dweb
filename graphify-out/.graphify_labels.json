@@ -1,6 +1,7 @@
 {
   "0": "Mobile Optimization & Lazy Boundary",
   "1": "Audio, Keyboard & Collapse Detection",
+  "2": "Community 2",
   "3": "Game State Reducer",
   "4": "AI Controller & Difficulty",
   "5": "Block Textures & Physics Hand-off",
@@ -12,6 +13,7 @@
   "11": "Analytics & Ads Services",
   "12": "Touch Gestures & Test Setup",
   "13": "Physics Cascade Simulation Loop",
+  "14": "Community 14",
   "15": "Tower Geometry Domain",
   "16": "Performance Profiler",
   "17": "Vercel Deploy Config",
@@ -24,10 +26,13 @@
   "24": "Community 24",
   "25": "Community 25",
   "26": "Community 26",
+  "27": "Community 27",
+  "28": "Community 28",
   "29": "Community 29",
   "30": "Community 30",
   "31": "Community 31",
   "32": "Community 32",
   "33": "Community 33",
-  "34": "Community 34"
+  "34": "Community 34",
+  "35": "Community 35"
 }

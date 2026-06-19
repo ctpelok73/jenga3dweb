@@ -30,9 +30,9 @@
     "semantic_hash": "c360a60748983e56dedc0fe8decfc719"
   },
   "scripts/check-build-budget.mjs": {
-    "mtime": 1780810039.944815,
-    "ast_hash": "dee5b996eb201b540f1b8f37e8c58a85",
-    "semantic_hash": "dee5b996eb201b540f1b8f37e8c58a85"
+    "mtime": 1781471521.2482736,
+    "ast_hash": "1ac0f04ef17b14cf65263166ca420a91",
+    "semantic_hash": ""
   },
   "src/AdBanner.jsx": {
     "mtime": 1779455762.28671,
@@ -40,9 +40,9 @@
     "semantic_hash": "654b9f30aa277ba583776445c60eb22d"
   },
   "src/App.jsx": {
-    "mtime": 1781002796.2229495,
-    "ast_hash": "544ad7b5c7f42aa6a75efcfdab01b3eb",
-    "semantic_hash": "544ad7b5c7f42aa6a75efcfdab01b3eb"
+    "mtime": 1781864427.3263812,
+    "ast_hash": "f160b2cd9e595e127be332faf5d4a74f",
+    "semantic_hash": ""
   },
   "src/AriaAnnouncer.jsx": {
     "mtime": 1779455762.2877164,
@@ -60,8 +60,8 @@
     "semantic_hash": "695c49c547117998d9ab111e2af15f03"
   },
   "src/GameSceneWithPhysics.jsx": {
-    "mtime": 1781202363.8366077,
-    "ast_hash": "d8caf874f8c607fd843ae68c09b9f490",
+    "mtime": 1781857808.6514556,
+    "ast_hash": "7585a5732a59803e83d72d92f0b031ad",
     "semantic_hash": ""
   },
   "src/InteractiveTutorialOverlay.jsx": {
@@ -70,9 +70,9 @@
     "semantic_hash": ""
   },
   "src/ParticleEffect.jsx": {
-    "mtime": 1780527281.930117,
-    "ast_hash": "307109ac642f9989d1d5769274573292",
-    "semantic_hash": "307109ac642f9989d1d5769274573292"
+    "mtime": 1781857145.0539103,
+    "ast_hash": "7249d1216a91c4061cbcc546a76e9a64",
+    "semantic_hash": ""
   },
   "src/PauseMenu.jsx": {
     "mtime": 1781141649.5611212,
@@ -85,19 +85,19 @@
     "semantic_hash": "54d036a3f70346ba40b10a8a837495ea"
   },
   "src/QRCodeDisplay.jsx": {
-    "mtime": 1779641123.3735998,
-    "ast_hash": "21e5b6da4a821a8a32e9968781bd27a7",
-    "semantic_hash": "21e5b6da4a821a8a32e9968781bd27a7"
+    "mtime": 1781857212.7478874,
+    "ast_hash": "095652c12c05ecfbcc4100712ce3d685",
+    "semantic_hash": ""
   },
   "src/RewardedVideoButton.jsx": {
-    "mtime": 1779639683.8466468,
-    "ast_hash": "edf546e7cf3d4e6456c52094ff0d83f5",
-    "semantic_hash": "edf546e7cf3d4e6456c52094ff0d83f5"
+    "mtime": 1781857395.5577707,
+    "ast_hash": "f6b80ba1fc13b2bdf54479d3e8a3d659",
+    "semantic_hash": ""
   },
   "src/SocialSharePanel.jsx": {
-    "mtime": 1779641142.0597885,
-    "ast_hash": "8dde899d9aacce90be2717e3b71d7a73",
-    "semantic_hash": "8dde899d9aacce90be2717e3b71d7a73"
+    "mtime": 1781857374.0321972,
+    "ast_hash": "b0d98c33e0ef5e03f34df26a3ac90109",
+    "semantic_hash": ""
   },
   "src/achievementsExtended.js": {
     "mtime": 1779645760.120529,
@@ -105,29 +105,29 @@
     "semantic_hash": "c56ba540abb38763be1beda829f90ccc"
   },
   "src/achievementsTracker.js": {
-    "mtime": 1780812052.6362891,
-    "ast_hash": "dce2da8298b4a571d3a031e5e0858516",
-    "semantic_hash": "dce2da8298b4a571d3a031e5e0858516"
+    "mtime": 1781862436.8370643,
+    "ast_hash": "65784e5795acab7b45d5e1b6d31296eb",
+    "semantic_hash": ""
   },
   "src/adService.js": {
-    "mtime": 1780132162.246812,
-    "ast_hash": "0a0f3df8244fd4709b1086577fe80f49",
-    "semantic_hash": "0a0f3df8244fd4709b1086577fe80f49"
+    "mtime": 1781864088.8922675,
+    "ast_hash": "789457e83a145c801cdc35e3827a81c4",
+    "semantic_hash": ""
   },
   "src/aiController.js": {
-    "mtime": 1780811686.5579278,
-    "ast_hash": "0904aae102f21f5aaa242b82260f2ab2",
-    "semantic_hash": "0904aae102f21f5aaa242b82260f2ab2"
+    "mtime": 1781862416.4897635,
+    "ast_hash": "208f1fead7ae50cd61ac90db2bd6b5de",
+    "semantic_hash": ""
   },
   "src/aiControllerAdvanced.js": {
-    "mtime": 1780811152.446107,
-    "ast_hash": "d1557436d4b165598711cec9acd6eaf6",
-    "semantic_hash": "d1557436d4b165598711cec9acd6eaf6"
+    "mtime": 1781857227.6200664,
+    "ast_hash": "7b69068666f77c9db11ff578ec15c4aa",
+    "semantic_hash": ""
   },
   "src/analyticsService.js": {
-    "mtime": 1780132153.387379,
-    "ast_hash": "203d976dd97ebfe0055d0fcc4371b380",
-    "semantic_hash": "203d976dd97ebfe0055d0fcc4371b380"
+    "mtime": 1781864114.6044528,
+    "ast_hash": "fa3392aae66b6f07c71274daf2f35187",
+    "semantic_hash": ""
   },
   "src/blockTextureCache.js": {
     "mtime": 1780810067.3806486,
@@ -155,9 +155,9 @@
     "semantic_hash": "fc87c274c9f3079a0da39680d9e5f6ac"
   },
   "src/components/ReplayPlayer.jsx": {
-    "mtime": 1779647903.1430159,
-    "ast_hash": "889ba5707eee9c1caf4b76218722134e",
-    "semantic_hash": "889ba5707eee9c1caf4b76218722134e"
+    "mtime": 1781862619.6729496,
+    "ast_hash": "d50b8e1acf59cc5e8f7e3126d22ddec7",
+    "semantic_hash": ""
   },
   "src/dailyChallengeTracker.js": {
     "mtime": 1780812079.4267147,
@@ -180,9 +180,9 @@
     "semantic_hash": "97bc31998581602e8271d2ddc1707cd9"
   },
   "src/hooks/useAIPlayer.js": {
-    "mtime": 1780729945.4187918,
-    "ast_hash": "608991171078fca06d1263adb0da0844",
-    "semantic_hash": "608991171078fca06d1263adb0da0844"
+    "mtime": 1781857697.466615,
+    "ast_hash": "1f452c9fc45741469fd3a3a16cab83de",
+    "semantic_hash": ""
   },
   "src/hooks/useGameReducer.js": {
     "mtime": 1780810736.2841392,
@@ -195,14 +195,14 @@
     "semantic_hash": "83eebdca2d40b45defa3740a391ac17c"
   },
   "src/hooks/useTimers.js": {
-    "mtime": 1780520512.4744058,
-    "ast_hash": "e6518a276c0e97b83e17b2951f9e0dc6",
-    "semantic_hash": "e6518a276c0e97b83e17b2951f9e0dc6"
+    "mtime": 1781857704.6012948,
+    "ast_hash": "2bb058381f9fa5112d5ebebf85099502",
+    "semantic_hash": ""
   },
   "src/keyboardController.js": {
-    "mtime": 1779455762.29831,
-    "ast_hash": "381e62bda9055cba86cd61c149e1063d",
-    "semantic_hash": "381e62bda9055cba86cd61c149e1063d"
+    "mtime": 1781870040.054092,
+    "ast_hash": "74fc26ffda943b13298a40d9b2e5a14c",
+    "semantic_hash": ""
   },
   "src/main.jsx": {
     "mtime": 1780553768.0788262,
@@ -210,18 +210,18 @@
     "semantic_hash": "8d88bd386ff0303bf7043c275d1b6ee7"
   },
   "src/mobileOptimizations.js": {
-    "mtime": 1780334928.2537508,
-    "ast_hash": "66f666540dbbf106a95dc769ec8ff84c",
-    "semantic_hash": "66f666540dbbf106a95dc769ec8ff84c"
+    "mtime": 1781864135.5975425,
+    "ast_hash": "12416b99b872abc5436d8a505cccd4a2",
+    "semantic_hash": ""
   },
   "src/performanceProfiler.js": {
-    "mtime": 1780553698.6503453,
-    "ast_hash": "2b17b8dc5397b70b52a69227fa709d74",
-    "semantic_hash": "2b17b8dc5397b70b52a69227fa709d74"
+    "mtime": 1781857138.999781,
+    "ast_hash": "eaf0728b40058265fa685fccb0eb9664",
+    "semantic_hash": ""
   },
   "src/physicsOptimizer.js": {
-    "mtime": 1781200013.400742,
-    "ast_hash": "2a2adc22956667697cddf99155a82488",
+    "mtime": 1781870046.5469792,
+    "ast_hash": "61b36d600851f70c31ae9f605cf879d4",
     "semantic_hash": ""
   },
   "src/profilerConsole.js": {
@@ -230,9 +230,9 @@
     "semantic_hash": "3650db6942e122dbcc300d111d42ae27"
   },
   "src/purchaseService.js": {
-    "mtime": 1780132194.10264,
-    "ast_hash": "94139548d5a84be85e59646fe16f10b2",
-    "semantic_hash": "94139548d5a84be85e59646fe16f10b2"
+    "mtime": 1781857723.2878187,
+    "ast_hash": "a3a1899f9b994004d4d5fbbd9a27fe5c",
+    "semantic_hash": ""
   },
   "src/scoreTracker.js": {
     "mtime": 1780811937.121249,
@@ -240,13 +240,13 @@
     "semantic_hash": "3f5b3c2988d2573094f0511b57458d3d"
   },
   "src/screens/AchievementsPanel.jsx": {
-    "mtime": 1781141649.562131,
-    "ast_hash": "42b3778ae9b38447d0049de8f1dab470",
+    "mtime": 1781857715.1604972,
+    "ast_hash": "dc52373685bd112863cb33f88935e61c",
     "semantic_hash": ""
   },
   "src/screens/GameOverScreen.jsx": {
-    "mtime": 1781141649.5635395,
-    "ast_hash": "508f71afa8f02980d09ba162c979a9e5",
+    "mtime": 1781862665.376171,
+    "ast_hash": "060e394d18dfba8faaf21f16ab87db88",
     "semantic_hash": ""
   },
   "src/screens/SettingsPanel.jsx": {
@@ -260,19 +260,19 @@
     "semantic_hash": ""
   },
   "src/screens/UIPanel.jsx": {
-    "mtime": 1781141649.5655596,
-    "ast_hash": "fd3366fb99b88dcaac59cb339dce947a",
+    "mtime": 1781471751.9783757,
+    "ast_hash": "5671898e8d5c7fbaba4ca231165f1a27",
     "semantic_hash": ""
   },
   "src/settingsTracker.js": {
-    "mtime": 1781204235.2314346,
-    "ast_hash": "2e977338f9cd75694aff3b5fdf98be33",
+    "mtime": 1781857292.3757083,
+    "ast_hash": "e74063b74afa900dbc8577e34cc5e14a",
     "semantic_hash": ""
   },
   "src/shareService.js": {
-    "mtime": 1780258155.9581616,
-    "ast_hash": "e4f4688e4599503e00724e2e5a9c227d",
-    "semantic_hash": "e4f4688e4599503e00724e2e5a9c227d"
+    "mtime": 1781864152.0113635,
+    "ast_hash": "448d6ee7479b639d5ec3071dc548ac09",
+    "semantic_hash": ""
   },
   "src/soundEngine.js": {
     "mtime": 1779641438.7038455,
@@ -280,9 +280,9 @@
     "semantic_hash": "2e3894e8b2d37088f0c0e9c99c3153e5"
   },
   "src/storage/createPersistedStore.js": {
-    "mtime": 1780811916.324898,
-    "ast_hash": "8b4d62cbad5ecdffd67bd826a7f3e146",
-    "semantic_hash": "8b4d62cbad5ecdffd67bd826a7f3e146"
+    "mtime": 1781857220.2604668,
+    "ast_hash": "a11594a72fa25526bd76459c1f4b5314",
+    "semantic_hash": ""
   },
   "src/styles.js": {
     "mtime": 1779639399.8709745,
@@ -335,9 +335,9 @@
     "semantic_hash": "63c12fdb5bfa47baceb76f0ea5a9d3f2"
   },
   "src/touchGestureController.js": {
-    "mtime": 1780132111.7924767,
-    "ast_hash": "2a892078857662749ed800b3508bf715",
-    "semantic_hash": "2a892078857662749ed800b3508bf715"
+    "mtime": 1781857747.1831117,
+    "ast_hash": "311a46de30eb216024e0e7328fbb90dc",
+    "semantic_hash": ""
   },
   "src/towerConfig.js": {
     "mtime": 1780331072.896777,
@@ -345,9 +345,9 @@
     "semantic_hash": "e122487b384e08aedfbff6e570e9b8f2"
   },
   "src/wasmLoader.js": {
-    "mtime": 1779645459.690507,
-    "ast_hash": "7eeacae04682484c41ea758a0ae17c23",
-    "semantic_hash": "7eeacae04682484c41ea758a0ae17c23"
+    "mtime": 1781857133.3353567,
+    "ast_hash": "3ebfc7a7051b58a4a59849253f88fa2a",
+    "semantic_hash": ""
   },
   "test_ai.js": {
     "mtime": 1779709172.1100445,
@@ -365,9 +365,9 @@
     "semantic_hash": "affab433dd83743c1bf409543cde9ec9"
   },
   "vite.config.js": {
-    "mtime": 1780289026.807466,
-    "ast_hash": "c3c7aab16942cd5ea3aae6104a11f7d9",
-    "semantic_hash": "c3c7aab16942cd5ea3aae6104a11f7d9"
+    "mtime": 1781471521.252276,
+    "ast_hash": "f9a86ba67f7ad0081b95199becaf7152",
+    "semantic_hash": ""
   },
   "vitest.config.js": {
     "mtime": 1780132455.0199537,
@@ -385,8 +385,8 @@
     "semantic_hash": "8323524b3753b79e31912c9d7ba5a36e"
   },
   "CLAUDE.md": {
-    "mtime": 1781004250.3473718,
-    "ast_hash": "3d154aa46aa1c7e86222c19d4990c875",
+    "mtime": 1781870060.3440683,
+    "ast_hash": "8b922c4fc65cae741d27607d8ebe8d94",
     "semantic_hash": ""
   },
   "PROFILING.md": {
@@ -425,8 +425,8 @@
     "semantic_hash": "51610c0096fbcd6fb838ae6dc5d2b003"
   },
   "src/hooks/useGameSimulation.js": {
-    "mtime": 1781203049.4770424,
-    "ast_hash": "6955aebe421f0b72b8834d2582475059",
+    "mtime": 1781864326.8411,
+    "ast_hash": "09fe959948f38724d4996fadb2616f56",
     "semantic_hash": ""
   },
   "scripts/ui-audit.mjs": {
@@ -462,6 +462,56 @@
   "src/test/useModalA11y.test.jsx": {
     "mtime": 1781141649.566559,
     "ast_hash": "7111581f5a84e796668019a91601142d",
+    "semantic_hash": ""
+  },
+  "src/physics/PhysicsHelpers.jsx": {
+    "mtime": 1781470400.9354026,
+    "ast_hash": "09726aef11bff3fa18ba508f530d7792",
+    "semantic_hash": ""
+  },
+  "src/physics/index.js": {
+    "mtime": 1781353180.1830633,
+    "ast_hash": "db6774651350080981b0197e9f64efcd",
+    "semantic_hash": ""
+  },
+  ".mimocode/package.json": {
+    "mtime": 1781856502.2206438,
+    "ast_hash": "309a2a278355748b991a76d89dfcbbbe",
+    "semantic_hash": ""
+  },
+  "scripts/check-page.mjs": {
+    "mtime": 1781470332.489658,
+    "ast_hash": "bdf4a3b99dfdf7834ba24ddf9260692b",
+    "semantic_hash": ""
+  },
+  "src/hooks/useDispatchers.js": {
+    "mtime": 1781864401.0734715,
+    "ast_hash": "adc3384d1fc9308d85a94d3e4b2ea6aa",
+    "semantic_hash": ""
+  },
+  "src/test/useAIPlayer.test.js": {
+    "mtime": 1781868893.7201164,
+    "ast_hash": "42f442ae5b9a992d1253f497cb1be22e",
+    "semantic_hash": ""
+  },
+  "src/test/useGameSimulation.test.js": {
+    "mtime": 1781868912.1151674,
+    "ast_hash": "641949ea89102ea548506237ee48055e",
+    "semantic_hash": ""
+  },
+  "src/test/useTimers.test.js": {
+    "mtime": 1781868748.8950253,
+    "ast_hash": "9a9c43576356529e47a7b01240a41e39",
+    "semantic_hash": ""
+  },
+  ".mimocode/plans/1781856560714-calm-comet.md": {
+    "mtime": 1781861523.1315224,
+    "ast_hash": "563d5856232e054a456875da2ae6585f",
+    "semantic_hash": ""
+  },
+  ".mimocode/skills/codebase-analysis/SKILL.md": {
+    "mtime": 1781516243.1489499,
+    "ast_hash": "307dc4371394c0f9ed2a1196fe0951cb",
     "semantic_hash": ""
   }
 }
