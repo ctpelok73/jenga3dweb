@@ -41,7 +41,8 @@ export function getSlotPosition(layer, slotIndex) {
 
 export function getSlotIndexFromPosition(layer, position) {
   const val = isOddLayer(layer) ? position[0] : position[2];
-  return Math.round((val + STEP) / STEP);
+  if (!Number.isFinite(val)) return 0;
+  return Math.max(0, Math.min(BLOCKS_PER_LAYER - 1, Math.round((val + STEP) / STEP)));
 }
 
 export function getMaxLayer(blocks) {

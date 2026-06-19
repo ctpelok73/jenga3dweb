@@ -3,7 +3,7 @@ import { isCollapsedBlock, FALLEN_Y } from '../domain/collapse';
 import { playPlace, playCollapse, playStabilize, playGameOver } from '../soundEngine';
 import { getBestScore, recordGame } from '../scoreTracker';
 import { trackGameOver, trackRewardedVideoReward } from '../analyticsService';
-import { recordCollapse, recordSuccessfulMove } from '../achievementsTracker';
+import { recordCollapse, recordSuccessfulMove, recordSpeedRun, recordHardModeWin } from '../achievementsTracker';
 import { recordDailyChallengeAttempt } from '../dailyChallengeTracker';
 import { saveGameReplay } from '../shareService';
 import { PLAYER_NAMES } from '../styles';
@@ -29,23 +29,27 @@ export function useGameSimulation({
   playerMode,
   currentPlayer,
   isDailyChallengeMode,
+  gameMode,
+  difficulty,
   setAiThinking,
   showAchievementNotification,
   timersRef,
   latestTurnCountRef,
   replayMovesRef,
   gameIdRef,
+  gameStartTimeRef,
 }) {
   const handleDailyChallenge = useCallback((currentTurnCount, cleanedBlocks) => {
     if (!isDailyChallengeMode) return Promise.resolve();
 
     const currentHeight = computeCurrentHeight(cleanedBlocks);
-    return recordDailyChallengeAttempt(currentTurnCount, currentHeight, true).then((challengeResult) => {
+    const timeMs = gameStartTimeRef ? Date.now() - gameStartTimeRef.current : undefined;
+    return recordDailyChallengeAttempt(currentTurnCount, currentHeight, true, timeMs).then((challengeResult) => {
       if (challengeResult.completed) {
         dispatch(gameActions.setAnnouncement('Челлендж дня выполнен! 🎉'));
       }
     }).catch(() => {});
-  }, [isDailyChallengeMode, dispatch]);
+  }, [isDailyChallengeMode, dispatch, gameStartTimeRef]);
 
   const handleCollapseOutcome = useCallback((currentTurnCount, updatedBlocks) => {
     playCollapse();
@@ -63,6 +67,21 @@ export function useGameSimulation({
     if (newUnlocks && newUnlocks.length > 0) {
       const achievementTimer = setTimeout(() => showAchievementNotification(newUnlocks), 1500);
       timersRef.current.push(achievementTimer);
+    }
+
+    if (gameMode === 'speed') {
+      const { newUnlocks: speedUnlocks } = recordSpeedRun();
+      if (speedUnlocks?.length > 0) {
+        const t = setTimeout(() => showAchievementNotification(speedUnlocks), 1500);
+        timersRef.current.push(t);
+      }
+    }
+    if (difficulty === 'hard') {
+      const { newUnlocks: hardUnlocks } = recordHardModeWin();
+      if (hardUnlocks?.length > 0) {
+        const t = setTimeout(() => showAchievementNotification(hardUnlocks), 1500);
+        timersRef.current.push(t);
+      }
     }
 
     handleDailyChallenge(currentTurnCount, updatedBlocks);
@@ -85,7 +104,7 @@ export function useGameSimulation({
     timersRef.current.push(shakeTimer);
 
     dispatch(gameActions.setPhase(PHASE_GAME_OVER));
-  }, [dispatch, playerMode, setAiThinking, showAchievementNotification, timersRef, replayMovesRef, gameIdRef, handleDailyChallenge]);
+  }, [dispatch, playerMode, setAiThinking, showAchievementNotification, timersRef, replayMovesRef, gameIdRef, handleDailyChallenge, gameMode, difficulty]);
 
   const handleSuccessfulOutcome = useCallback((currentTurnCount, cleanedBlocks) => {
     playStabilize();

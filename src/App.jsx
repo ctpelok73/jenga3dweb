@@ -16,7 +16,7 @@ import { playSelect, playPull, playGameOver, resumeAudio, cancelPendingSounds } 
 import { recordGame } from './scoreTracker';
 import { initializeAnalytics, trackGameStart, trackRewardedVideoReward } from './analyticsService';
 import { initAdSDK, isAdFree } from './adService';
-import { recordMove } from './achievementsTracker';
+import { recordMove, recordSpeedRun, recordHardModeWin } from './achievementsTracker';
 import { getSettings, getDifficultyDynamicIds, getThemeColors } from './settingsTracker';
 import { cycleBlock, cycleInLayer, getSelectableBlocks, jumpToLayer } from './keyboardController';
 import DailyChallengePanel from './DailyChallengePanel';
@@ -114,6 +114,7 @@ function App() {
   const canvasRef = useRef(null);
   const replayMovesRef = useRef([]);
   const gameIdRef = useRef(generateGameId());
+  const gameStartTimeRef = useRef(null);
   const { shouldOptimize, renderSettings, deviceLevel, maxDynamicBlocks } = useMobileOptimizations();
   const [currentSettings, setCurrentSettings] = useState(() => getSettings());
 
@@ -180,7 +181,18 @@ function App() {
     setPhase(PHASE_GAME_OVER);
     playGameOver();
     recordGame(latestTurnCountRef.current, false);
-  }, []);
+
+    const { newUnlocks: speedUnlocks } = recordSpeedRun();
+    if (speedUnlocks?.length > 0) {
+      showAchievementNotification(speedUnlocks);
+    }
+    if (currentSettings.difficulty === 'hard') {
+      const { newUnlocks: hardUnlocks } = recordHardModeWin();
+      if (hardUnlocks?.length > 0) {
+        showAchievementNotification(hardUnlocks);
+      }
+    }
+  }, [currentSettings.difficulty, showAchievementNotification]);
 
   const { moveTimeLeft, speedTimeLeft, startSpeedTimer, clearSpeedTimer } = useTimers({
     phase,
@@ -199,6 +211,7 @@ function App() {
     setBlocks(isDaily ? generateDailyTower(getThemeColors) : generateThemedTower());
     bumpRestartKey();
     resetRoundState();
+    gameStartTimeRef.current = Date.now();
     if (gameMode === 'speed') {
       startSpeedTimer(speedDuration);
     }
@@ -253,10 +266,7 @@ function App() {
 
     playPull();
 
-    // Сохраняем исходную позицию блока до обновления blocks
     const extractionPosition = [moveBlock.position[0], moveBlock.position[1], moveBlock.position[2]];
-    setLastExtractionPosition(extractionPosition);
-
     const removedLayer = moveBlock.layer;
 
     let targetPosition, targetRotation, targetLayer;
@@ -265,8 +275,6 @@ function App() {
       targetRotation = targetSlot.rotation;
       targetLayer = targetSlot.newLayer;
     } else {
-      // Fallback path (no UI slot, e.g. timer auto-move): drop into the
-      // first available top-layer slot via the same domain logic.
       const slots = getDropSlots(blocks);
       if (slots.length === 0) return;
       const fallback = slots[0];
@@ -280,11 +288,15 @@ function App() {
         ? { ...b, position: targetPosition, rotation: targetRotation, layer: targetLayer }
         : b
     );
-    setBlocks(updatedBlocks);
-    setSelectedId(null);
-    setLastMovedBlockId(moveBlock.id);
+
+    const rawDynamicIds = getDifficultyDynamicIds(updatedBlocks, moveBlock, removedLayer);
+    const dynamicIds = shouldOptimize
+      ? capDynamicIdsForMobile(updatedBlocks, rawDynamicIds, moveBlock, removedLayer, maxDynamicBlocks)
+      : rawDynamicIds;
+
+    dispatch(gameActions.executeMove(updatedBlocks, moveBlock.id, extractionPosition, dynamicIds));
+
     const newTurnCount = turnCount + 1;
-    setTurnCount(newTurnCount);
     latestTurnCountRef.current = newTurnCount;
 
     const selectionTimeMs = selectionTimeRef.current ? (Date.now() - selectionTimeRef.current) : null;
@@ -303,13 +315,8 @@ function App() {
       timestamp: Date.now(),
     });
 
-    const rawDynamicIds = getDifficultyDynamicIds(updatedBlocks, moveBlock, removedLayer);
-    const dynamicIds = shouldOptimize
-      ? capDynamicIdsForMobile(updatedBlocks, rawDynamicIds, moveBlock, removedLayer, maxDynamicBlocks)
-      : rawDynamicIds;
-    setSimulatingBlockIds(dynamicIds);
     setMessage('⏳ Стабилизация...');
-  }, [selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification, shouldOptimize, maxDynamicBlocks]);
+  }, [dispatch, selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification, shouldOptimize, maxDynamicBlocks]);
 
   executeMoveRef.current = executeMove;
   blocksRef.current = blocks;
@@ -460,12 +467,15 @@ function App() {
     playerMode,
     currentPlayer,
     isDailyChallengeMode,
+    gameMode,
+    difficulty: currentSettings.difficulty,
     setAiThinking,
     showAchievementNotification,
     timersRef: achievementToastTimers,
     latestTurnCountRef,
     replayMovesRef,
     gameIdRef,
+    gameStartTimeRef,
   });
 
   const handleSettingsChange = useCallback(() => {

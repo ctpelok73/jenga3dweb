@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './ui.css';
 import App from './App';
+import ErrorBoundary from './ErrorBoundary';
 if (import.meta.env.DEV) import('./profilerConsole');
 
 // Подавляем известные предупреждения из сторонних библиотек,
@@ -20,5 +21,7 @@ console.warn = (...args) => {
 // из-за чего WebGL Canvas теряет контекст при первом unmount.
 // Убираем StrictMode для стабильной работы 3D-сцены.
 createRoot(document.getElementById('root')).render(
-  <App />
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
 );

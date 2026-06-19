@@ -122,6 +122,9 @@ const roundResetFields = {
   aiThinking: false,
   moveTimeLeft: null,
   speedTimeLeft: null,
+  message: '',
+  screenShake: false,
+  achievementToast: null,
 };
 
 // ─── Маппинг имён панелей на ключи состояния ───────────────────────────────

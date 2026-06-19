@@ -144,3 +144,17 @@ export function recordSuccessfulMove(turns) {
 
   return updateAchievementStats(stats, data);
 }
+
+export function recordSpeedRun() {
+  const data = store.load();
+  const stats = data.stats;
+  stats.speedRuns = (stats.speedRuns || 0) + 1;
+  return updateAchievementStats(stats, data);
+}
+
+export function recordHardModeWin() {
+  const data = store.load();
+  const stats = data.stats;
+  stats.hardModeWins = (stats.hardModeWins || 0) + 1;
+  return updateAchievementStats(stats, data);
+}
