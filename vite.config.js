@@ -67,6 +67,7 @@ export default defineConfig({
     }),
   ],
   build: {
+    modulePreload: false,
     chunkSizeWarningLimit: 2500, // increased limit to accommodate large rapier chunk
     minify: 'terser',
     sourcemap: false,

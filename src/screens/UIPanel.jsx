@@ -48,7 +48,7 @@ export default function UIPanel({ canMove, onMakeMove, onRestart, message, tower
   }, [turnCount]);
 
   return (
-    <div className="j-hud-overlay" aria-label="Игровая панель">
+    <div className="j-hud-overlay" role="status" aria-label="Игровая панель">
       <div className="j-hud">
         <div className="j-hud__header">
           <h2 className="j-hud__title">🧱 Jenga</h2>
