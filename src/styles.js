@@ -1,1 +1,1 @@
-export const PLAYER_NAMES = ['Игрок 1', 'Игрок 2', '🤖 ИИ'];
+export const PLAYER_NAMES = ['Игрок 1', 'Игрок 2', '🤖 ИИ', '🌐 Онлайн'];

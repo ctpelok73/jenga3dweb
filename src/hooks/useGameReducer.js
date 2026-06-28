@@ -66,7 +66,7 @@ export const initialState = {
   selectedId: null,          // number | null — выбранный блок
   turnCount: 0,              // Счётчик ходов
   currentPlayer: 0,          // Текущий игрок: 0 или 1
-  playerMode: 1,             // 1=соло, 2=pvp, 3=против ИИ
+  playerMode: 1,             // 1=соло, 2=pvp, 3=против ИИ, 4=онлайн, 4=онлайн
   gameMode: 'classic',       // 'classic' | 'speed'
   restartKey: 0,             // Ключ перезапуска (для принудительного ремаунта)
 
@@ -77,6 +77,8 @@ export const initialState = {
   showDailyChallenge: false,
   showPurchase: false,
   showTutorial: getInitialTutorialState(),
+  showOnlineLobby: false,
+  showOnlineStats: false,
 
   // --- Симуляция физики ---
   simulatingBlockIds: null,     // Set<number> | null — ID блоков в динамическом режиме
@@ -136,6 +138,8 @@ const panelKeyMap = {
   dailyChallenge: 'showDailyChallenge',
   purchase: 'showPurchase',
   tutorial: 'showTutorial',
+  onlineLobby: 'showOnlineLobby',
+  onlineStats: 'showOnlineStats',
 };
 
 // ─── Редьюсер ───────────────────────────────────────────────────────────────
@@ -388,6 +392,8 @@ export const setShowPauseMenu = (value) => togglePanel('pauseMenu', value);
 export const setShowDailyChallenge = (value) => togglePanel('dailyChallenge', value);
 export const setShowPurchase = (value) => togglePanel('purchase', value);
 export const setShowTutorial = (value) => togglePanel('tutorial', value);
+export const setShowOnlineLobby = (value) => togglePanel('onlineLobby', value);
+export const setShowOnlineStats = (value) => togglePanel('onlineStats', value);
 
 /** Установить симулируемые блоки и связанные данные */
 export const setSimulation = (simulatingBlockIds, lastMovedBlockId, lastExtractionPosition) => ({

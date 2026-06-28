@@ -60,7 +60,7 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
           <div className="j-gameover-result" style={{ color: 'var(--j-purple-light)' }}>Speed Run</div>
         )}
         {isNewRecord && (
-          <div className="j-gameover-record">NEW RECORD!</div>
+          <div className="j-gameover-record">🏆 NEW RECORD!</div>
         )}
         {playerMode === 2 && (
           <div className={`j-gameover-result ${playerClass}`}>
@@ -74,6 +74,13 @@ export default function GameOverScreen({ turns, onRestart, currentPlayer, player
         )}
         <div className="j-gameover-score">{turns}</div>
         <div className="j-gameover-score-label">ходов сделано</div>
+        {isNewRecord && (
+          <div className="j-confetti">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="j-confetti__particle" />
+            ))}
+          </div>
+        )}
         <div className="j-stats">
           <div className="j-stat">
             <div className="j-stat__val">{best}</div>

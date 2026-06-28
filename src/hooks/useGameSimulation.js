@@ -38,6 +38,7 @@ export function useGameSimulation({
   replayMovesRef,
   gameIdRef,
   gameStartTimeRef,
+  onOnlineCollapse,
 }) {
   const handleDailyChallenge = useCallback((currentTurnCount, cleanedBlocks) => {
     if (!isDailyChallengeMode) return Promise.resolve();
@@ -103,8 +104,15 @@ export function useGameSimulation({
     const shakeTimer = setTimeout(() => dispatch(gameActions.setScreenShake(false)), 600);
     timersRef.current.push(shakeTimer);
 
+    // For online mode, notify server AND set game over locally
+    // Server will confirm/update the result via game_over message
+    if (playerMode === 4 && onOnlineCollapse) {
+      onOnlineCollapse();
+      // Fall through to show game over immediately
+    }
+
     dispatch(gameActions.setPhase(PHASE_GAME_OVER));
-  }, [dispatch, playerMode, setAiThinking, showAchievementNotification, timersRef, replayMovesRef, gameIdRef, handleDailyChallenge, gameMode, difficulty]);
+  }, [dispatch, playerMode, setAiThinking, showAchievementNotification, timersRef, replayMovesRef, gameIdRef, handleDailyChallenge, gameMode, difficulty, onOnlineCollapse]);
 
   const handleSuccessfulOutcome = useCallback((currentTurnCount, cleanedBlocks) => {
     playStabilize();
@@ -119,18 +127,22 @@ export function useGameSimulation({
 
     handleDailyChallenge(currentTurnCount, cleanedBlocks);
 
-    if (playerMode === 2) {
+    if (playerMode === 2 || playerMode === 3) {
+      setAiThinking(playerMode === 3 ? false : undefined);
       const nextPlayer = currentPlayer === 0 ? 1 : 0;
       dispatch(gameActions.setCurrentPlayer(nextPlayer));
-      dispatch(gameActions.setMessage(`Ход: ${PLAYER_NAMES[nextPlayer]}. Выберите блок.`));
+      if (playerMode === 2) {
+        dispatch(gameActions.setMessage(`Ход: ${PLAYER_NAMES[nextPlayer]}. Выберите блок.`));
+      } else {
+        dispatch(gameActions.setMessage(nextPlayer === 1 ? '🤖 ИИ думает...' : `Ход: ${PLAYER_NAMES[0]}. Выберите блок.`));
+      }
       return;
     }
 
-    if (playerMode === 3) {
+    if (playerMode === 4) {
       setAiThinking(false);
-      const nextPlayer = currentPlayer === 0 ? 1 : 0;
-      dispatch(gameActions.setCurrentPlayer(nextPlayer));
-      dispatch(gameActions.setMessage(nextPlayer === 1 ? '🤖 ИИ думает...' : `Ход: ${PLAYER_NAMES[0]}. Выберите блок.`));
+      dispatch(gameActions.setSelectedId(null));
+      dispatch(gameActions.setMessage('⏳ Ожидание подтверждения...'));
       return;
     }
 

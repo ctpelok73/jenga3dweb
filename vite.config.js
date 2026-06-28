@@ -66,9 +66,14 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001',
+    },
+  },
   build: {
     modulePreload: false,
-    chunkSizeWarningLimit: 2500, // increased limit to accommodate large rapier chunk
+    chunkSizeWarningLimit: 2500,
     minify: 'terser',
     terserOptions: {
       compress: {

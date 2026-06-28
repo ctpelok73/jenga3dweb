@@ -33,6 +33,10 @@ import useGameReducer, * as gameActions from './hooks/useGameReducer';
 import { useDispatchers } from './hooks/useDispatchers';
 import useAchievementToasts from './hooks/useAchievementToasts';
 import useGameSimulation, { continueAfterCollapseUpdate } from './hooks/useGameSimulation';
+import useOnlineGame from './hooks/useOnlineGame';
+import OnlineLobby from './screens/OnlineLobby';
+import OnlineGameScreen from './screens/OnlineGameScreen';
+import OnlineGameOver from './screens/OnlineGameOver';
 
 const GameScene = lazy(() => import('./GameScene'));
 
@@ -101,6 +105,9 @@ function App() {
     setLastExtractionPosition, setGameMode, setSpeedDuration, setAiThinking,
   } = useDispatchers(dispatch, state);
 
+  const [showOnline, setShowOnline] = useState(false);
+  const onlineGame = useOnlineGame();
+
   // Lazy initial value for adFree (the reducer defaults to false; sync the real value on mount)
   useEffect(() => {
     if (isAdFree() || isRemoveAdsPurchased()) dispatch(gameActions.setAdFree(true));
@@ -148,7 +155,7 @@ function App() {
   const topCompleteLayer = useMemo(() => getTopCompleteLayer(blocks), [blocks]);
 
   const selectedBlock = useMemo(() => blocks.find((b) => b.id === selectedId) || null, [blocks, selectedId]);
-  const canMove = selectedBlock !== null && phase === PHASE_PLAYING && simulatingBlockIds === null && selectedBlock.layer < topCompleteLayer;
+  const canMove = selectedBlock !== null && phase === PHASE_PLAYING && simulatingBlockIds === null && selectedBlock.layer < topCompleteLayer && (playerMode !== 4 || onlineGame.gameState?.yourTurn);
 
   const dropSlots = useMemo(() => {
     if (!selectedBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return null;
@@ -245,6 +252,7 @@ function App() {
   const handleBlockClick = useCallback((id) => {
     if (phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
     if (playerMode === 3 && currentPlayer === 1) return;
+    if (playerMode === 4 && !onlineGame.gameState?.yourTurn) return;
     const block = blocks.find((b) => b.id === id);
     if (!block) return;
     if (block.layer >= topCompleteLayer) { setMessage('⚠ Нельзя брать из верхнего слоя!'); return; }
@@ -258,11 +266,17 @@ function App() {
       selectionTimeRef.current = Date.now();
       setSelectedId(id);
     }
-  }, [phase, simulatingBlockIds, blocks, topCompleteLayer, playerMode, currentPlayer, selectedId]);
+  }, [phase, simulatingBlockIds, blocks, topCompleteLayer, playerMode, currentPlayer, selectedId, onlineGame.gameState?.yourTurn]);
 
   const executeMove = useCallback((targetSlot, block = null) => {
     const moveBlock = block || selectedBlock;
     if (!moveBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
+
+    if (playerMode === 4) {
+      // Send the move to the server, then continue with local simulation
+      // so physics/collapse detection runs on the mover's client too.
+      onlineGame.makeMove(moveBlock.id, targetSlot);
+    }
 
     playPull();
 
@@ -316,7 +330,7 @@ function App() {
     });
 
     setMessage('⏳ Стабилизация...');
-  }, [dispatch, selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification, shouldOptimize, maxDynamicBlocks]);
+  }, [dispatch, selectedBlock, phase, simulatingBlockIds, blocks, turnCount, showAchievementNotification, shouldOptimize, maxDynamicBlocks, playerMode, onlineGame]);
 
   executeMoveRef.current = executeMove;
   blocksRef.current = blocks;
@@ -324,14 +338,16 @@ function App() {
 
   const handleMakeMove = useCallback(() => {
     if (!canMove || (playerMode === 3 && currentPlayer === 1)) return;
+    if (playerMode === 4 && !onlineGame.gameState?.yourTurn) return;
     executeMove(null);
-  }, [canMove, executeMove, playerMode, currentPlayer]);
+  }, [canMove, executeMove, playerMode, currentPlayer, onlineGame.gameState?.yourTurn]);
 
   const handleDropSlot = useCallback((slotData) => {
     if (!selectedBlock || phase !== PHASE_PLAYING || simulatingBlockIds !== null) return;
     if (playerMode === 3 && currentPlayer === 1) return;
+    if (playerMode === 4 && !onlineGame.gameState?.yourTurn) return;
     executeMove(slotData);
-  }, [selectedBlock, phase, simulatingBlockIds, executeMove, playerMode, currentPlayer]);
+  }, [selectedBlock, phase, simulatingBlockIds, executeMove, playerMode, currentPlayer, onlineGame.gameState?.yourTurn]);
 
   const focusBlockById = useCallback((id) => {
     if (id === null || id === undefined) return;
@@ -418,13 +434,80 @@ function App() {
     setShowSettings(false);
     setShowAchievements(false);
     setIsDailyChallengeMode(false);
+    if (playerMode === 4) {
+      onlineGame.leaveRoom();
+    }
     clearSpeedTimer();
     setGameMode('classic');
     setPhase(PHASE_START);
     setBlocks(generateThemedTower());
     bumpRestartKey();
     resetRoundState();
-  }, [resetRoundState]);
+  }, [resetRoundState, playerMode, onlineGame]);
+
+  const handleOpenOnline = useCallback(() => {
+    setShowOnline(true);
+  }, []);
+
+  const handleStartOnlineGame = useCallback((gameData) => {
+    setShowOnline(false);
+    setPlayerMode(4);
+    if (gameData.blocks) {
+      setBlocks(gameData.blocks);
+    }
+    setCurrentPlayer(gameData.currentPlayer ?? 0);
+    setTurnCount(0);
+    setSelectedId(null);
+    setSimulatingBlockIds(null);
+    setLastMovedBlockId(null);
+    setContinuedAfterCollapse(false);
+    setKeyboardFocusId(null);
+    setAnnouncement('');
+    setAiThinking(false);
+    setLastExtractionPosition(null);
+    selectionTimeRef.current = null;
+    replayMovesRef.current = [];
+    gameIdRef.current = generateGameId();
+    clearToasts();
+    cancelPendingSounds();
+    bumpRestartKey();
+    setPhase(PHASE_PLAYING);
+    if (gameData.yourTurn) {
+      setMessage('🟢 Ваш ход! Выберите блок.');
+    } else {
+      setMessage('🔴 Ход противника...');
+    }
+  }, [setPlayerMode, setPhase, setBlocks, setCurrentPlayer, setTurnCount, setSelectedId, setMessage, bumpRestartKey, setSimulatingBlockIds, setLastMovedBlockId, setContinuedAfterCollapse, setKeyboardFocusId, setAnnouncement, setAiThinking, setLastExtractionPosition, clearToasts]);
+
+  useEffect(() => {
+    if (onlineGame.gameResult && playerMode === 4) {
+      setPhase(PHASE_GAME_OVER);
+    }
+  }, [onlineGame.gameResult, playerMode, setPhase]);
+
+  useEffect(() => {
+    // Don't overwrite blocks while physics simulation is in progress
+    if (onlineGame.gameState?.blocks && playerMode === 4 && phase === PHASE_PLAYING && simulatingBlockIds === null) {
+      setBlocks(onlineGame.gameState.blocks);
+      if (onlineGame.gameState.currentPlayer !== undefined) {
+        setCurrentPlayer(onlineGame.gameState.currentPlayer);
+      }
+      if (onlineGame.gameState.turnCount !== undefined) {
+        setTurnCount(onlineGame.gameState.turnCount);
+      }
+      if (onlineGame.gameState.yourTurn) {
+        setMessage('🟢 Ваш ход! Выберите блок.');
+      } else {
+        setMessage('🔴 Ход противника...');
+      }
+    }
+  }, [onlineGame.gameState, playerMode, phase, setBlocks, setCurrentPlayer, setTurnCount, setMessage, simulatingBlockIds]);
+
+  useEffect(() => {
+    if (onlineGame.gameState?.yourTurn === false && playerMode === 4) {
+      setSelectedId(null);
+    }
+  }, [onlineGame.gameState?.yourTurn, playerMode, setSelectedId]);
 
   useKeyboardNavigation({
     phase,
@@ -476,6 +559,7 @@ function App() {
     replayMovesRef,
     gameIdRef,
     gameStartTimeRef,
+    onOnlineCollapse: playerMode === 4 ? onlineGame.reportCollapse : null,
   });
 
   const handleSettingsChange = useCallback(() => {
@@ -514,7 +598,7 @@ function App() {
           />
         </Suspense>
       )}
-      {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && !showDailyChallenge && !showPurchase && (
+      {phase === PHASE_START && !showTutorial && !showSettings && !showAchievements && !showDailyChallenge && !showPurchase && !showOnline && (
         <StartScreen
           onStart={handleStart}
           playerMode={playerMode}
@@ -527,7 +611,14 @@ function App() {
           onOpenAchievements={() => setShowAchievements(true)}
           onOpenDailyChallenge={() => setShowDailyChallenge(true)}
           onOpenPurchase={() => setShowPurchase(true)}
+          onOpenOnline={handleOpenOnline}
           showPurchaseButton={isPremiumStoreAvailable()}
+        />
+      )}
+      {showOnline && (
+        <OnlineLobby
+          onBack={() => setShowOnline(false)}
+          onStartGame={handleStartOnlineGame}
         />
       )}
       {phase === PHASE_START && showTutorial && (
@@ -551,22 +642,32 @@ function App() {
         />
       )}
       {phase === PHASE_PLAYING && !showPauseMenu && !showSettings && !showAchievements && (
-        <UIPanel
-          canMove={canMove}
-          onMakeMove={handleMakeMove}
-          onRestart={handleRestart}
-          message={message}
-          towerHeight={towerHeight}
-          turnCount={turnCount}
-          stabilizing={simulatingBlockIds !== null}
-          currentPlayer={currentPlayer}
-          playerMode={playerMode}
-          aiThinking={aiThinking}
-          onPauseMenu={() => setShowPauseMenu(true)}
-          moveTimeLeft={moveTimeLeft}
-          gameMode={gameMode}
-          speedTimeLeft={speedTimeLeft}
-        />
+        playerMode === 4 ? (
+          <OnlineGameScreen
+            opponentName={onlineGame.opponentName}
+            connected={onlineGame.connected}
+            yourTurn={onlineGame.gameState?.yourTurn}
+            turnCount={turnCount}
+            onLeave={handleBackToMenu}
+          />
+        ) : (
+          <UIPanel
+            canMove={canMove}
+            onMakeMove={handleMakeMove}
+            onRestart={handleRestart}
+            message={message}
+            towerHeight={towerHeight}
+            turnCount={turnCount}
+            stabilizing={simulatingBlockIds !== null}
+            currentPlayer={currentPlayer}
+            playerMode={playerMode}
+            aiThinking={aiThinking}
+            onPauseMenu={() => setShowPauseMenu(true)}
+            moveTimeLeft={moveTimeLeft}
+            gameMode={gameMode}
+            speedTimeLeft={speedTimeLeft}
+          />
+        )
       )}
       {showPauseMenu && !showSettings && !showAchievements && (
         <PauseMenu
@@ -582,15 +683,27 @@ function App() {
         />
       )}
       {phase === PHASE_GAME_OVER && (
-        <GameOverScreen
-          turns={turnCount}
-          onRestart={handleRestart}
-          currentPlayer={currentPlayer}
-          playerMode={playerMode}
-          onContinueAfterCollapse={handleContinueAfterCollapse}
-          continuedAfterCollapse={continuedAfterCollapse}
-          gameMode={gameMode}
-        />
+        playerMode === 4 ? (
+          <OnlineGameOver
+            gameResult={onlineGame.gameResult || { winner: false, collapsed: true, turnCount, pending: true }}
+            opponentName={onlineGame.opponentName}
+            onRestart={() => {
+              onlineGame.leaveRoom();
+              setShowOnline(true);
+            }}
+            onBackToMenu={handleBackToMenu}
+          />
+        ) : (
+          <GameOverScreen
+            turns={turnCount}
+            onRestart={handleRestart}
+            currentPlayer={currentPlayer}
+            playerMode={playerMode}
+            onContinueAfterCollapse={handleContinueAfterCollapse}
+            continuedAfterCollapse={continuedAfterCollapse}
+            gameMode={gameMode}
+          />
+        )
       )}
       {achievementToast && (
         <AchievementToast

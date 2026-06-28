@@ -16,3 +16,11 @@ graphify-out/cost.json
 graphify-out/.graphify_python
 graphify-out/.graphify_root
 graphify-out/2*/
+
+# Server data
+server/data/
+server/*.db*
+
+# Specs & plans (local development docs)
+docs/superpowers/
+

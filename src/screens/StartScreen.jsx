@@ -4,7 +4,7 @@ import { getBestScore, getTotalGames } from '../scoreTracker';
 import { getUnlockedAchievements, ACHIEVEMENTS } from '../achievementsTracker';
 import { isDailyChallengeCompleted } from '../dailyChallengeTracker';
 
-export default function StartScreen({ onStart, playerMode, setPlayerMode, gameMode, setGameMode, speedDuration, setSpeedDuration, onOpenSettings, onOpenAchievements, onOpenDailyChallenge, onOpenPurchase, showPurchaseButton = true }) {
+export default function StartScreen({ onStart, playerMode, setPlayerMode, gameMode, setGameMode, speedDuration, setSpeedDuration, onOpenSettings, onOpenAchievements, onOpenDailyChallenge, onOpenPurchase, onOpenOnline, showPurchaseButton = true }) {
   const best = getBestScore();
   const total = getTotalGames();
   const unlockedCount = getUnlockedAchievements().length;
@@ -90,6 +90,9 @@ export default function StartScreen({ onStart, playerMode, setPlayerMode, gameMo
           </button>
           <button className={`j-action-btn ${dailyDone ? 'j-action-btn--green' : 'j-action-btn--yellow'}`} aria-label="Ежедневный челлендж" onClick={onOpenDailyChallenge}>
             📅 Челлендж
+          </button>
+          <button className="j-action-btn j-action-btn--purple" aria-label="Онлайн" onClick={onOpenOnline}>
+            🌐 Онлайн
           </button>
           {showPurchaseButton && (
             <button className="j-action-btn j-action-btn--blue" aria-label="Премиум магазин" onClick={onOpenPurchase}>
