@@ -13,6 +13,7 @@ import {
 } from './towerConfig';
 import { BlockBody, FixedBody } from './physics';
 import ParticleEffect from './ParticleEffect';
+import InstancedBlocks from './components/InstancedBlocks';
 import { getBlockMaterialProps, getEnvironmentTheme } from './blockTextures';
 import { physicsOptimizer } from './physicsOptimizer';
 import { getPhysicsSettingsForMobile, getDynamicBlockLimit } from './mobileOptimizations';
@@ -54,6 +55,7 @@ const Block = memo(function Block({
   theme,
   isKeyboardFocused = false,
   lowPowerMode = false,
+  onUnhover,
 }) {
   const rigidRef = useRef(null);
   const meshRef = useRef(null);
@@ -164,7 +166,8 @@ const Block = memo(function Block({
   const handlePointerOut = useCallback((event) => {
     event.stopPropagation();
     setIsHovered(false);
-  }, []);
+    if (onUnhover) onUnhover();
+  }, [onUnhover]);
 
   return (
     <BlockBody position={position} rotation={rotation} type={isDynamic ? 'dynamic' : 'fixed'} ref={rigidRef} userData={{ id }}>
@@ -389,29 +392,7 @@ function Scene({
   const simulateTime = useRef(0);
   const completionCalled = useRef(false);
   const [particleBlockId, setParticleBlockId] = useState(null);
-
-  const [visibleCount, setVisibleCount] = useState(9);
-  const visibleCountRef = useRef(9);
-  const prevBlocksLenRef = useRef(blocks.length);
-
-  useEffect(() => {
-    if (blocks.length !== prevBlocksLenRef.current) {
-      prevBlocksLenRef.current = blocks.length;
-      visibleCountRef.current = 9;
-      setVisibleCount(9);
-      return;
-    }
-
-    if (visibleCountRef.current >= blocks.length) return;
-
-    const id = requestAnimationFrame(() => {
-      visibleCountRef.current = Math.min(visibleCountRef.current + 9, blocks.length);
-      setVisibleCount(visibleCountRef.current);
-    });
-    return () => cancelAnimationFrame(id);
-  }, [visibleCount, blocks.length]);
-
-  const visibleBlocks = visibleCount >= blocks.length ? blocks : blocks.slice(0, visibleCount);
+  const [hoveredBlockId, setHoveredBlockId] = useState(null);
 
   const cascadeDynamicIdsRef = useRef(null);
   const [cascadeDynamicIds, setCascadeDynamicIds] = useState(null);
@@ -439,6 +420,7 @@ function Scene({
     return lastExtractionPosition;
   }, [particleBlockId, lastExtractionPosition]);
 
+  // effectiveDynamicIds MUST be defined BEFORE interactiveBlockIds (used below)
   const effectiveDynamicIds = useMemo(() => {
     if (!simulatingBlockIds && !cascadeDynamicIds) return null;
     const merged = new Set();
@@ -451,47 +433,103 @@ function Scene({
     return merged.size > 0 ? merged : null;
   }, [simulatingBlockIds, cascadeDynamicIds]);
 
+  // ─── Split blocks into instanced (static) vs individual (interactive) ───
+  // Interactive blocks are: dynamic, selected, ghost, hovered, keyboard-focused.
+  // These need per-instance visual effects (emissive, opacity, edges).
+  // Everything else is batched into InstancedMesh (1 draw call).
+  const interactiveBlockIds = useMemo(() => {
+    const ids = new Set();
+    if (selectedId != null) ids.add(selectedId);
+    if (hoveredBlockId != null) ids.add(hoveredBlockId);
+    if (keyboardFocusId != null) ids.add(keyboardFocusId);
+    if (effectiveDynamicIds) {
+      for (const id of effectiveDynamicIds) ids.add(id);
+    }
+    return ids;
+  }, [selectedId, hoveredBlockId, keyboardFocusId, effectiveDynamicIds]);
+
+  const individualBlocks = useMemo(
+    () => blocks.filter((b) => interactiveBlockIds.has(b.id)),
+    [blocks, interactiveBlockIds],
+  );
+
+  const instancedBlocks = useMemo(
+    () => blocks.filter((b) => !interactiveBlockIds.has(b.id)),
+    [blocks, interactiveBlockIds],
+  );
+
   const storeRigidRef = useCallback((id, ref) => {
     rigidRefs.current[id] = ref;
   }, []);
 
+  const handleInstancedClick = useCallback((id) => {
+    onBlockClick(id);
+  }, [onBlockClick]);
+
+  const handleInstancedHover = useCallback((id) => {
+    setHoveredBlockId(id);
+  }, []);
+
+  // Called both by InstancedMesh onPointerOut AND by individual Block onPointerOut
+  // to keep parent hover state in sync with child hover state.
+  const handleInstancedUnhover = useCallback(() => {
+    setHoveredBlockId(null);
+  }, []);
+
   const findNextUnsupportedLayer = useCallback((currentBlocks, alreadyDynamicIds) => {
-    const layerBlockCounts = {};
-    const layerBlocks = {};
+    // Single-pass: build layer arrays and count fixed blocks
+    const layerBlocks = [];
+    const fixedCount = [];
+    const dynamicLayers = [];
     let maxLayer = 0;
 
-    for (const b of currentBlocks) {
-      if (b.layer > maxLayer) maxLayer = b.layer;
-      if (!layerBlocks[b.layer]) layerBlocks[b.layer] = [];
-      layerBlocks[b.layer].push(b);
+    for (let i = 0; i < currentBlocks.length; i++) {
+      const b = currentBlocks[i];
+      const layer = b.layer;
+      if (layer > maxLayer) maxLayer = layer;
 
-      if (!alreadyDynamicIds.has(b.id) && b.position[1] > -0.5) {
-        layerBlockCounts[b.layer] = (layerBlockCounts[b.layer] || 0) + 1;
+      if (!layerBlocks[layer]) {
+        layerBlocks[layer] = [];
+        fixedCount[layer] = 0;
       }
-    }
+      layerBlocks[layer].push(b);
 
-    const dynamicLayers = new Set();
-    for (const b of currentBlocks) {
       if (alreadyDynamicIds.has(b.id)) {
-        dynamicLayers.add(b.layer);
+        dynamicLayers.push(layer);
+      } else if (b.position[1] > -0.5) {
+        fixedCount[layer]++;
       }
     }
 
-    for (const dynLayer of dynamicLayers) {
+    // De-duplicate dynamic layers (use a Set check but iterate a unique set)
+    const seen = {};
+    for (let d = 0; d < dynamicLayers.length; d++) {
+      const dynLayer = dynamicLayers[d];
+      if (seen[dynLayer]) continue;
+      seen[dynLayer] = true;
+
       const layerAbove = dynLayer + 1;
       if (layerAbove > maxLayer) continue;
-      if (!layerBlocks[layerAbove]) continue;
+      const aboveBlocks = layerBlocks[layerAbove];
+      if (!aboveBlocks) continue;
 
-      const aboveAlreadyDynamic = layerBlocks[layerAbove].every((b) => alreadyDynamicIds.has(b.id));
-      if (aboveAlreadyDynamic) continue;
+      // Check if layer above is already entirely dynamic
+      let allAboveDynamic = true;
+      for (let a = 0; a < aboveBlocks.length; a++) {
+        if (!alreadyDynamicIds.has(aboveBlocks[a].id)) {
+          allAboveDynamic = false;
+          break;
+        }
+      }
+      if (allAboveDynamic) continue;
 
-      const fixedInSupport = layerBlockCounts[dynLayer] || 0;
-
-      let supportLayerCollapsed = false;
-      if (fixedInSupport === 0) {
-        const dynBlocksInLayer = layerBlocks[dynLayer].filter((b) => alreadyDynamicIds.has(b.id));
+      // If support layer has 0 fixed blocks, check if all dynamic blocks fell
+      if ((fixedCount[dynLayer] || 0) === 0) {
+        const dynBlocks = layerBlocks[dynLayer];
         let allFallen = true;
-        for (const b of dynBlocksInLayer) {
+        for (let d2 = 0; d2 < dynBlocks.length; d2++) {
+          const b = dynBlocks[d2];
+          if (!alreadyDynamicIds.has(b.id)) continue;
           const rigid = rigidRefs.current[b.id];
           if (rigid) {
             const trans = rigid.translation();
@@ -502,13 +540,9 @@ function Scene({
             }
           }
         }
-        if (allFallen || dynBlocksInLayer.length === 0) {
-          supportLayerCollapsed = true;
+        if (allFallen) {
+          return layerAbove;
         }
-      }
-
-      if (supportLayerCollapsed) {
-        return layerAbove;
       }
     }
 
@@ -523,8 +557,6 @@ function Scene({
 
     profiler.mark('physics_start');
     physicsOptimizer.updateSimulationState(true, activeIds.size);
-    const cam = state.camera.position;
-    physicsOptimizer.updateCameraPosition([cam.x, cam.y, cam.z]);
 
     const frameParams = physicsOptimizer.getFrameParams(activeIds.size);
     if (!frameParams.shouldUpdatePhysics) {
@@ -752,7 +784,19 @@ function Scene({
         <ParticleEffect position={movedBlockPos} enabled={particleBlockId !== null} duration={0.6} />
       )}
 
-      {visibleBlocks.map((b) => (
+      {/* Physics colliders for instanced blocks (no visual mesh — InstancedMesh handles that) */}
+      {instancedBlocks.map((b) => (
+        <BlockBody
+          key={`body-${b.id}`}
+          type="fixed"
+          position={b.position}
+          rotation={b.rotation}
+          userData={{ id: b.id }}
+        />
+      ))}
+
+      {/* Interactive blocks: individual rendering with full effects */}
+      {individualBlocks.map((b) => (
         <Block
           key={b.id}
           id={b.id}
@@ -765,10 +809,21 @@ function Scene({
           onRigidRef={storeRigidRef}
           isDynamic={effectiveDynamicIds != null && effectiveDynamicIds.has(b.id)}
           theme={blockTheme}
-          isKeyboardFocused={b.id === keyboardFocusId}
+                  isKeyboardFocused={b.id === keyboardFocusId}
           lowPowerMode={lowPowerMode}
+          onUnhover={handleInstancedUnhover}
         />
       ))}
+
+      {/* Single draw call for ALL static block surfaces + edges */}
+      <InstancedBlocks
+        blocks={instancedBlocks}
+        blockTheme={blockTheme}
+        lowPowerMode={lowPowerMode}
+        onBlockClick={handleInstancedClick}
+        onBlockHover={handleInstancedHover}
+        onBlockUnhover={handleInstancedUnhover}
+      />
 
       {dropSlots && dropSlots.map((slot) => (
         <DropSlot

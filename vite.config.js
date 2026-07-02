@@ -74,15 +74,13 @@ export default defineConfig({
   build: {
     modulePreload: false,
     chunkSizeWarningLimit: 2500,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
+    minify: 'esbuild',
     sourcemap: false,
     target: 'es2020',
+    esbuild: {
+      drop: ['console', 'debugger'],
+    },
+    cssMinify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks(id) {

@@ -6,6 +6,7 @@ import { getEnvironmentTheme } from './blockTextures';
 import LoadingProgressBar from './components/LoadingProgressBar';
 import { wasmLoader } from './wasmLoader';
 import { useMobileOptimizations, RENDER_QUALITY, DEVICE_LEVELS } from './mobileOptimizations';
+import { initGPUProfiler } from './profilerConsole';
 
 const GameSceneWithPhysics = lazy(() => import('./GameSceneWithPhysics'));
 
@@ -132,6 +133,15 @@ export default function GameScene({ blocks, selectedId, onBlockClick, simulating
 
     canvas.addEventListener('webglcontextlost', handleContextLost, false);
     canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
+
+    // Wire up GPU profiler in dev mode
+    if (import.meta.env.DEV && typeof initGPUProfiler === 'function') {
+      try {
+        initGPUProfiler(gl);
+      } catch (e) {
+        // ignore — profilerConsole may not be loaded yet
+      }
+    }
 
     canvasCleanupRef.current = () => {
       window.clearTimeout(contextRestoreTimeoutRef.current);

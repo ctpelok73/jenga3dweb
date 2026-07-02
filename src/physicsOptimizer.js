@@ -6,10 +6,6 @@
  *      динамических блоков и переходим на 30fps когда активной симуляции нет.
  *   2. Velocity threshold — адаптивный порог скорости и таймаут стабилизации
  *      в зависимости от количества активных блоков.
- *
- * Camera-position LOD-менеджер сохранён для совместимости (камеру обновляем
- * на каждом кадре), но per-block LOD/collision cache были удалены — за всё
- * время не использовались в runtime.
  */
 
 /**
@@ -57,19 +53,21 @@ export class AdaptiveFrameRateController {
  */
 export class VelocityThresholdOptimizer {
   constructor() {
-    this.baseThreshold = 0.08;
-    this.maxThreshold = 0.15;
+    this.baseThreshold = 0.06;
+    this.maxThreshold = 0.12;
   }
 
   getThreshold(dynamicBlockCount) {
-    const factor = Math.min(dynamicBlockCount / 10, 1);
+    const factor = Math.min(dynamicBlockCount / 12, 1);
     return this.baseThreshold + (this.maxThreshold - this.baseThreshold) * factor;
   }
 
   getTimeout(dynamicBlockCount) {
-    const baseTimeout = 8000;
-    const factor = Math.min(dynamicBlockCount / 20, 1);
-    return baseTimeout + 4000 * factor;
+    // База 2000ms — большинство каскадов укладываются в 1-2 секунды.
+    // Для больших каскадов добавляем до 3000ms.
+    const baseTimeout = 2000;
+    const factor = Math.min(dynamicBlockCount / 15, 1);
+    return baseTimeout + 3000 * factor;
   }
 }
 
@@ -80,15 +78,10 @@ export class PhysicsOptimizer {
   constructor() {
     this.frameRateController = new AdaptiveFrameRateController();
     this.velocityOptimizer = new VelocityThresholdOptimizer();
-    this.cameraPosition = [0, 5, 8];
   }
 
   updateSimulationState(isSimulating, dynamicBlockCount = 0) {
     this.frameRateController.setSimulating(isSimulating, dynamicBlockCount);
-  }
-
-  updateCameraPosition(position) {
-    this.cameraPosition = position;
   }
 
   getFrameParams(dynamicBlockCount = 0) {

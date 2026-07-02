@@ -104,13 +104,3 @@ export function setupGPUProfiler(renderer) {
   };
   return gpuStats;
 }
-
-// Frame time hook for React Three Fiber
-export function useFrameProfiler(name, system = 'logic') {
-  return (state) => {
-    profiler.mark(`${name}_start`);
-    // Actual work happens in component
-    const duration = profiler.measure(name, `${name}_start`, system);
-    return duration;
-  };
-}
