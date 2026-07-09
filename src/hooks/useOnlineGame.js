@@ -55,7 +55,7 @@ export function useOnlineGame() {
       setGameState({
         blocks: data.blocks,
         currentPlayer: data.currentPlayer,
-        yourTurn: data.currentPlayer === 0,
+        yourTurn: data.yourTurn,
       });
       setOpponentName(data.opponentName);
       setWaiting(false);
@@ -67,7 +67,7 @@ export function useOnlineGame() {
       setGameState({
         blocks: data.blocks,
         currentPlayer: data.currentPlayer,
-        yourTurn: data.currentPlayer === 0,
+        yourTurn: data.yourTurn,
       });
       setWaiting(false);
       setError(null);

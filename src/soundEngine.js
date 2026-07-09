@@ -106,6 +106,15 @@ function playNoise(duration, volume = 0.1) {
   source.start(ctx.currentTime, 0, duration);
 }
 
+/** @private — reset internal state for testing */
+export function _resetInternalState() {
+  audioCtx = null;
+  masterGainNode = null;
+  _noiseBuffer = null;
+  for (const id of _pendingTimers) clearTimeout(id);
+  _pendingTimers.length = 0;
+}
+
 export function cancelPendingSounds() {
   for (const id of _pendingTimers) clearTimeout(id);
   _pendingTimers.length = 0;

@@ -30,7 +30,7 @@ const _scale = new THREE.Vector3(1, 1, 1);
  * For neon/candy themes edges match the block's color;
  * for others it's a static theme color.
  */
-function getBlockEdgeColor(b, blockTheme) {
+export function getBlockEdgeColor(b, blockTheme) {
   switch (blockTheme) {
     case 'neon':  return b.color;
     case 'candy': return b.color;
@@ -45,7 +45,7 @@ function getBlockEdgeColor(b, blockTheme) {
  * Merge all block edges into a single BufferGeometry with per-vertex colors.
  * This avoids creating N × lineSegments draw calls.
  */
-function mergeEdgeGeometries(blocks, blockTheme = 'classic') {
+export function mergeEdgeGeometries(blocks, blockTheme = 'classic') {
   const positions = [];
   const colors = [];
   const tmpPos = sharedEdgesGeometry.attributes.position;
@@ -124,6 +124,9 @@ const InstancedBlocks = memo(function InstancedBlocks({
   useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh || count === 0) return;
+    // Guard: outside a real WebGL/R3F canvas (e.g. jsdom) the ref is a
+    // plain element without InstancedMesh methods — skip sync harmlessly.
+    if (typeof mesh.setMatrixAt !== 'function') return;
 
     mesh.count = count;
 
@@ -149,7 +152,7 @@ const InstancedBlocks = memo(function InstancedBlocks({
   // ─── Sync material (theme textures, lowPowerMode) ───
   useEffect(() => {
     const mat = materialRef.current;
-    if (!mat) return;
+    if (!mat || typeof mat.color?.set !== 'function') return;
 
     if (lowPowerMode) {
       mat.map = null;
@@ -170,7 +173,7 @@ const InstancedBlocks = memo(function InstancedBlocks({
 
   // ─── Edge material: use vertexColors (per-block) from merged geometry ───
   useEffect(() => {
-    if (edgeMaterialRef.current) {
+    if (edgeMaterialRef.current && typeof edgeMaterialRef.current.color?.set === 'function') {
       edgeMaterialRef.current.vertexColors = true;
       edgeMaterialRef.current.color.set('#ffffff');
     }

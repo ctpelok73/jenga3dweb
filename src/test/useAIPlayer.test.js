@@ -200,4 +200,110 @@ describe('useAIPlayer', () => {
 
     expect(aiPersonality.adaptToPlayer).not.toHaveBeenCalled();
   });
+
+  // ─── Hard difficulty: minimax null → falls back to heuristic ─────
+
+  it('falls back to chooseAIBlockAdvanced when minimax returns null on hard', () => {
+    minimaxAI.findBestMove.mockReturnValue(null);
+    chooseAIBlockAdvanced.mockReturnValue({ id: 9, layer: 4 });
+    const props = createProps({ currentSettings: { difficulty: 'hard' } });
+    renderHook((p) => useAIPlayer(p), { initialProps: props });
+
+    act(() => vi.advanceTimersByTime(AI_THINK_DELAY));
+
+    expect(minimaxAI.findBestMove).toHaveBeenCalled();
+    expect(chooseAIBlockAdvanced).toHaveBeenCalled();
+    expect(props.onSelectBlock).toHaveBeenCalledWith(9);
+  });
+
+  // ─── Safety timeout ──────────────────────────────────────────────
+
+  it('safety timeout resets aiThinking after 8000ms if move not executed', () => {
+    const props = createProps();
+    renderHook((p) => useAIPlayer(p), { initialProps: props });
+
+    act(() => vi.advanceTimersByTime(AI_THINK_DELAY));
+    expect(props.onAiThinkingChange).toHaveBeenCalledWith(true);
+    props.onAiThinkingChange.mockClear();
+
+    // Do NOT advance to AI_MOVE_DELAY — simulate hang
+    act(() => vi.advanceTimersByTime(8000));
+
+    expect(props.onAiThinkingChange).toHaveBeenCalledWith(false);
+  });
+
+  // ─── computeAIDropSlot called with correct args ──────────────────
+
+  it('calls computeAIDropSlot with currentBlocks and selected aiBlock', () => {
+    const aiBlock = { id: 6, layer: 2 };
+    chooseAIBlockAdvanced.mockReturnValue(aiBlock);
+    const blocks = [{ id: 1 }, { id: 6, layer: 2 }];
+    const props = createProps({ blocksRef: { current: blocks } });
+    renderHook((p) => useAIPlayer(p), { initialProps: props });
+
+    act(() => vi.advanceTimersByTime(AI_THINK_DELAY));
+
+    expect(computeAIDropSlot).toHaveBeenCalledWith(blocks, aiBlock);
+  });
+
+  // ─── onAiThinkingChange(false) NOT called on success ──────────────
+
+  it('does not prematurely reset aiThinking when AI finds a block', () => {
+    const props = createProps();
+    renderHook((p) => useAIPlayer(p), { initialProps: props });
+
+    act(() => vi.advanceTimersByTime(AI_THINK_DELAY));
+
+    // Should NOT have been called with false after finding a block
+    const falseCalls = props.onAiThinkingChange.mock.calls.filter(([v]) => v === false);
+    expect(falseCalls).toHaveLength(0);
+  });
+
+  // ─── Cleanup on unmount ──────────────────────────────────────────
+
+  it('clears AI timers on unmount (effect cleanup)', () => {
+    const props = createProps();
+    const { unmount } = renderHook((p) => useAIPlayer(p), { initialProps: props });
+
+    // After unmount, timers should be cleared
+    unmount();
+
+    // If cleanup worked, advancing time should NOT trigger onAiThinkingChange again
+    // (the think timer was cleared before it could fire)
+    act(() => vi.advanceTimersByTime(AI_THINK_DELAY));
+
+    // onAiThinkingChange(true) was already called during mount
+    expect(props.onAiThinkingChange).toHaveBeenCalledTimes(1);
+  });
+
+  // ─── Dep change cancels pending AI turn ──────────────────────────
+
+  it('cancels pending AI turn when phase changes during thinking', () => {
+    const props = createProps();
+    const { rerender } = renderHook((p) => useAIPlayer(p), { initialProps: props });
+
+    // Change phase to 'gameOver' before think delay fires
+    rerender(createProps({ phase: 'gameOver' }));
+
+    // The think timer should have been cancelled by cleanup
+    act(() => vi.advanceTimersByTime(AI_THINK_DELAY));
+
+    // Should NOT have attempted to select a block
+    expect(props.onSelectBlock).not.toHaveBeenCalled();
+  });
+
+  // ─── difficulty || 'normal' fallback ──────────────────────────────
+
+  it('defaults to normal difficulty when currentSettings.difficulty is undefined', () => {
+    chooseAIBlockAdvanced.mockReturnValue({ id: 2, layer: 1 });
+    const props = createProps({ currentSettings: {} });
+    renderHook((p) => useAIPlayer(p), { initialProps: props });
+
+    act(() => vi.advanceTimersByTime(AI_THINK_DELAY));
+
+    // Should call chooseAIBlockAdvanced with 'normal' (not 'hard' because no minimax)
+    expect(minimaxAI.findBestMove).not.toHaveBeenCalled();
+    expect(chooseAIBlockAdvanced).toHaveBeenCalled();
+    expect(props.onSelectBlock).toHaveBeenCalled();
+  });
 });

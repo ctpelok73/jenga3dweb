@@ -20,5 +20,35 @@
         ]
       }
     ]
+  },
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless", "--browser", "chromium"]
+    },
+    "task-master-ai": {
+      "command": "npx",
+      "args": ["-y", "task-master-ai"]
+    },
+    "memory-server": {
+      "command": "C:\\Users\\lexa7\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": [
+        "C:\\Users\\lexa7\\.claude\\mcp-servers\\python-memory-mcp-server\\main.py"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "C:\\Users\\lexa7\\.claude\\memory\\memory.jsonl"
+      }
+    }
   }
 }

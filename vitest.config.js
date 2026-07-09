@@ -10,5 +10,14 @@ export default defineConfig({
     include: ['src/test/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     exclude: ['node_modules/**', 'dist/**', 'tests/e2e/**'],
     css: false,
+    coverage: {
+      provider: 'v8',
+      thresholds: {
+        lines: 50,
+        statements: 50,
+        functions: 50,
+        branches: 40,
+      },
+    },
   },
 });
