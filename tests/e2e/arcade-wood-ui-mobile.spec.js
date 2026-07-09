@@ -346,9 +346,15 @@ test('mobile navigation produces no critical console errors', async ({ page }) =
 
   // Navigate through panels
   await page.getByRole('button', { name: 'Настройки' }).click();
-  await page.locator('.j-close-btn').click();
+  await expect(page.getByRole('dialog', { name: 'Настройки' })).toBeVisible();
+  await page.getByRole('button', { name: 'Закрыть настройки' }).click();
+  await expect(page.getByRole('dialog', { name: 'Настройки' })).toBeHidden();
+
   await page.getByRole('button', { name: 'Достижения' }).click();
-  await page.locator('.j-close-btn').click();
+  await expect(page.getByRole('dialog', { name: 'Достижения' })).toBeVisible();
+  await page.getByRole('button', { name: 'Закрыть достижения' }).click();
+  await expect(page.getByRole('dialog', { name: 'Достижения' })).toBeHidden();
+
   await page.getByRole('button', { name: 'Онлайн' }).click();
   await page.getByRole('button', { name: /Назад/ }).click();
   await page.getByRole('button', { name: 'Ежедневный челлендж' }).click();
